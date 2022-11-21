@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../apps/posawesome/posawesome/public/js/toConsole.bundle.js"],
+  "sourcesContent": ["$(function() {\n\tfrappe.realtime.on('toconsole', function(data) {\n\t\tdata.forEach(element => {\n\t\t\tconsole.log(element);\n\t\t});\n\t});\n});"],
+  "mappings": ";;AAAA,IAAE,WAAW;AACZ,WAAO,SAAS,GAAG,aAAa,SAAS,MAAM;AAC9C,WAAK,QAAQ,aAAW;AACvB,gBAAQ,IAAI,OAAO;AAAA,MACpB,CAAC;AAAA,IACF,CAAC;AAAA,EACF,CAAC;",
+  "names": []
+}

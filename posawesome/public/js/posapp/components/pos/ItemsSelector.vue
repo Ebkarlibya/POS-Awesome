@@ -116,9 +116,24 @@
         </v-col>
       </v-row>
     </v-card>
+    <!-- Item Group Filter -->
     <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
       <v-row no-gutters align="center" justify="center">
-        <v-col cols="12">
+        <!-- fast item group filters -->
+        <div v-if="showFastGroupFilters">
+          <v-btn 
+            v-for="groupName in items_group"
+            :key="groupName"
+            small 
+            color="primary" 
+            @click="item_group=groupName"
+            class="ms-2 mb-2"
+            >
+              {{groupName}}
+          </v-btn>
+        </div>
+        <!-- default item group filters -->
+        <v-col v-else cols="12">
           <v-select
             :items="items_group"
             :label="frappe._('Items Group')"
@@ -505,6 +520,9 @@ export default {
         this.first_search = newValue;
       }, 200),
     },
+    showFastGroupFilters(){
+      return this.pos_profile.posa_show_fast_item_group_search_filters;
+    }
   },
 
   created: function () {
