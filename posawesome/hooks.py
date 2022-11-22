@@ -228,6 +228,7 @@ fixtures = [
                     "POS Profile-posa_display_item_code",
                     "POS Profile-posa_allow_zero_rated_items",
                     "POS Profile-posa_show_fast_item_group_search_filters",
+                    "POS Profile-posa_default_item_selection_view_type",
                     "POS Profile-posa_allow_print_draft_invoices",
                     "Address-posa_delivery_charges",
                     "Sales Invoice-posa_delivery_charges",

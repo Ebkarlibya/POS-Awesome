@@ -1,21 +1,23 @@
 
-        
 
-# add feature of fast Item Group filtring
-date: 21-11-2022
+
+
+
+
+
+
+listing repo changes
+
 - modified: posawesome/hooks.py
-- modified: posawesome/public/js/posapp/components/pos/ItemsSelector.vue
-
-
-
-# add support to Frappe v14 
-date: 21-11-2022
-- modified: posawesome/hooks.py
+- modified posawesome/.gitignore
 - modified: posawesome/posawesome/api/posapp.py
 - modified posawesome/posawesome/workspace/pos_awesome/pos_awesome.json
-- modified posawesome/.gitignore
 - modified: posawesome/fixtures/custom_field.json
 - modified: posawesome/fixtures/property_setter.json
+- modified: posawesome/public/js/posapp/components/pos/Customer.vue
+- modified: posawesome/public/js/posapp/components/pos/Invoice.vue
+- modified: posawesome/public/js/posapp/components/pos/ItemsSelector.vue
+- modified: posawesome/public/js/posapp/components/pos/Pos.vue
 - renamed: posawesome/public/js/posapp/posapp.js -> posawesome/public/js/posapp/posapp.bundle.js
 - renamed: posawesome/public/js/toConsole.js -> posawesome/public/js/toConsole.bundle.js
 - deleted: posawesome/posawesome/workspace/mpesa_payments/mpesa_payments.json

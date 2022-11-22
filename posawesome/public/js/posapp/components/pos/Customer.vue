@@ -4,7 +4,6 @@
       dense
       clearable
       auto-select-first
-      outlined
       color="primary"
       :label="frappe._('Customer')"
       v-model="customer"
