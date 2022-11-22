@@ -59,11 +59,11 @@
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
-                xl="2"
-                lg="2"
-                md="2"
+                xl="3"
+                lg="3"
+                md="3"
                 sm="3"
-                cols="12"
+                cols="10"
                 min-height="50"
               >
                 <v-card hover="hover" @click="add_item(item)">

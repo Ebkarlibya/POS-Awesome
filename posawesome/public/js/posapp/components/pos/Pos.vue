@@ -14,8 +14,8 @@
         v-show="!payment && !offers && !coupons"
         xl="7"
         lg="7"
-        md="6"
-        sm="6"
+        md="7"
+        sm="7"
         cols="12"
         class="pos pr-0"
       >
@@ -58,8 +58,8 @@
       <v-col
         xl="5"
         lg="5"
-        md="6"
-        sm="6"
+        md="5"
+        sm="5"
         cols="12"
         class="pos"
       >

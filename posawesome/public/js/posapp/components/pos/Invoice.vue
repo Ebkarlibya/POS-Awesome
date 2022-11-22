@@ -352,7 +352,7 @@
                       disabled
                     ></v-text-field>
                   </v-col>
-                  <v-col align="center" cols="4" v-if="item.posa_offer_applied">
+                  <v-col align="center" cols="4" >
                     <v-checkbox
                       dense
                       :label="frappe._('Offer Applied')"
