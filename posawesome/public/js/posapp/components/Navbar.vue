@@ -6,7 +6,7 @@
         class="grey--text"
       ></v-app-bar-nav-icon>
       <v-img
-        src="/assets/posawesome/js/posapp/components/pos/pos.png"
+        :src="company_img"
         alt="POS Awesome"
         max-width="32"
         class="mr-2"
@@ -17,8 +17,7 @@
         style="cursor: pointer"
         class="text-uppercase primary--text"
       >
-        <span class="font-weight-light">pos</span>
-        <span>awesome</span>
+        <span class="font-weight-light">{{company}}</span>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -227,6 +226,21 @@ export default {
       );
     },
   },
+  computed: {
+    getFavIcon() {
+      var favicon = undefined;
+      var nodeList = document.getElementsByTagName("link");
+      for (var i = 0; i < nodeList.length; i++)
+      {
+          if((nodeList[i].getAttribute("rel") == "icon")||(nodeList[i].getAttribute("rel") == "shortcut icon"))
+          {
+              favicon = nodeList[i].getAttribute("href");
+          }
+      }
+      console.log(favicon);
+      return favicon;
+    }
+  },
   created: function () {
     this.$nextTick(function () {
       evntBus.$on('show_mesage', (data) => {
@@ -234,9 +248,20 @@ export default {
       });
       evntBus.$on('set_company', (data) => {
         this.company = data.name;
-        this.company_img = data.company_logo
-          ? data.company_logo
-          : this.company_img;
+        // this.company_img = data.company_logo
+        //   ? data.company_logo
+        //   : this.company_img;
+        let favicon = undefined;
+        let nodeList = document.getElementsByTagName("link");
+        for (let i = 0; i < nodeList.length; i++)
+        {
+            if((nodeList[i].getAttribute("rel") == "icon")||(nodeList[i].getAttribute("rel") == "shortcut icon"))
+            {
+                favicon = nodeList[i].getAttribute("href");
+            }
+        }
+
+        this.company_img = favicon;
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;

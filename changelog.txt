@@ -8,12 +8,14 @@
 
 listing repo changes
 
+- modified: posawesome/__init__.py
 - modified: posawesome/hooks.py
-- modified posawesome/.gitignore
+- modified: posawesome/.gitignore
 - modified: posawesome/posawesome/api/posapp.py
 - modified posawesome/posawesome/workspace/pos_awesome/pos_awesome.json
 - modified: posawesome/fixtures/custom_field.json
 - modified: posawesome/fixtures/property_setter.json
+- modified: posawesome/public/js/posapp/components/Navbar.vue
 - modified: posawesome/public/js/posapp/components/pos/Customer.vue
 - modified: posawesome/public/js/posapp/components/pos/Invoice.vue
 - modified: posawesome/public/js/posapp/components/pos/ItemsSelector.vue
