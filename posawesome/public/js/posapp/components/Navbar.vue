@@ -246,22 +246,13 @@ export default {
       evntBus.$on('show_mesage', (data) => {
         this.show_mesage(data);
       });
-      evntBus.$on('set_company', (data) => {
+      evntBus.$on('set_company', async (data) => {
         this.company = data.name;
         // this.company_img = data.company_logo
         //   ? data.company_logo
         //   : this.company_img;
-        let favicon = undefined;
-        let nodeList = document.getElementsByTagName("link");
-        for (let i = 0; i < nodeList.length; i++)
-        {
-            if((nodeList[i].getAttribute("rel") == "icon")||(nodeList[i].getAttribute("rel") == "shortcut icon"))
-            {
-                favicon = nodeList[i].getAttribute("href");
-            }
-        }
-
-        this.company_img = favicon;
+        let res = await frappe.db.get_value("Website Settings", {}, "banner_image");
+        this.company_img = res.message.banner_image;
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;

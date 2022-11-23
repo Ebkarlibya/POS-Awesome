@@ -123,7 +123,7 @@
         <v-btn
           v-for="groupName in items_group"
           :key="groupName"
-          small
+          medium
           color="primary"
           @click="item_group = groupName"
           class="ms-2 mb-2"
