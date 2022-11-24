@@ -17,7 +17,7 @@
         style="cursor: pointer"
         class="text-uppercase primary--text"
       >
-        <span class="font-weight-light">{{company}}</span>
+        <!-- <span class="font-weight-light">{{company}}</span> -->
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -98,7 +98,7 @@
             <v-img :src="company_img"></v-img>
           </v-list-item-avatar>
 
-          <v-list-item-title>{{ company }}</v-list-item-title>
+          <v-list-item-title>POS</v-list-item-title>
 
           <v-btn icon @click.stop="mini = !mini">
             <v-icon>mdi-chevron-left</v-icon>
