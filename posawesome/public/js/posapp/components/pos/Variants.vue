@@ -127,6 +127,7 @@
            @click="setQty" :disabled="this.qtyDialogItemValue < 0">{{
             __("Set Qty")
           }}</v-btn>
+          <v-spacer></v-spacer>
           <v-btn 
           color="error"
           @click="qtyDialogShow = false">{{
