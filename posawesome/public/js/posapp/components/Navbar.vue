@@ -5,13 +5,17 @@
         @click.stop="drawer = !drawer"
         class="grey--text"
       ></v-app-bar-nav-icon>
-      <v-img
-        :src="company_img"
-        alt="POS Awesome"
-        max-width="32"
-        class="mr-2"
-        color="primary"
-      ></v-img>
+
+      <a href="/app" target="_blank" rel="noopener noreferrer">
+        <v-img
+          :src="company_img"
+          alt="POS Awesome"
+          max-width="32"
+          class="mr-2"
+          color="primary"
+        ></v-img>
+      </a>
+      
       <v-toolbar-title
         @click="go_desk"
         style="cursor: pointer"
