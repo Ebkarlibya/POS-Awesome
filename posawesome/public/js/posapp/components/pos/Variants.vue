@@ -42,14 +42,14 @@
                 <v-col
                   v-for="(item, idx) in filterdItems"
                   :key="idx"
-                  xl="6"
-                  lg="6"
-                  md="6"
-                  sm="6"
+                  xl="4"
+                  lg="4"
+                  md="4"
+                  sm="4"
                   cols="12"
                   min-height="100"
                 >
-                  <v-card hover="hover">
+                  <v-card hover="hover" @click="addSelectedVariantItem(item)">
                     <v-img
                       :src="
                         item.image ||
@@ -70,22 +70,14 @@
                           <div class="text-subtitle-2 primary--text accent-3">
                             {{ item.rate || 0 }} {{ item.currency || "" }}
                           </div>
+
                           <v-btn
                             icon
-                            color="secondary"
-                            @click.stop="removeSelectedVariantitem(item)"
+                            primary="primary"
+                            class="text-subtitle-2 primary--text accent-3"
+                            @click.stop="openQtyEditDialog(item)"
                           >
-                            <v-icon>mdi-minus-circle-outline</v-icon>
-                          </v-btn>
-                          <div class="text-subtitle-2 primary--text accent-3">
                             {{ item.selectedVariantQty || 0 }}
-                          </div>
-                          <v-btn
-                            icon
-                            color="secondary"
-                            @click.stop="addSelectedVariantitem(item)"
-                          >
-                            <v-icon>mdi-plus-circle-outline</v-icon>
                           </v-btn>
                         </v-col>
                       </v-row>
@@ -98,6 +90,43 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="qtyDialogShow"
+      persistent
+      width="350"
+    >
+      <v-card elevation="2" outlined shaped>
+        <v-card-title>{{__("Set Qty")}}</v-card-title>
+        <v-card-text>
+          <v-row dense>
+            <v-col class="variants-qty_controls">
+              <v-btn icon color="secondary" @click.stop="qtyDialogItemValue -= 1"
+                style="margin-right: 30px; margin-left: 30px"
+              >
+                <v-icon>mdi-minus-circle-outline</v-icon>
+              </v-btn>
+              <v-text-field
+                :label="__('Qty')"
+                hide-details="auto"
+                v-model="qtyDialogItemValue"
+              >
+              </v-text-field>
+              <v-btn icon color="secondary" @click.stop="qtyDialogItemValue += 1"
+                style="margin-right: 30px; margin-left: 30px"
+                >
+                <v-icon>mdi-plus-circle-outline</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn 
+            @click="setQty"
+            :disabled="this.qtyDialogItemValue < 0"
+          >{{ __("Set Qty") }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-row>
 </template>
 
@@ -106,14 +135,16 @@ import { evntBus } from "../../bus";
 export default {
   data: () => ({
     varaintsDialog: false,
-    selectedVariantItems: [],
+    qtyDialogShow: false,
+    qtyDialogItem: null,
+    qtyDialogItemValue: 0,
     parentItem: null,
     items: null,
     filters: {},
     filterdItems: [],
   }),
   methods: {
-    addSelectedVariantitem(item) {
+    addSelectedVariantItem(item) {
       item.selectedVariantQty += 1;
       this.$forceUpdate();
     },
@@ -131,6 +162,26 @@ export default {
         }
       });
       this.close_dialog();
+    },
+    openQtyEditDialog(item) {
+      this.qtyDialogItem = item;
+      this.qtyDialogItemValue = item.selectedVariantQty;
+      this.qtyDialogShow = true;
+    },
+    // variantDialogIncQty() {
+    //   qtyDialogItemValue += 1;
+    // },
+    // variantDialogDecQty() {
+    //   if (this.variantQtyDialogItem.selectedVariantQty < 1) return;
+    //   this.variantQtyDialogItem.selectedVariantQty -= 1;
+    // },
+    setQty(){
+      if (this.qtyDialogItemValue < 0) {
+        return;
+      }
+      this.qtyDialogItem.selectedVariantQty = this.qtyDialogItemValue;
+      this.qtyDialogShow = false;
+      this.$forceUpdate();
     },
     close_dialog() {
       this.varaintsDialog = false;

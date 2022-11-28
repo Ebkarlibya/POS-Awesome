@@ -258,7 +258,7 @@ export default {
       }
       if (this.pos_profile.item_groups.length > 0) {
         this.pos_profile.item_groups.forEach((element) => {
-          if (element.item_group !== "All Item Groups") {
+          if (element.item_group !== "All Item Groups" && element.enabled === 1) {
             this.items_group.push(element.item_group);
           }
         });
