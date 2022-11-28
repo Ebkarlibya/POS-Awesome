@@ -90,17 +90,16 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-dialog
-      v-model="qtyDialogShow"
-      persistent
-      width="350"
-    >
+    <v-dialog v-model="qtyDialogShow" persistent width="350">
       <v-card elevation="2" outlined shaped>
-        <v-card-title>{{__("Set Qty")}}</v-card-title>
+        <v-card-title>{{ __("Set Qty") }}</v-card-title>
         <v-card-text>
           <v-row dense>
             <v-col class="variants-qty_controls">
-              <v-btn icon color="secondary" @click.stop="qtyDialogItemValue -= 1"
+              <v-btn
+                icon
+                color="secondary"
+                @click.stop="qtyDialogItemValue -= 1"
                 style="margin-right: 30px; margin-left: 30px"
               >
                 <v-icon>mdi-minus-circle-outline</v-icon>
@@ -111,9 +110,12 @@
                 v-model="qtyDialogItemValue"
               >
               </v-text-field>
-              <v-btn icon color="secondary" @click.stop="qtyDialogItemValue += 1"
+              <v-btn
+                icon
+                color="secondary"
+                @click.stop="qtyDialogItemValue += 1"
                 style="margin-right: 30px; margin-left: 30px"
-                >
+              >
                 <v-icon>mdi-plus-circle-outline</v-icon>
               </v-btn>
             </v-col>
@@ -121,9 +123,15 @@
         </v-card-text>
         <v-card-actions>
           <v-btn 
-            @click="setQty"
-            :disabled="this.qtyDialogItemValue < 0"
-          >{{ __("Set Qty") }}</v-btn>
+           color="primary"
+           @click="setQty" :disabled="this.qtyDialogItemValue < 0">{{
+            __("Set Qty")
+          }}</v-btn>
+          <v-btn 
+          color="error"
+          @click="qtyDialogShow = false">{{
+            __("Close")
+          }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -168,14 +176,7 @@ export default {
       this.qtyDialogItemValue = item.selectedVariantQty;
       this.qtyDialogShow = true;
     },
-    // variantDialogIncQty() {
-    //   qtyDialogItemValue += 1;
-    // },
-    // variantDialogDecQty() {
-    //   if (this.variantQtyDialogItem.selectedVariantQty < 1) return;
-    //   this.variantQtyDialogItem.selectedVariantQty -= 1;
-    // },
-    setQty(){
+    setQty() {
       if (this.qtyDialogItemValue < 0) {
         return;
       }
@@ -238,17 +239,9 @@ export default {
     evntBus.$on("open_variants_model", (item, items) => {
       this.varaintsDialog = true;
       this.parentItem = item || null;
-
-      // debugger
-      // for(let i = 0 ; i < this.parentItem.attributes.length;i++) {
-      //   for(let j = 0; j < this.parentItem.attributes[i].values.length; i++) {
-      //     if(this.parentItem.attributes[i].values[j]) {
-      //       this.parentItem.attributes[i].values[j].qty = 0;
-      //     }
-      //   }
-      // }
-
       this.items = items;
+
+      // add property to track variants insertion qty for set qty dialog
       this.items.map((it) => {
         if (it.variant_of) {
           it["selectedVariantQty"] = 0;

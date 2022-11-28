@@ -82,7 +82,7 @@
   "insert_after": "item_group",
   "is_system_generated": 0,
   "is_virtual": 0,
-  "label": "Enabled",
+  "label": "Enabled at Fast Item Group Search Filters",
   "length": 0,
   "mandatory_depends_on": null,
   "modified": "2022-11-28 10:48:37.997784",
