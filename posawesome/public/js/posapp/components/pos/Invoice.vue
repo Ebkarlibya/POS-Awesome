@@ -352,7 +352,7 @@
                       disabled
                     ></v-text-field>
                   </v-col>
-                  <v-col align="center" cols="4" v-if="item.posa_offer_applied">
+                  <v-col align="center" cols="4" >
                     <v-checkbox
                       dense
                       :label="frappe._('Offer Applied')"
@@ -747,10 +747,10 @@ export default {
           value: 'item_name',
         },
         { text: __('QTY'), value: 'qty', align: 'center' },
-        { text: __('UOM'), value: 'uom', align: 'center' },
+        // { text: __('UOM'), value: 'uom', align: 'center' },
         { text: __('Rate'), value: 'rate', align: 'center' },
         { text: __('Amount'), value: 'amount', align: 'center' },
-        { text: __('is Offer'), value: 'posa_is_offer', align: 'center' },
+        // { text: __('is Offer'), value: 'posa_is_offer', align: 'center' },
       ],
     };
   },
@@ -2428,6 +2428,7 @@ export default {
   created() {
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
+      this.invoiceType = this.pos_profile.posa_default_pos_sell_type;
       this.customer = data.pos_profile.customer;
       this.pos_opening_shift = data.pos_opening_shift;
       this.stock_settings = data.stock_settings;

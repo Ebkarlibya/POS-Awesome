@@ -1,0 +1,20 @@
+listing repo changes:
+- modified: posawesome/__init__.py
+- modified: posawesome/hooks.py
+- modified: posawesome/.gitignore
+- modified: posawesome/posawesome/api/posapp.py
+- modified: posawesome/posawesome/workspace/pos_awesome/pos_awesome.json
+- modified: posawesome/fixtures/custom_field.json
+- modified: posawesome/fixtures/property_setter.json
+- modified: posawesome/public/js/posapp/components/Navbar.vue
+- modified: posawesome/public/js/posapp/components/pos/Customer.vue
+- modified: posawesome/public/js/posapp/components/pos/Invoice.vue
+- modified: posawesome/public/js/posapp/components/pos/ItemsSelector.vue
+- modified: posawesome/public/js/posapp/components/pos/Pos.vue
+- modified: posawesome/public/js/posapp/components/pos/Variants.vue
+- renamed:  posawesome/public/js/posapp/posapp.js -> posawesome/public/js/posapp/posapp.bundle.js
+- renamed:  posawesome/public/js/toConsole.js -> posawesome/public/js/toConsole.bundle.js
+- deleted:  posawesome/posawesome/workspace/mpesa_payments/mpesa_payments.json
+- deleted:  posawesome/posawesome/workspace/mpesa_url/mpesa_url.json
+- deleted:  posawesome/public/build.json
+- new file: posawesome/changelog.txt

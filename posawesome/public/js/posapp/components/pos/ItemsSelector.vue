@@ -48,7 +48,7 @@
             v-model="new_line"
             color="accent"
             value="true"
-            label="NLine"
+            :label="__('NLine')"
             dense
             hide-details
           ></v-checkbox>
@@ -59,11 +59,11 @@
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
-                xl="2"
+                xl="3"
                 lg="3"
-                md="6"
-                sm="6"
-                cols="6"
+                md="3"
+                sm="3"
+                cols="10"
                 min-height="50"
               >
                 <v-card hover="hover" @click="add_item(item)">
@@ -84,7 +84,7 @@
                   <v-card-text class="text--primary pa-1">
                     <div class="text-caption primary--text">
                       {{ formtCurrency(item.rate) || 0 }}
-                      {{ item.currency || '' }}
+                      {{ item.currency || "" }}
                     </div>
                   </v-card-text>
                 </v-card>
@@ -116,8 +116,23 @@
         </v-col>
       </v-row>
     </v-card>
+    <!-- Item Group Filter -->
     <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
-      <v-row no-gutters align="center" justify="center">
+      <!-- fast item group filters -->
+      <v-row v-if="showFastGroupFilters">
+        <v-btn
+          v-for="groupName in items_group"
+          :key="groupName"
+          medium
+          color="primary"
+          @click="item_group = groupName"
+          class="ms-2 mb-2"
+        >
+          {{ groupName }}
+        </v-btn>
+      </v-row>
+      <!-- default item group filters -->
+      <v-row v-else no-gutters align="center">
         <v-col cols="12">
           <v-select
             :items="items_group"
@@ -128,6 +143,8 @@
             v-model="item_group"
           ></v-select>
         </v-col>
+      </v-row>
+      <v-row no-gutters align="center">
         <v-col cols="3" class="mt-1">
           <v-btn-toggle
             v-model="items_view"
@@ -136,19 +153,19 @@
             dense
             rounded
           >
-            <v-btn small value="list">{{ __('List') }}</v-btn>
-            <v-btn small value="card">{{ __('Card') }}</v-btn>
+            <v-btn small value="list">{{ __("List") }}</v-btn>
+            <v-btn small value="card">{{ __("Card") }}</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-2">
           <v-btn small block color="primary" text @click="show_coupons"
-            >{{ couponsCount }} {{ __('Coupons') }}</v-btn
+            >{{ couponsCount }} {{ __("Coupons") }}</v-btn
           >
         </v-col>
         <v-col cols="5" class="mt-2">
           <v-btn small block color="primary" text @click="show_offers"
-            >{{ offersCount }} {{ __('Offers') }} : {{ appliedOffersCount }}
-            {{ __('Applied') }}</v-btn
+            >{{ offersCount }} {{ __("Offers") }} : {{ appliedOffersCount }}
+            {{ __("Applied") }}</v-btn
           >
         </v-col>
       </v-row>
@@ -158,19 +175,19 @@
 
 
 <script>
-import { evntBus } from '../../bus';
-import _ from 'lodash';
+import { evntBus } from "../../bus";
+import _ from "lodash";
 export default {
   data: () => ({
-    pos_profile: '',
+    pos_profile: "",
     flags: {},
-    items_view: 'list',
-    item_group: 'ALL',
+    items_view: "list",
+    item_group: "ALL",
     loading: false,
-    items_group: ['ALL'],
+    items_group: ["ALL"],
     items: [],
-    search: '',
-    first_search: '',
+    search: "",
+    first_search: "",
     itemsPerPage: 1000,
     offersCount: 0,
     appliedOffersCount: 0,
@@ -191,31 +208,31 @@ export default {
       this.get_items();
     },
     new_line() {
-      evntBus.$emit('set_new_line', this.new_line);
+      evntBus.$emit("set_new_line", this.new_line);
     },
   },
 
   methods: {
     show_offers() {
-      evntBus.$emit('show_offers', 'true');
+      evntBus.$emit("show_offers", "true");
     },
     show_coupons() {
-      evntBus.$emit('show_coupons', 'true');
+      evntBus.$emit("show_coupons", "true");
     },
     get_items() {
       if (!this.pos_profile) {
-        console.log('No POS Profile');
+        console.log("No POS Profile");
         return;
       }
       const vm = this;
       this.loading = true;
       if (vm.pos_profile.posa_local_storage && localStorage.items_storage) {
-        vm.items = JSON.parse(localStorage.getItem('items_storage'));
-        evntBus.$emit('set_all_items', vm.items);
+        vm.items = JSON.parse(localStorage.getItem("items_storage"));
+        evntBus.$emit("set_all_items", vm.items);
         vm.loading = false;
       }
       frappe.call({
-        method: 'posawesome.posawesome.api.posapp.get_items',
+        method: "posawesome.posawesome.api.posapp.get_items",
         args: {
           pos_profile: vm.pos_profile,
           price_list: vm.customer_price_list,
@@ -223,12 +240,12 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
-            evntBus.$emit('set_all_items', vm.items);
+            evntBus.$emit("set_all_items", vm.items);
             vm.loading = false;
-            console.info('loadItmes');
+            console.info("loadItmes");
             if (vm.pos_profile.posa_local_storage) {
-              localStorage.setItem('items_storage', '');
-              localStorage.setItem('items_storage', JSON.stringify(r.message));
+              localStorage.setItem("items_storage", "");
+              localStorage.setItem("items_storage", JSON.stringify(r.message));
             }
           }
         },
@@ -236,19 +253,19 @@ export default {
     },
     get_items_groups() {
       if (!this.pos_profile) {
-        console.log('No POS Profile');
+        console.log("No POS Profile");
         return;
       }
       if (this.pos_profile.item_groups.length > 0) {
         this.pos_profile.item_groups.forEach((element) => {
-          if (element.item_group !== 'All Item Groups') {
+          if (element.item_group !== "All Item Groups" && element.enabled === 1) {
             this.items_group.push(element.item_group);
           }
         });
       } else {
         const vm = this;
         frappe.call({
-          method: 'posawesome.posawesome.api.posapp.get_items_groups',
+          method: "posawesome.posawesome.api.posapp.get_items_groups",
           args: {},
           callback: function (r) {
             if (r.message) {
@@ -263,20 +280,20 @@ export default {
     getItmesHeaders() {
       const items_headers = [
         {
-          text: __('Name'),
-          align: 'start',
+          text: __("Name"),
+          align: "start",
           sortable: true,
-          value: 'item_name',
+          value: "item_name",
         },
         {
-          text: __('Code'),
-          align: 'start',
+          text: __("Code"),
+          align: "start",
           sortable: true,
-          value: 'item_code',
+          value: "item_code",
         },
-        { text: __('Rate'), value: 'rate', align: 'start' },
-        { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
-        { text: __('UOM'), value: 'stock_uom', align: 'start' },
+        { text: __("Rate"), value: "rate", align: "start" },
+        { text: __("Available QTY"), value: "actual_qty", align: "start" },
+        { text: __("UOM"), value: "stock_uom", align: "start" },
       ];
       if (!this.pos_profile.posa_display_item_code) {
         items_headers.splice(1, 1);
@@ -286,12 +303,12 @@ export default {
     },
     add_item(item) {
       if (item.has_variants) {
-        evntBus.$emit('open_variants_model', item, this.items);
+        evntBus.$emit("open_variants_model", item, this.items);
       } else {
         if (!item.qty || item.qty === 1) {
           item.qty = Math.abs(this.qty);
         }
-        evntBus.$emit('add_item', item);
+        evntBus.$emit("add_item", item);
         this.qty = 1;
       }
     },
@@ -323,25 +340,25 @@ export default {
       if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
         let pesokg1 = first_search.substr(7, 5);
         let pesokg;
-        if (pesokg1.startsWith('0000')) {
-          pesokg = '0.00' + pesokg1.substr(4);
-        } else if (pesokg1.startsWith('000')) {
-          pesokg = '0.0' + pesokg1.substr(3);
-        } else if (pesokg1.startsWith('00')) {
-          pesokg = '0.' + pesokg1.substr(2);
-        } else if (pesokg1.startsWith('0')) {
+        if (pesokg1.startsWith("0000")) {
+          pesokg = "0.00" + pesokg1.substr(4);
+        } else if (pesokg1.startsWith("000")) {
+          pesokg = "0.0" + pesokg1.substr(3);
+        } else if (pesokg1.startsWith("00")) {
+          pesokg = "0." + pesokg1.substr(2);
+        } else if (pesokg1.startsWith("0")) {
           pesokg =
-            pesokg1.substr(1, 1) + '.' + pesokg1.substr(2, pesokg1.length);
-        } else if (!pesokg1.startsWith('0')) {
+            pesokg1.substr(1, 1) + "." + pesokg1.substr(2, pesokg1.length);
+        } else if (!pesokg1.startsWith("0")) {
           pesokg =
-            pesokg1.substr(0, 2) + '.' + pesokg1.substr(2, pesokg1.length);
+            pesokg1.substr(0, 2) + "." + pesokg1.substr(2, pesokg1.length);
         }
         scal_qty = pesokg;
       }
       return scal_qty;
     },
     get_search(first_search) {
-      let search_term = '';
+      let search_term = "";
       if (
         first_search &&
         first_search.startsWith(this.pos_profile.posa_scale_barcode_start)
@@ -361,7 +378,7 @@ export default {
     update_items_details(items) {
       const vm = this;
       frappe.call({
-        method: 'posawesome.posawesome.api.posapp.get_items_details',
+        method: "posawesome.posawesome.api.posapp.get_items_details",
         args: {
           pos_profile: vm.pos_profile,
           items_data: items,
@@ -401,11 +418,11 @@ export default {
     },
     trigger_onscan(sCode) {
       if (this.filtred_items.length == 0) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `No Item has this barcode "${sCode}"`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
       } else {
         this.enter_event();
         this.debounce_search = null;
@@ -416,22 +433,25 @@ export default {
       value = parseFloat(value);
       return value
         .toFixed(this.currency_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,");
     },
     formtFloat(value) {
       value = parseFloat(value);
       return value
         .toFixed(this.float_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,");
     },
   },
 
   computed: {
+    itemSelectDisplayType(){
+      return this.pos_profile.posa_default_item_selection_view_type;
+    },
     filtred_items() {
       this.search = this.get_search(this.first_search);
       let filtred_list = [];
       let filtred_group_list = [];
-      if (this.item_group != 'ALL') {
+      if (this.item_group != "ALL") {
         filtred_group_list = this.items.filter((item) =>
           item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
         );
@@ -505,31 +525,35 @@ export default {
         this.first_search = newValue;
       }, 200),
     },
+    showFastGroupFilters() {
+      return this.pos_profile.posa_show_fast_item_group_search_filters;
+    },
   },
 
   created: function () {
     this.$nextTick(function () {});
-    evntBus.$on('register_pos_profile', (data) => {
+    evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
+      this.items_view = data.pos_profile.posa_default_item_selection_view_type || "list";
       this.get_items();
       this.get_items_groups();
       this.float_precision =
-        frappe.defaults.get_default('float_precision') || 2;
+        frappe.defaults.get_default("float_precision") || 2;
       this.currency_precision =
-        frappe.defaults.get_default('currency_precision') || 2;
+        frappe.defaults.get_default("currency_precision") || 2;
     });
-    evntBus.$on('update_cur_items_details', () => {
+    evntBus.$on("update_cur_items_details", () => {
       this.update_cur_items_details();
     });
-    evntBus.$on('update_offers_counters', (data) => {
+    evntBus.$on("update_offers_counters", (data) => {
       this.offersCount = data.offersCount;
       this.appliedOffersCount = data.appliedOffersCount;
     });
-    evntBus.$on('update_coupons_counters', (data) => {
+    evntBus.$on("update_coupons_counters", (data) => {
       this.couponsCount = data.couponsCount;
       this.appliedCouponsCount = data.appliedCouponsCount;
     });
-    evntBus.$on('update_customer_price_list', (data) => {
+    evntBus.$on("update_customer_price_list", (data) => {
       this.customer_price_list = data;
     });
   },
