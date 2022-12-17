@@ -144,7 +144,8 @@ def get_items(pos_profile, price_list=None):
             has_batch_no,
             has_serial_no,
             max_discount,
-            brand
+            brand,
+            posa_enable_pos_additional_item_description
         FROM
             `tabItem`
         WHERE
@@ -219,6 +220,15 @@ def get_items(pos_profile, price_list=None):
                 pass
             else:
                 row = {}
+
+                if item.get("posa_enable_pos_additional_item_description") == 1:
+                    additional_item_descriptions = frappe.get_all(
+                        "POS Additional Item Description Table",
+                        fields=["description", "auto_selected"],
+                        filters={"parent": item_code},
+                    )
+                    item.update({"additional_item_descriptions": additional_item_descriptions})
+
                 row.update(item)
                 row.update(
                     {

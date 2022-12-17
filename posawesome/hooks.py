@@ -229,7 +229,6 @@ fixtures = [
                     "POS Profile-posa_input_qty",
                     "POS Profile-posa_display_item_code",
                     "POS Profile-posa_allow_zero_rated_items",
-                    "POS Profile-posa_show_fast_item_group_search_filters",
                     "POS Profile-posa_default_item_selection_view_type",
                     "POS Profile-posa_allow_print_draft_invoices",
                     "POS Item Group-enabled",
@@ -238,7 +237,19 @@ fixtures = [
                     "Sales Invoice-posa_delivery_charges_rate",
                     "POS Profile-posa_auto_set_delivery_charges",
                     "POS Profile-posa_use_delivery_charges",
-                    "POS Profile-posa_default_pos_sell_type"
+                    # # # # # # #
+                    # ETMS POS  #
+                    # # # # # # #
+
+                    # POS Profile
+                    "POS Profile-posa_default_pos_sell_type", # select
+                    "POS Profile-posa_show_fast_item_group_search_filters", # checkbox
+                    # Item
+                    "ITem-posa_pos_description_tab", # tab break
+                    "Item-posa_enable_pos_additional_item_description", # checkbox
+                    "Item-posa_pos_additional_item_description", # table
+                    # (POS Profile) & (Item)
+                    "POS Profile-posa_enable_pos_additional_item_description", # checkbox
                 ),
             ]
         ],

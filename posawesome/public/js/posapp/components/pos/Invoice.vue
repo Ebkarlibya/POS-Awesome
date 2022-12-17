@@ -916,7 +916,7 @@ export default {
       new_item.posa_is_offer = item.posa_is_offer;
       new_item.posa_is_replace = item.posa_is_replace || null;
       new_item.is_free_item = 0;
-      new_item.posa_notes = '';
+      new_item.posa_notes = item.posa_notes || '';
       new_item.posa_delivery_date = '';
       new_item.posa_row_id = this.makeid(20);
       if (
@@ -2437,7 +2437,8 @@ export default {
       this.currency_precision =
         frappe.defaults.get_default('currency_precision') || 2;
     });
-    evntBus.$on('add_item', (item) => {
+    evntBus.$on('add_item', (item, asNewLine = false) => {
+      this.new_line = asNewLine;
       this.add_item(item);
     });
     evntBus.$on('update_customer', (customer) => {

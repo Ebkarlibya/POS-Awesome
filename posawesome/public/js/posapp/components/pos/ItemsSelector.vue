@@ -170,6 +170,66 @@
         </v-col>
       </v-row>
     </v-card>
+    <!-- additional item description dialog -->
+    <v-dialog v-model="showItemDescDialog" persistent width="450">
+      <v-card elevation="2" outlined shaped>
+        <v-card-title>{{ __("Select Item Descriptions") }}</v-card-title>
+        <br>
+        <v-card-text>
+          <v-row dense>
+            <v-col class="variants-qty_controls">
+              <v-btn
+                v-for="itemDesc in additional_item_descriptions"
+                :key="itemDesc.description"
+                medium
+                :color="itemDesc.auto_selected ? 'warning' : 'white'"
+                @click="selectItemDescription(itemDesc)"
+                class="ms-2 mb-2"
+              >
+                {{ itemDesc.description }}
+              </v-btn>
+              
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-col class="desc-item_controls">
+              <v-btn
+                icon
+                color="secondary"
+                @click.stop="descriptionItemQty -= 1"
+                style="margin-right: 30px; margin-left: 30px"
+              >
+                <v-icon>mdi-minus-circle-outline</v-icon>
+              </v-btn>
+              <v-text-field
+                :label="__('Qty')"
+                hide-details="auto"
+                v-model="descriptionItemQty"
+              >
+              </v-text-field>
+              <v-btn
+                icon
+                color="secondary"
+                @click.stop="descriptionItemQty += 1"
+                style="margin-right: 30px; margin-left: 30px"
+              >
+                <v-icon>mdi-plus-circle-outline</v-icon>
+              </v-btn>
+            </v-col>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            @click="addDescriptionItem"
+            :disabled="descriptionItemQty <= 0"
+            >{{ __("Insert") }}</v-btn
+          >
+          <v-spacer></v-spacer>
+          <v-btn color="error" @click="showItemDescDialog = false">{{
+            __("Close")
+          }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -198,6 +258,10 @@ export default {
     currency_precision: 2,
     new_line: false,
     qty: 1,
+    showItemDescDialog: false,
+    descriptionItem: null,
+    descriptionItemQty: 1,
+    additional_item_descriptions: [],
   }),
 
   watch: {
@@ -301,10 +365,41 @@ export default {
 
       return items_headers;
     },
+    selectItemDescription(item_desc) {
+      item_desc.auto_selected = !item_desc.auto_selected;
+    },
+    addDescriptionItem() {
+      if(this.descriptionItemQty < 0) return;
+      let descriptionText = " | ";
+
+      this.descriptionItem.additional_item_descriptions.forEach((item_desc) => {
+        if(item_desc.auto_selected) {
+          descriptionText += item_desc.description + " | ";
+        }
+      });
+
+      this.descriptionItem.posa_notes = descriptionText;
+      this.descriptionItem.qty = parseInt(this.descriptionItemQty);
+
+      evntBus.$emit("add_item", this.descriptionItem, true);
+
+      this.descriptionItem = null;
+      this.descriptionItemQty = 1;
+      this.additional_item_descriptions = [];
+      this.showItemDescDialog = false;
+    },
     add_item(item) {
       if (item.has_variants) {
         evntBus.$emit("open_variants_model", item, this.items);
-      } else {
+      } else if(
+          this.pos_profile.posa_enable_pos_additional_item_description ===  1 &&
+          item.posa_enable_pos_additional_item_description === 1
+        ) {
+        this.additional_item_descriptions = item.additional_item_descriptions;
+        this.descriptionItem = item;
+        this.showItemDescDialog = true;
+      } 
+      else {
         if (!item.qty || item.qty === 1) {
           item.qty = Math.abs(this.qty);
         }
@@ -565,4 +660,9 @@ export default {
 </script>
 
 <style scoped>
+  .desc-item_controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 </style>
