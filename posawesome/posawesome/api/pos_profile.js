@@ -9,4 +9,9 @@ frappe.ui.form.on('POS Profile', {
             };
         });
     },
+    validate: function(frm) {
+        if(frm.doc.posa_enable_pos_additional_item_description === 1 && !frm.doc.posa_display_additional_notes) {
+            frappe.throw('Please Check "Display Additional Notes" first.');
+        }
+    }
 });

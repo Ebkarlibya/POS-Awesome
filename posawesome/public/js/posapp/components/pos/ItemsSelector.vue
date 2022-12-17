@@ -171,7 +171,7 @@
       </v-row>
     </v-card>
     <!-- additional item description dialog -->
-    <v-dialog v-model="showItemDescDialog" persistent width="450">
+    <v-dialog v-model="showItemDescDialog" persistent width="600">
       <v-card elevation="2" outlined shaped>
         <v-card-title>{{ __("Select Item Descriptions") }}</v-card-title>
         <br>
@@ -182,7 +182,7 @@
                 v-for="itemDesc in additional_item_descriptions"
                 :key="itemDesc.description"
                 medium
-                :color="itemDesc.auto_selected ? 'warning' : 'white'"
+                :color="itemDesc.selected ? 'warning' : 'white'"
                 @click="selectItemDescription(itemDesc)"
                 class="ms-2 mb-2"
               >
@@ -192,6 +192,7 @@
             </v-col>
           </v-row>
         </v-card-text>
+        <br><br>
         <v-col class="desc-item_controls">
               <v-btn
                 icon
@@ -204,7 +205,7 @@
               <v-text-field
                 :label="__('Qty')"
                 hide-details="auto"
-                v-model="descriptionItemQty"
+                v-model.number="descriptionItemQty"
               >
               </v-text-field>
               <v-btn
@@ -216,6 +217,7 @@
                 <v-icon>mdi-plus-circle-outline</v-icon>
               </v-btn>
             </v-col>
+        <br>
         <v-card-actions>
           <v-btn
             color="primary"
@@ -261,7 +263,8 @@ export default {
     showItemDescDialog: false,
     descriptionItem: null,
     descriptionItemQty: 1,
-    additional_item_descriptions: [],
+    selectedDescriptionItemOption: false,
+    additional_item_descriptions: []
   }),
 
   watch: {
@@ -366,14 +369,22 @@ export default {
       return items_headers;
     },
     selectItemDescription(item_desc) {
-      item_desc.auto_selected = !item_desc.auto_selected;
+      
+      if(
+        this.descriptionItem.posa_force_selecting_only_one_option &&
+        this.selectedDescriptionItemOption) return;
+
+      item_desc.selected = !item_desc.selected;
+      this.selectedDescriptionItemOption = true;
+
+      this.$forceUpdate();
     },
     addDescriptionItem() {
       if(this.descriptionItemQty < 0) return;
       let descriptionText = " | ";
 
       this.descriptionItem.additional_item_descriptions.forEach((item_desc) => {
-        if(item_desc.auto_selected) {
+        if(item_desc.selected) {
           descriptionText += item_desc.description + " | ";
         }
       });
@@ -383,9 +394,11 @@ export default {
 
       evntBus.$emit("add_item", this.descriptionItem, true);
 
+      // reset
       this.descriptionItem = null;
       this.descriptionItemQty = 1;
       this.additional_item_descriptions = [];
+      this.selectedDescriptionItemOption = false;
       this.showItemDescDialog = false;
     },
     add_item(item) {
@@ -396,6 +409,9 @@ export default {
           item.posa_enable_pos_additional_item_description === 1
         ) {
         this.additional_item_descriptions = item.additional_item_descriptions;
+        this.additional_item_descriptions.map(el => {
+          el["selected"] = false;
+        });
         this.descriptionItem = item;
         this.showItemDescDialog = true;
       } 
