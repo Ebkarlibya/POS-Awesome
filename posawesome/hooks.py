@@ -247,6 +247,7 @@ fixtures = [
                     # Item
                     "ITem-posa_pos_description_tab", # tab break
                     "Item-posa_enable_pos_additional_item_description", # checkbox
+                    "Item-posa_force_selecting_only_one_option", # checkbox
                     "Item-posa_pos_additional_item_description", # table
                     # (POS Profile) & (Item)
                     "POS Profile-posa_enable_pos_additional_item_description", # checkbox
