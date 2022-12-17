@@ -145,7 +145,8 @@ def get_items(pos_profile, price_list=None):
             has_serial_no,
             max_discount,
             brand,
-            posa_enable_pos_additional_item_description
+            posa_enable_pos_additional_item_description,
+            posa_force_selecting_only_one_option
         FROM
             `tabItem`
         WHERE

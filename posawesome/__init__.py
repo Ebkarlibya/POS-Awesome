@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import frappe
 
 
-__version__ = "4.0.6"
+__version__ = "4.0.7"
 
 
 
