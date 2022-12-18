@@ -186,7 +186,7 @@
                 @click="selectItemDescription(itemDesc)"
                 class="ms-2 mb-2"
               >
-                {{ itemDesc.description }}
+                <strong>{{ itemDesc.description }}</strong>
               </v-btn>
               
             </v-col>
@@ -263,7 +263,6 @@ export default {
     showItemDescDialog: false,
     descriptionItem: null,
     descriptionItemQty: 1,
-    selectedDescriptionItemOption: false,
     additional_item_descriptions: []
   }),
 
@@ -370,12 +369,23 @@ export default {
     },
     selectItemDescription(item_desc) {
       
-      if(
-        this.descriptionItem.posa_force_selecting_only_one_option &&
-        this.selectedDescriptionItemOption) return;
+      if(this.descriptionItem.posa_force_selecting_only_one_option){
+
+        for(let i = 0; i < this.additional_item_descriptions.length; i++){
+          if(this.additional_item_descriptions[i].description === item_desc.description) {
+            this.additional_item_descriptions[i].selected = true;
+              } else {
+                this.additional_item_descriptions[i].selected = false;
+              }
+        }
+
+
+        this.$forceUpdate();
+        return
+      }
+      
 
       item_desc.selected = !item_desc.selected;
-      this.selectedDescriptionItemOption = true;
 
       this.$forceUpdate();
     },
@@ -398,7 +408,6 @@ export default {
       this.descriptionItem = null;
       this.descriptionItemQty = 1;
       this.additional_item_descriptions = [];
-      this.selectedDescriptionItemOption = false;
       this.showItemDescDialog = false;
     },
     add_item(item) {
