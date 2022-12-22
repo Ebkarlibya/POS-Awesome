@@ -225,7 +225,7 @@ def get_items(pos_profile, price_list=None):
                 if item.get("posa_enable_pos_additional_item_description") == 1:
                     additional_item_descriptions = frappe.get_all(
                         "POS Additional Item Description Table",
-                        fields=["description", "auto_selected"],
+                        fields=["description"],
                         filters={"parent": item_code},
                     )
                     item.update({"additional_item_descriptions": additional_item_descriptions})
