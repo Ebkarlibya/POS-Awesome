@@ -752,9 +752,13 @@ def get_items_details(pos_profile, items_data):
         for item in items_data:
             item_code = item.get("item_code")
             item_stock_qty = get_stock_availability(item_code, warehouse)
-            has_batch_no, has_serial_no = frappe.get_value(
-                "Item", item_code, ["has_batch_no", "has_serial_no"]
-            )
+            try:
+                has_batch_no, has_serial_no = frappe.get_value(
+                    "Item", item_code, ["has_batch_no", "has_serial_no"]
+                )
+            except Exception as e:
+                frappe.log_error(frappe.get_traceback(), "ETMS POS Trap trace")
+                frappe.log_error(item_code, "ETMS POS Trap item_code")
 
             uoms = frappe.get_all(
                 "UOM Conversion Detail",
