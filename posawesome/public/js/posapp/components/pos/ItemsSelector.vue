@@ -2,7 +2,6 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 75vh; height: 75vh"
     >
       <v-progress-linear
         :active="loading"
@@ -117,9 +116,9 @@
       </v-row>
     </v-card>
     <!-- Item Group Filter -->
-    <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
+    <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
-      <v-row v-if="showFastGroupFilters">
+      <v-row v-if="showFastGroupFilters" class="pb-3">
         <v-btn
           v-for="groupName in items_group"
           :key="groupName"
