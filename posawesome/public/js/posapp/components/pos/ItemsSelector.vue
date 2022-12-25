@@ -173,6 +173,10 @@
     <v-dialog v-model="showItemDescDialog" persistent width="600">
       <v-card elevation="2" outlined shaped>
         <v-card-title>{{ __("Select Item Descriptions") }}</v-card-title>
+        <v-card-subtitle v-if="descriptionItem"
+          style="margin: 5px 3px 0px 3px; color: #0097a7 !important; font-size: 18px"
+          >
+        {{ descriptionItem.item_name }}</v-card-subtitle>
         <br>
         <v-card-text>
           <v-row dense>
