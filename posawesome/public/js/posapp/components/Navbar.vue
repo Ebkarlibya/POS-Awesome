@@ -6,7 +6,7 @@
         class="grey--text"
       ></v-app-bar-nav-icon>
       <v-img
-        src="/assets/posawesome/js/posapp/components/pos/pos.png"
+        :src="company_img"
         alt="POS Awesome"
         max-width="32"
         class="mr-2"
@@ -65,6 +65,14 @@
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
+                <v-list-item @click="openDesk">
+                  <v-list-item-icon>
+                    <v-icon>mdi-menu</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ __("Desk") }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
                 <v-list-item @click="logOut">
                   <v-list-item-icon>
                     <v-icon>mdi-logout</v-icon>
@@ -180,6 +188,10 @@ export default {
       );
       win.focus();
     },
+    openDesk() {
+      const win = window.open("/app", "_blank");
+      win.focus();
+    },
     close_shift_dialog() {
       evntBus.$emit('open_closing_dialog');
     },
@@ -232,11 +244,22 @@ export default {
       evntBus.$on('show_mesage', (data) => {
         this.show_mesage(data);
       });
-      evntBus.$on('set_company', (data) => {
-        this.company = data.name;
-        this.company_img = data.company_logo
-          ? data.company_logo
-          : this.company_img;
+      evntBus.$on('set_company', async (data) => {
+        // this.company = data.name;
+        // this.company_img = data.company_logo
+        //   ? data.company_logo
+        //   : this.company_img;
+        // this.company_img = data.company_logo
+        //   ? data.company_logo
+        //   : this.company_img;
+        let res = frappe.db.get_value(
+          "Website Settings",
+          {},
+          "banner_image"
+        );
+        res.then(res => {
+          this.company_img = res.message.banner_image;
+        });
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
