@@ -1,84 +1,33 @@
 <template>
   <div>
-    <v-card
-      class="selection mx-auto grey lighten-5"
-    >
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="loading"
-        absolute
-        top
-        color="info"
-      ></v-progress-linear>
+    <v-card class="selection mx-auto grey lighten-5">
+      <v-progress-linear :active="loading" :indeterminate="loading" absolute top color="info"></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col class="pb-0 mb-2">
-          <v-text-field
-            dense
-            clearable
-            autofocus
-            outlined
-            color="primary"
-            :label="frappe._('Search Items')"
-            hint="Search by item code, serial number, batch no or barcode"
-            background-color="white"
-            hide-details
-            v-model="debounce_search"
-            @keydown.esc="esc_event"
-            @keydown.enter="enter_event"
-            ref="debounce_search"
-          ></v-text-field>
+          <v-text-field dense clearable autofocus outlined color="primary" :label="frappe._('Search Items')"
+            hint="Search by item code, serial number, batch no or barcode" background-color="white" hide-details
+            v-model="debounce_search" @keydown.esc="esc_event" @keydown.enter="enter_event"
+            ref="debounce_search"></v-text-field>
         </v-col>
         <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
-          <v-text-field
-            dense
-            outlined
-            color="primary"
-            :label="frappe._('QTY')"
-            background-color="white"
-            hide-details
-            v-model.number="qty"
-            type="number"
-            @keydown.enter="enter_event"
-            @keydown.esc="esc_event"
-          ></v-text-field>
+          <v-text-field dense outlined color="primary" :label="frappe._('QTY')" background-color="white" hide-details
+            v-model.number="qty" type="number" @keydown.enter="enter_event" @keydown.esc="esc_event"></v-text-field>
         </v-col>
         <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
-          <v-checkbox
-            v-model="new_line"
-            color="accent"
-            value="true"
-            :label="__('NLine')"
-            dense
-            hide-details
-          ></v-checkbox>
+          <v-checkbox v-model="new_line" color="accent" value="true" :label="__('NLine')" dense
+            hide-details></v-checkbox>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
             <v-row dense class="overflow-y-auto" style="max-height: 67vh">
-              <v-col
-                v-for="(item, idx) in filtred_items"
-                :key="idx"
-                xl="3"
-                lg="3"
-                md="3"
-                sm="3"
-                cols="10"
-                min-height="50"
-              >
+              <v-col v-for="(item, idx) in filtred_items" :key="idx" xl="3" lg="3" md="3" sm="3" cols="10"
+                min-height="50">
                 <v-card hover="hover" @click="add_item(item)">
-                  <v-img
-                    :src="
-                      item.image ||
-                      '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
-                    "
-                    class="white--text align-end"
-                    gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
-                    height="100px"
-                  >
-                    <v-card-text
-                      v-text="item.item_name"
-                      class="text-subtitle-2 px-1 pb-2"
-                    ></v-card-text>
+                  <v-img :src="
+                    item.image ||
+                    '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
+                  " class="white--text align-end" gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)" height="100px">
+                    <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
                     <div class="text-caption primary--text">
@@ -93,15 +42,8 @@
           <div fluid class="items" v-if="items_view == 'list'">
             <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
               <template>
-                <v-data-table
-                  :headers="getItmesHeaders()"
-                  :items="filtred_items"
-                  item-key="item_code"
-                  class="elevation-1"
-                  :items-per-page="itemsPerPage"
-                  hide-default-footer
-                  @click:row="add_item"
-                >
+                <v-data-table :headers="getItmesHeaders()" :items="filtred_items" item-key="item_code"
+                  class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer @click:row="add_item">
                   <template v-slot:item.rate="{ item }">
                     {{ formtCurrency(item.rate) }}
                   </template>
@@ -119,120 +61,104 @@
     <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
       <v-row v-if="showFastGroupFilters" class="pb-3">
-        <v-btn
-          v-for="groupName in items_group"
-          :key="groupName"
-          medium
-          color="primary"
-          @click="item_group = groupName"
-          class="ms-2 mb-2"
-        >
+        <v-btn v-for="groupName in items_group" :key="groupName" medium color="primary" @click="item_group = groupName"
+          class="ms-2 mb-2">
           {{ groupName }}
         </v-btn>
       </v-row>
       <!-- default item group filters -->
       <v-row v-else no-gutters align="center">
         <v-col cols="12">
-          <v-select
-            :items="items_group"
-            :label="frappe._('Items Group')"
-            dense
-            outlined
-            hide-details
-            v-model="item_group"
-          ></v-select>
+          <v-select :items="items_group" :label="frappe._('Items Group')" dense outlined hide-details
+            v-model="item_group"></v-select>
         </v-col>
       </v-row>
       <v-row no-gutters align="center">
         <v-col cols="3" class="mt-1">
-          <v-btn-toggle
-            v-model="items_view"
-            color="primary"
-            group
-            dense
-            rounded
-          >
+          <v-btn-toggle v-model="items_view" color="primary" group dense rounded>
             <v-btn small value="list">{{ __("List") }}</v-btn>
             <v-btn small value="card">{{ __("Card") }}</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-2">
-          <v-btn small block color="primary" text @click="show_coupons"
-            >{{ couponsCount }} {{ __("Coupons") }}</v-btn
-          >
+          <v-btn small block color="primary" text @click="show_coupons">{{ couponsCount }} {{ __("Coupons") }}</v-btn>
         </v-col>
         <v-col cols="5" class="mt-2">
-          <v-btn small block color="primary" text @click="show_offers"
-            >{{ offersCount }} {{ __("Offers") }} : {{ appliedOffersCount }}
-            {{ __("Applied") }}</v-btn
-          >
+          <v-btn small block color="primary" text @click="show_offers">{{ offersCount }} {{ __("Offers") }} : {{
+            appliedOffersCount
+          }}
+            {{ __("Applied") }}</v-btn>
         </v-col>
       </v-row>
     </v-card>
     <!-- additional item description dialog -->
     <v-dialog v-model="showItemDescDialog" persistent width="600">
-      <v-card elevation="2" outlined shaped>
-        <v-card-title>{{ __("Select Item Descriptions") }}</v-card-title>
-        <v-card-subtitle v-if="descriptionItem"
-          style="margin: 5px 3px 0px 3px; color: #0097a7 !important; font-size: 18px"
-          >
-        {{ descriptionItem.item_name }}</v-card-subtitle>
-        <br>
-        <v-card-text>
-          <v-row dense>
-            <v-col class="variants-qty_controls">
-              <v-btn
-                v-for="itemDesc in additional_item_descriptions"
-                :key="itemDesc.description"
-                medium
-                :color="itemDesc.selected ? 'warning' : 'white'"
-                @click="selectItemDescription(itemDesc)"
-                class="ms-2 mb-2"
-              >
-                <strong>{{ itemDesc.description }}</strong>
-              </v-btn>
-              
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <br><br>
-        <v-col class="desc-item_controls">
-              <v-btn
-                icon
-                color="secondary"
-                @click.stop="descriptionItemQty -= 1"
-                style="margin-right: 30px; margin-left: 30px"
-              >
-                <v-icon>mdi-minus-circle-outline</v-icon>
-              </v-btn>
-              <v-text-field
-                :label="__('Qty')"
-                hide-details="auto"
-                v-model.number="descriptionItemQty"
-              >
-              </v-text-field>
-              <v-btn
-                icon
-                color="secondary"
-                @click.stop="descriptionItemQty += 1"
-                style="margin-right: 30px; margin-left: 30px"
-              >
-                <v-icon>mdi-plus-circle-outline</v-icon>
-              </v-btn>
-            </v-col>
-        <br>
-        <v-card-actions>
-          <v-btn
-            color="primary"
-            @click="addDescriptionItem"
-            :disabled="descriptionItemQty <= 0"
-            >{{ __("Insert") }}</v-btn
-          >
+      <v-card outlined shaped>
+        <v-card-title>
+          {{ __("Select Item Descriptions") }}
           <v-spacer></v-spacer>
+
+          <v-btn color="primary" @click="addDescriptionItem" :disabled="descriptionItemQty <= 0">{{
+            __("Insert")
+          }}</v-btn>
+          <div style="margin-right: 10px;"></div>
           <v-btn color="error" @click="showItemDescDialog = false">{{
             __("Close")
           }}</v-btn>
-        </v-card-actions>
+        </v-card-title>
+
+        <v-card-subtitle v-if="descriptionItem"
+          style="margin: 5px 3px 0px 3px; color: #0097a7 !important; font-size: 18px">
+          {{ descriptionItem.item_name }}</v-card-subtitle>
+
+        <v-row style="margin: 0px 15px 0px 15px">
+          <v-col sm="3" v-for="itemDesc in additional_item_descriptions">
+
+              <v-card elevation="2" outlined shaped :key="itemDesc.description" max-height="190px" >
+                <v-card-text>
+                  <p primary   class="text-center" style="font-size: large; color: black;">
+                    {{ itemDesc.description }}
+                  </p>
+                  <p primary   class="text-center" style="font-size: large; color: black;">
+                    {{ itemDesc.selected_qty }}
+                  </p>
+                </v-card-text>
+                <!-- bottom -->
+                <v-card-actions>
+                  <v-btn icon color="secondary" @click.stop="decDescItemQty(itemDesc)"
+                    @mousedown.stop="fastDecDescItemQty(itemDesc)"
+                    @mouseup.stop="clearTimers"
+                    @mouseleave.stop="clearTimers"
+                    style="margin-start: 5px; margin-end: 10px">
+                    <v-icon>mdi-minus-circle-outline</v-icon>
+                  </v-btn>
+                  <!-- <v-text-field :label="__('Qty')" hide-details="auto" v-model.number="descriptionItemQty">
+                  </v-text-field> -->
+                  <v-btn icon color="secondary" @click.stop="incDescItemQty(itemDesc)"
+                    @mousedown.stop="fastIncDescItemQty(itemDesc)"
+                    @mouseup.stop="clearTimers"
+                    @mouseleave.stop="clearTimers"
+                    style="margin-start: 5px; margin-end: 10px">
+                    <v-icon>mdi-plus-circle-outline</v-icon>
+                  </v-btn>
+  
+                </v-card-actions>
+                
+              </v-card>
+          </v-col>
+
+        </v-row>
+        <v-card-title>
+          <v-spacer></v-spacer>
+
+          <v-btn color="primary" @click="addDescriptionItem" :disabled="descriptionItemQty <= 0">{{
+            __("Insert")
+          }}</v-btn>
+          <div style="margin-right: 10px;"></div>
+          <v-btn color="error" @click="showItemDescDialog = false">{{
+            __("Close")
+          }}</v-btn>
+        </v-card-title>
       </v-card>
     </v-dialog>
   </div>
@@ -266,7 +192,9 @@ export default {
     showItemDescDialog: false,
     descriptionItem: null,
     descriptionItemQty: 1,
-    additional_item_descriptions: []
+    additional_item_descriptions: [],
+    timeout: null,
+    interval: null
   }),
 
   watch: {
@@ -370,63 +298,104 @@ export default {
 
       return items_headers;
     },
-    selectItemDescription(item_desc) {
-      
-      if(this.descriptionItem.posa_force_selecting_only_one_option){
+    selectItemDescription() {
 
-        for(let i = 0; i < this.additional_item_descriptions.length; i++){
-          if(this.additional_item_descriptions[i].description === item_desc.description) {
+      if (this.descriptionItem.posa_force_selecting_only_one_option) {
+
+        for (let i = 0; i < this.additional_item_descriptions.length; i++) {
+          if (this.additional_item_descriptions[i].description === item_desc.description) {
             this.additional_item_descriptions[i].selected = true;
-              } else {
-                this.additional_item_descriptions[i].selected = false;
-              }
+          } else {
+            this.additional_item_descriptions[i].selected = false;
+          }
         }
 
+        debugger;
+        this.additional_item_descriptions.forEach((item_desc) => {
+          console.log(item_desc);
+        });
 
         this.$forceUpdate();
         return
       }
-      
 
       item_desc.selected = !item_desc.selected;
 
+
+
       this.$forceUpdate();
     },
+    incDescItemQty(itemDesc) {
+      itemDesc.selected_qty += 1;
+      this.$forceUpdate();
+    },
+    fastIncDescItemQty(itemDesc) {
+      this.clearTimers();
+      this.timeout = setTimeout(() => {
+        this.interval = setInterval(() => {
+          this.incDescItemQty(itemDesc);
+        }, 100);
+      }, 1000);
+    },
+    decDescItemQty(itemDesc) {
+      if (itemDesc.selected_qty > 0) {
+        itemDesc.selected_qty -= 1;
+      }
+      this.$forceUpdate();
+    },
+    fastDecDescItemQty(itemDesc) {
+      this.clearTimers();
+      this.timeout = setTimeout(() => {
+        this.interval = setInterval(() => {
+          this.decDescItemQty(itemDesc);
+        }, 100);
+      }, 1000);
+    },
+    clearTimers() {
+      clearTimeout(this.timeout);
+      clearInterval(this.interval);
+    },
     addDescriptionItem() {
-      if(this.descriptionItemQty < 0) return;
-      let descriptionText = " | ";
+      // if (this.descriptionItemQty < 0) return;
 
-      this.descriptionItem.additional_item_descriptions.forEach((item_desc) => {
-        if(item_desc.selected) {
-          descriptionText += item_desc.description + " | ";
+      let total_qty = 0;
+      let descriptionText = "";
+      this.descriptionItem.posa_notes = "";
+
+      this.additional_item_descriptions.forEach((item_desc) => {
+        if (item_desc.selected_qty > 0) {
+          total_qty += item_desc.selected_qty;
+          descriptionText += `${item_desc.selected_qty} | ${item_desc.description}\n`;
         }
       });
+      
+      this.descriptionItem.qty = total_qty;
+      this.descriptionItem.posa_notes += descriptionText;
 
-      this.descriptionItem.posa_notes = descriptionText;
-      this.descriptionItem.qty = parseInt(this.descriptionItemQty);
-
-      evntBus.$emit("add_item", this.descriptionItem, true);
+      evntBus.$emit("add_item", this.descriptionItem, descriptionText);
+      this.descriptionItem.posa_notes = "";
 
       // reset
-      this.descriptionItem = null;
-      this.descriptionItemQty = 1;
-      this.additional_item_descriptions = [];
-      this.showItemDescDialog = false;
+      setTimeout(() => {
+        this.descriptionItem = null;
+        this.showItemDescDialog = false;
+        this.additional_item_descriptions = [];
+      }, 100);
     },
     add_item(item) {
       if (item.has_variants) {
         evntBus.$emit("open_variants_model", item, this.items);
-      } else if(
-          this.pos_profile.posa_enable_pos_additional_item_description ===  1 &&
-          item.posa_enable_pos_additional_item_description === 1
-        ) {
-        this.additional_item_descriptions = item.additional_item_descriptions;
-        this.additional_item_descriptions.map(el => {
-          el["selected"] = false;
-        });
+      } else if (
+        this.pos_profile.posa_enable_pos_additional_item_description === 1 &&
+        item.posa_enable_pos_additional_item_description === 1
+      ) {
+        this.additional_item_descriptions = JSON.parse(JSON.stringify(item.additional_item_descriptions));
+        this.additional_item_descriptions.map(el => el["selected_qty"] = 0);
+        
         this.descriptionItem = item;
+        
         this.showItemDescDialog = true;
-      } 
+      }
       else {
         if (!item.qty || item.qty === 1) {
           item.qty = Math.abs(this.qty);
@@ -567,7 +536,7 @@ export default {
   },
 
   computed: {
-    itemSelectDisplayType(){
+    itemSelectDisplayType() {
       return this.pos_profile.posa_default_item_selection_view_type;
     },
     filtred_items() {
@@ -654,7 +623,7 @@ export default {
   },
 
   created: function () {
-    this.$nextTick(function () {});
+    this.$nextTick(function () { });
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
       this.items_view = data.pos_profile.posa_default_item_selection_view_type || "list";
@@ -688,9 +657,9 @@ export default {
 </script>
 
 <style scoped>
-  .desc-item_controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+.desc-item_controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 </style>
