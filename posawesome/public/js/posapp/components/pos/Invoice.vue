@@ -83,13 +83,13 @@
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="1">
-                    <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
+                    <v-btn :disabled="is_item_description_enabled(item) || !!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
                       @click.stop="subtract_one(item)">
                       <v-icon>mdi-minus-circle-outline</v-icon>
                     </v-btn>
                   </v-col>
                   <v-col cols="1">
-                    <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
+                    <v-btn :disabled="is_item_description_enabled(item) || !!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
                       @click.stop="add_one(item)">
                       <v-icon>mdi-plus-circle-outline</v-icon>
                     </v-btn>
@@ -103,7 +103,7 @@
                   <v-col cols="4">
                     <v-text-field dense outlined color="primary" :label="frappe._('QTY')" background-color="white"
                       hide-details v-model.number="item.qty" type="number" @change="calc_sotck_gty(item, $event)"
-                      :disabled="!!item.posa_is_offer || !!item.posa_is_replace"></v-text-field>
+                      :disabled="is_item_description_enabled(item) || !!item.posa_is_offer || !!item.posa_is_replace"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-select dense background-color="white" :label="frappe._('UOM')" v-model="item.uom"
@@ -179,6 +179,8 @@
                   <v-col align="center" cols="4">
                     <v-checkbox dense :label="frappe._('Offer Applied')" v-model="item.posa_offer_applied" readonly
                       hide-details class="shrink mr-2 mt-0"></v-checkbox>
+                      <v-checkbox dense :label="frappe._('Has Item Description')" input-value="1"
+                       v-if="is_item_description_enabled(item)" readonly hide-details class="shrink mr-2 mt-0"></v-checkbox>
                   </v-col>
                   <v-col cols="4" v-if="item.has_serial_no == 1 || item.serial_no">
                     <v-text-field dense outlined color="primary" :label="frappe._('Serial No QTY')"
@@ -244,10 +246,21 @@
                     </v-menu>
                   </v-col>
                   <v-col cols="8" v-if="pos_profile.posa_display_additional_notes">
+                    <v-btn
+                      primary
+                      small
+                      v-if="is_item_description_enabled(item)"
+                      @click="edit_desc_item(item)"
+                    >
+                      {{ frappe._('Edit Item Description') }}
+                    </v-btn>
+                    <br><br>
                     <v-textarea class="pa-0" outlined dense clearable color="primary" auto-grow rows="8"
                       :label="frappe._('Additional Notes')" v-model="item.posa_notes"
-                      :value="item.posa_notes"></v-textarea>
-                  </v-col>
+                      :value="item.posa_notes"
+                      :disabled="is_item_description_enabled(item)"
+                      ></v-textarea>
+                    </v-col>
                 </v-row>
               </td>
             </template>
@@ -325,6 +338,12 @@
 <script>
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
+
+var originalFunc = evntBus.$emit;
+evntBus.$emit = function() {
+  console.log(arguments);
+  originalFunc.apply(this, arguments);
+};
 
 export default {
   data() {
@@ -414,6 +433,9 @@ export default {
 
   methods: {
     remove_item(item) {
+      if(this.is_item_description_enabled(item)) {
+        this.remove_desc_item(item);
+      }
       const index = this.items.findIndex(
         (el) => el.posa_row_id == item.posa_row_id
       );
@@ -427,7 +449,12 @@ export default {
         this.expanded.splice(idx, 1);
       }
     },
-
+    remove_desc_item(item){
+      evntBus.$emit('remove_desc_item', item);
+    },
+    edit_desc_item(item) {
+      evntBus.$emit('edit_desc_item', item);
+    },
     add_one(item) {
       item.qty++;
       if (item.qty == 0) {
@@ -443,6 +470,9 @@ export default {
       }
       this.calc_sotck_gty(item, item.qty);
       this.$forceUpdate();
+    },
+    is_item_description_enabled(item) {
+      return (this.pos_profile.posa_enable_pos_additional_item_description && item.posa_enable_pos_additional_item_description);
     },
     arrange_calc_mline_str(mline_str) {
       let mline_items = mline_str.split("\n");
@@ -477,8 +507,7 @@ export default {
       }
       return txt;
     },
-    add_item(item, extra_notes) {
-      extra_notes = this.arrange_calc_mline_str(extra_notes);
+    add_item(item, resetQty, extra_notes) {
       if (!item.uom) {
         item.uom = item.stock_uom;
       }
@@ -503,8 +532,13 @@ export default {
         this.update_item_detail(new_item);
       } else {
         const cur_item = this.items[index];
-        cur_item.posa_notes += extra_notes;
-        cur_item.posa_notes = this.arrange_calc_mline_str(cur_item.posa_notes);
+        if(extra_notes && this.is_item_description_enabled(item)) {
+          cur_item.posa_notes = extra_notes;
+        }
+        if(resetQty) {
+          cur_item.qty = 0;
+        }
+        // cur_item.posa_notes = this.arrange_calc_mline_str(cur_item.posa_notes);
         this.update_items_details([cur_item]);
         if (item.has_serial_no && item.to_set_serial_no) {
           if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
@@ -543,7 +577,6 @@ export default {
       }
       this.$forceUpdate();
     },
-
     get_new_item(item) {
       const new_item = { ...item };
       if (!item.qty) {
@@ -2090,8 +2123,8 @@ export default {
       this.currency_precision =
         frappe.defaults.get_default('currency_precision') || 2;
     });
-    evntBus.$on('add_item', (item, extra_notes) => {
-      this.add_item(item, extra_notes);
+    evntBus.$on('add_item', (item, resetQty = false, extra_notes = null) => {
+      this.add_item(item, resetQty, extra_notes);
     });
     evntBus.$on('update_customer', (customer) => {
       this.customer = customer;
