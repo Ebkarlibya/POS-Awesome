@@ -18,7 +18,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5">
+    <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5 mt-5">
       <v-row align="center" class="items px-2 py-1">
         <v-col v-if="pos_profile.posa_allow_sales_order" cols="9" class="pb-2 pr-0">
           <Customer></Customer>
@@ -662,6 +662,13 @@ export default {
       } else {
         if (doc.items.length) {
           old_invoice = this.update_invoice(doc);
+          if (doc.items.length) {
+          old_invoice = this.update_invoice(doc);
+          frappe.show_alert({
+            message: __(`${old_invoice.name} added to Held list`),
+            indicator: 'green',
+            });
+          }
         }
       }
       if (!data.name && !data.is_return) {
@@ -679,6 +686,14 @@ export default {
           this.invoiceTypes = ['Return'];
         }
         this.invoice_doc = data;
+
+        if (doc.items.length) {
+          old_invoice = this.update_invoice(doc);
+          frappe.show_alert({
+            message: __(`${old_invoice.name} added to Held list`),
+            indicator: 'green',
+          });
+        }
         this.items = data.items;
         this.update_items_details(this.items);
         this.posa_offers = data.posa_offers || [];

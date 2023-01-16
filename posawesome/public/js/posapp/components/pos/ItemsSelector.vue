@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="selection mx-auto grey lighten-5">
+    <v-card class="selection mx-auto grey lighten-5 mt-5">
       <v-progress-linear :active="loading" :indeterminate="loading" absolute top color="info"></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col class="pb-0 mb-2">
