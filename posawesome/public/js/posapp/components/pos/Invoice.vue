@@ -22,11 +22,12 @@
       style="max-height: 70vh; height: 70vh"
       class="cards my-0 py-0 grey lighten-5 mt-5"
     >
-      <v-row align="center" class="items px-2 py-1 mb-5">
+      <v-row align="center" class="items px-2 py-1 mb-1">
         <v-col
           v-if="pos_profile.posa_allow_sales_order"
           cols="9"
-          class="px-6 pt-6"
+          class="px-6 pt-3"
+          style="display: flex;"
         >
         <Customer></Customer>
         <v-spacer></v-spacer>
@@ -36,9 +37,11 @@
           @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
           @selectRestaurantTable="selectRestaurantTable"
           :posa_pos_restaurant_table="posa_pos_restaurant_table"
+          class=""
           >
         </RestaurantTable>
         </v-col>
+
         <v-col
           v-if="!pos_profile.posa_allow_sales_order"
           cols="12"
@@ -998,12 +1001,16 @@ export default {
       this.return_doc = '';
       const doc = this.get_invoice_doc();
       doc.posa_pos_restaurant_table = this.posa_pos_restaurant_table;
-
+      debugger
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
       } else {
         if (doc.items.length) {
           old_invoice = this.update_invoice(doc);
+          frappe.show_alert({
+            message: __(`${old_invoice.name} added to Held list`),
+            indicator: 'green',
+          });
         }
       }
       if (!data.name && !data.is_return) {
@@ -1021,6 +1028,11 @@ export default {
           this.invoiceTypes = ['Return'];
         }
         this.invoice_doc = data;
+        
+        frappe.show_alert({
+            message: __(`${old_invoice.name} added to Held list`),
+            indicator: 'green',
+        });
         this.items = data.items;
         this.update_items_details(this.items);
         this.posa_offers = data.posa_offers || [];
