@@ -20,22 +20,42 @@
     </v-dialog>
     <v-card
       style="max-height: 70vh; height: 70vh"
-      class="cards my-0 py-0 grey lighten-5"
+      class="cards my-0 py-0 grey lighten-5 mt-5"
     >
-      <v-row align="center" class="items px-2 py-1">
+      <v-row align="center" class="items px-2 py-1 mb-5">
         <v-col
           v-if="pos_profile.posa_allow_sales_order"
           cols="9"
-          class="pb-2 pr-0"
+          class="px-6 pt-6"
         >
-          <Customer></Customer>
+        <Customer></Customer>
+        <v-spacer></v-spacer>
+        <RestaurantTable 
+          v-if="pos_profile.posa_enable_pos_restaurant_table"
+          ref="restaurantTable"
+          @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
+          @selectRestaurantTable="selectRestaurantTable"
+          :posa_pos_restaurant_table="posa_pos_restaurant_table"
+          >
+        </RestaurantTable>
         </v-col>
         <v-col
           v-if="!pos_profile.posa_allow_sales_order"
           cols="12"
-          class="pb-2"
-        >
-          <Customer></Customer>
+          class="px-6 pt-6"
+          >
+          <v-row justify-space-between>
+            <Customer></Customer>
+            <v-spacer></v-spacer>
+            <RestaurantTable 
+              v-if="pos_profile.posa_enable_pos_restaurant_table"
+              ref="restaurantTable"
+              @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
+              @selectRestaurantTable="selectRestaurantTable"
+              :posa_pos_restaurant_table="posa_pos_restaurant_table"
+              >
+            </RestaurantTable>
+          </v-row>
         </v-col>
         <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2">
           <v-select
@@ -707,6 +727,7 @@
 <script>
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
+import RestaurantTable from './RestaurantTable.vue';
 
 export default {
   data() {
@@ -739,6 +760,7 @@ export default {
       delivery_charges: [],
       delivery_charges_rate: 0,
       selcted_delivery_charges: {},
+      posa_pos_restaurant_table: '',
       items_headers: [
         {
           text: __('Name'),
@@ -757,7 +779,8 @@ export default {
 
   components: {
     Customer,
-  },
+    RestaurantTable
+},
 
   computed: {
     total_qty() {
@@ -795,6 +818,9 @@ export default {
   },
 
   methods: {
+    selectRestaurantTable(table) {
+      this.posa_pos_restaurant_table = table.name;
+    },
     remove_item(item) {
       const index = this.items.findIndex(
         (el) => el.posa_row_id == item.posa_row_id
@@ -971,6 +997,8 @@ export default {
       this.posa_coupons = [];
       this.return_doc = '';
       const doc = this.get_invoice_doc();
+      doc.posa_pos_restaurant_table = this.posa_pos_restaurant_table;
+
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
       } else {

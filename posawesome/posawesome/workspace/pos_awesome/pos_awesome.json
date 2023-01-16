@@ -144,7 +144,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Extra",
-   "link_count": 1,
+   "link_count": 2,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -157,9 +157,19 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Restaurant Table",
+   "link_count": 0,
+   "link_to": "POS Restaurant Table",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-16 12:06:12.046095",
+ "modified": "2023-01-15 12:01:44.664310",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",

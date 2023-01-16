@@ -14,11 +14,21 @@
           <v-container>
             <v-row>
               <v-col cols="12" class="pa-1">
+                <div class="mx-2 my-5">
+                  <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    :label="__('Search Helds')"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </div>
                 <template>
                   <v-data-table
                     :headers="headers"
                     :items="dialog_data"
                     item-key="name"
+                    :search="search"
                     class="elevation-1"
                     :single-select="singleSelect"
                     show-select
@@ -49,11 +59,13 @@ export default {
     singleSelect: true,
     selected: [],
     dialog_data: {},
+    search: '',
     headers: [
       {
         text: __('Customer'),
         value: 'customer',
         align: 'start',
+        filterable: true,
         sortable: true,
       },
       {
@@ -74,6 +86,12 @@ export default {
         align: 'start',
         sortable: false,
       },
+      {
+        text: __('Table'),
+        value: 'posa_pos_restaurant_table',
+        align: 'start',
+        sortable: true,
+      }
     ],
   }),
   watch: {},

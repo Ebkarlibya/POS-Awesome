@@ -251,6 +251,8 @@ fixtures = [
                     "Item-posa_pos_additional_item_description", # table
                     # (POS Profile) & (Item)
                     "POS Profile-posa_enable_pos_additional_item_description", # checkbox
+                    # Sales Invoice
+                    "Sales Invoice-posa_pos_restaurant_table"
                 ),
             ]
         ],
