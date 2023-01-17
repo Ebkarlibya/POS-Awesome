@@ -668,9 +668,9 @@ export default {
           if (doc.items.length) {
           old_invoice = this.update_invoice(doc);
           frappe.show_alert({
-            message: __(`${old_invoice.name} added to Held list`),
+            message: __(`{0} added to Held list`, [old_invoice.name]),
             indicator: 'green',
-            });
+          });
           }
         }
       }
@@ -693,7 +693,7 @@ export default {
         if (doc.items.length) {
           old_invoice = this.update_invoice(doc);
           frappe.show_alert({
-            message: __(`${old_invoice.name} added to Held list`),
+            message: __(`{0} added to Held list`, [old_invoice.name]),
             indicator: 'green',
           });
         }
