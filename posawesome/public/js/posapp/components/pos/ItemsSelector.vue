@@ -408,6 +408,16 @@ export default {
         item_desc.selected_qty = 0;
       });
     },
+    reset_desc_items() {
+      this.items.forEach(item => {
+        if(item.additional_item_descriptions) {
+          item.additional_item_descriptions.forEach((item_desc) => {
+            item_desc.selected_qty = 0;
+          });
+          item.descriptionTotalQty = 0;
+        } 
+      })
+    },
     add_item(item) {
       if (item.has_variants) {
         evntBus.$emit("open_variants_model", item, this.items);
@@ -690,6 +700,15 @@ export default {
     });
     evntBus.$on("remove_desc_item", (item) => {
       this.remove_desc_item(item);
+    });
+    evntBus.$on("reset_desc_items", (invoice) => {
+      this.reset_desc_items(invoice);
+    });
+    evntBus.$on('new_invoice', () => {
+      this.invoice_doc = '';
+      setTimeout(() => {
+        this.reset_desc_items();
+      }, 1000);
     });
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;

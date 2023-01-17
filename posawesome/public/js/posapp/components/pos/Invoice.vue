@@ -645,6 +645,7 @@ export default {
       this.delivery_charges_rate = 0;
       this.selcted_delivery_charges = {};
       evntBus.$emit('set_customer_readonly', false);
+      evntBus.$emit("reset_desc_items");
       this.cancel_dialog = false;
     },
 
@@ -657,6 +658,8 @@ export default {
       this.posa_coupons = [];
       this.return_doc = '';
       const doc = this.get_invoice_doc();
+      evntBus.$emit("reset_desc_items");
+
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
       } else {
