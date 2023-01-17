@@ -1008,7 +1008,7 @@ export default {
         if (doc.items.length) {
           old_invoice = this.update_invoice(doc);
           frappe.show_alert({
-            message: __(`${old_invoice.name} added to Held list`),
+            message: __(`{0} added to Held list`, [old_invoice.name]),
             indicator: 'green',
           });
         }
@@ -1030,9 +1030,9 @@ export default {
         this.invoice_doc = data;
         
         frappe.show_alert({
-            message: __(`${old_invoice.name} added to Held list`),
+            message: __(`{0} added to Held list`, [old_invoice.name]),
             indicator: 'green',
-        });
+          });
         this.items = data.items;
         this.update_items_details(this.items);
         this.posa_offers = data.posa_offers || [];
