@@ -817,7 +817,9 @@ export default {
         async: true,
         callback: function (r) {
           if (r.message) {
-            vm.load_print_page();
+            if(!vm.pos_profile.posa_disable_payment_print_popup) {
+              vm.load_print_page();
+            }
             evntBus.$emit('set_last_invoice', vm.invoice_doc.name);
             evntBus.$emit('show_mesage', {
               text: `Invoice ${r.message.name} is Submited`,

@@ -245,6 +245,7 @@ fixtures = [
                     "POS Profile-posa_default_pos_sell_type", # select
                     "POS Profile-posa_show_fast_item_group_search_filters", # checkbox
                     "POS Profile-posa_enable_pos_restaurant_table", # checkbox
+                    "POS Profile-posa_disable_payment_print_popup", # checkbox
                     # Item
                     "ITem-posa_pos_description_tab", # tab break
                     "Item-posa_enable_pos_additional_item_description", # checkbox
