@@ -1001,7 +1001,7 @@ export default {
       this.return_doc = '';
       const doc = this.get_invoice_doc();
       doc.posa_pos_restaurant_table = this.posa_pos_restaurant_table;
-      debugger
+      
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
       } else {
