@@ -54,7 +54,7 @@
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
-            <v-row dense class="overflow-y-auto" style="max-height: 67vh">
+            <v-row dense class="overflow-y-auto" style="max-height: 63vh">
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
