@@ -8,12 +8,12 @@
  "hide_custom": 0,
  "icon": "retail",
  "idx": 0,
- "label": "POS Awesome",
+ "label": "POS Plus",
  "links": [
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "POS Awesome",
+   "label": "POS Plus",
    "link_count": 0,
    "link_to": "posapp",
    "link_type": "Page",
@@ -133,7 +133,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "POS Awesome App",
+   "label": "POS Plus App",
    "link_count": 0,
    "link_to": "posapp",
    "link_type": "Page",
@@ -173,10 +173,10 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "POS Awesome App",
+   "label": "POS Plus App",
    "link_to": "posapp",
    "type": "Page"
   }
  ],
- "title": "POS Awesome"
+ "title": "POS Plus"
 }
