@@ -149,9 +149,6 @@ doc_events = {
 
 fixtures = [
     {
-        "doctype": "Translation",
-    },
-    {
         "doctype": "Custom Field",
         "filters": [
             [

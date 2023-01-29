@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Extra\",\"col\":4}}]",
+ "content": "[{\"id\":\"GrxnjMP5-Q\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Plus</span>\",\"col\":12}},{\"id\":\"RqeJbdSLbx\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Plus App\",\"col\":3}},{\"id\":\"G6vYV0xTh5\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"Q2bybUmJ39\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"kUTjw9NHEm\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"4WI5th7qzy\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"3At0LNPYvy\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"MdRE1rZUm2\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}},{\"id\":\"56yKoWZK8a\",\"type\":\"card\",\"data\":{\"card_name\":\"Extra\",\"col\":4}}]",
  "creation": "2022-11-29 14:33:45.038200",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -8,6 +8,7 @@
  "hide_custom": 0,
  "icon": "retail",
  "idx": 0,
+ "is_hidden": 0,
  "label": "POS Awesome",
  "links": [
   {
@@ -125,24 +126,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "POS",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Awesome App",
-   "link_count": 0,
-   "link_to": "posapp",
-   "link_type": "Page",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Extra",
    "link_count": 2,
    "onboard": 0,
@@ -167,10 +150,28 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS",
+   "link_count": 1,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Plus App",
+   "link_count": 0,
+   "link_to": "posapp",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-01-15 12:01:44.664310",
- "modified_by": "Administrator",
+ "modified": "2023-01-29 10:32:01.175939",
+ "modified_by": "etms.sysuser@ebkar.ly",
  "module": "POSAwesome",
  "name": "POS Awesome",
  "owner": "Administrator",
@@ -183,7 +184,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "POS Awesome App",
+   "label": "POS Plus App",
    "link_to": "posapp",
    "type": "Page"
   }
