@@ -1000,7 +1000,7 @@ export default {
       this.posa_coupons = [];
       this.return_doc = '';
       const doc = this.get_invoice_doc();
-      doc.posa_pos_restaurant_table = this.posa_pos_restaurant_table;
+      //doc.posa_pos_restaurant_table = this.posa_pos_restaurant_table;
       
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
@@ -1087,6 +1087,12 @@ export default {
       doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
       doc.posa_coupons = this.posa_coupons;
+      
+
+      if(!doc.posa_pos_restaurant_table) {
+        doc.posa_pos_restaurant_table = this.posa_pos_restaurant_table;
+      }
+
       doc.posa_delivery_charges = this.selcted_delivery_charges.name;
       doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
       return doc;
