@@ -51,6 +51,81 @@ frappe.ui.form.on('POS Offer', {
 	replace_cheapest_item: function (frm) {
 		controllers(frm);
 	},
+	create_same_offer_for_other_companies: async function(frm) {
+		let suggested_offer_names = await frappe.call(
+			{
+				method: "posawesome.api.get_companies_pos_offers_names",
+				args: {
+					offer_name: "Test",
+					exclude_company: frm.doc.company
+				}
+			}
+		);
+		suggested_offer_names = suggested_offer_names.message;
+		
+		let d = new frappe.ui.Dialog({
+			title: __('Create This POS Offers for Multi Companies'),
+			fields: [
+				{
+					label: 'From Offer',
+					fieldname: 'pos_offer',
+					fieldtype: 'Link',
+					default: frm.doc.name,
+					options: 'POS Offer',
+					read_only: 1
+				},
+				{
+					label: __('For Companies'),
+					fieldname: 'for_companies',
+					fieldtype: 'Table',
+					data: [],
+					fields: [
+						{ fieldname: 'company', fieldtype: 'Link', in_list_view: 1, label: 'Company', read_only: 1, options: 'Company' },
+						{ fieldname: 'suggested_offer_name', fieldtype: 'Data', in_list_view: 1, label: 'Suggested Offer Name' }
+					]
+				}
+			],
+			primary_action_label: 'Create POS Offers',
+			primary_action(values) {
+				frappe.call(
+					{
+						method: 'posawesome.api.make_multi_company_pos_offers',
+						args: { 
+							current_pos_offer_name: frm.doc.name,
+							for_companies: values.for_companies
+						},
+						callback: function (r) {
+							let res = r.message;
+
+							if(res) {
+								frappe.show_alert(res.data);
+							}
+							if(res.status === "success") {
+								d.hide();
+							}
+						}
+					}
+				)
+				// d.hide();
+			}
+		});
+		
+		d.show();
+
+		suggested_offer_names.forEach(sugg => {
+			console.log(sugg);
+			d.fields_dict.for_companies.df.data.push(
+				{
+					company: sugg.company,
+					suggested_offer_name: sugg.suggested_offer_name
+				}
+			)
+		})
+
+		d.fields_dict.for_companies.grid.refresh();
+		console.log(d.fields_dict.for_companies.df.data);
+
+	}
 });
 
 

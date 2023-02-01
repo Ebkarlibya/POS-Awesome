@@ -12,10 +12,12 @@
   "description",
   "column_break_4",
   "disable",
+  "is_created_from_pos_offer",
   "section_break_3",
   "apply_on",
   "offer",
   "company",
+  "create_same_offer_for_other_companies",
   "pos_profile",
   "warehouse",
   "column_break_8",
@@ -305,13 +307,28 @@
    "fieldname": "coupon_based",
    "fieldtype": "Check",
    "label": "Coupon Code Based"
+  },
+  {
+   "depends_on": "eval:!cur_frm.is_new() && doc.is_created_from_pos_offer===0",
+   "fieldname": "create_same_offer_for_other_companies",
+   "fieldtype": "Button",
+   "label": "Create same Offer for Other Companies"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_created_from_pos_offer",
+   "fieldtype": "Check",
+   "label": "Is Created From POS Offer",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
- "modified": "2021-07-25 17:09:55.634113",
+ "links": [],
+ "modified": "2023-01-31 17:02:14.290278",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -385,5 +402,6 @@
  "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
