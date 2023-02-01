@@ -399,6 +399,7 @@ def update_invoice(data):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
 
+    invoice_doc.update_modified()
     invoice_doc.save()
     return invoice_doc
 
