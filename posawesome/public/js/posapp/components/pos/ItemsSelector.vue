@@ -278,6 +278,7 @@ export default {
         console.log("No POS Profile");
         return;
       }
+      this.items_group.length = 0;
       if (this.pos_profile.item_groups.length > 0) {
         this.pos_profile.item_groups.forEach((element) => {
           if (element.item_group !== "All Item Groups" && element.enabled === 1) {
