@@ -66,7 +66,10 @@
     <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
       <v-row v-if="showFastGroupFilters" class="pb-3">
-        <v-btn v-for="groupName in items_group" :key="groupName" medium color="primary" @click="item_group = groupName"
+        <v-btn v-for="groupName in items_group" 
+          :key="groupName" medium color="primary" 
+          ref="gBtnRef"
+          @click="setFastItemGroupFilter($event, groupName)"
           class="ms-2 mb-2">
           {{ groupName }}
         </v-btn>
@@ -335,6 +338,28 @@ export default {
       }
 
       return items_headers;
+    },
+    setFastItemGroupFilter(event, groupName) {
+      this.$refs.gBtnRef.forEach(ref => {
+        let gBtn = ref.$el;
+        let gSpan = gBtn.children[0];
+        
+        if(gSpan.innerText === groupName) {
+            // if already selected deselect
+            if(gBtn.classList.contains("warning")) {
+              gBtn.classList.remove("warning")
+              gBtn.classList.add("primary")
+              this.item_group = "ALL"
+            } else {
+              gBtn.classList.remove("primary")
+              gBtn.classList.add("warning")
+              this.item_group = groupName
+            }
+        } else {
+            gBtn.classList.remove("warning")
+            gBtn.classList.add("primary")  
+        }
+      })
     },
     incDescItemQty(itemDesc) {
       itemDesc.selected_qty += 1;
