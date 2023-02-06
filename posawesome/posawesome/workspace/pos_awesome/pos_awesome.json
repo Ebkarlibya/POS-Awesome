@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Extra\",\"col\":4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Plus</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Plus App\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Extra\",\"col\":4}}]",
  "creation": "2022-11-29 14:33:45.038200",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -8,6 +8,7 @@
  "hide_custom": 0,
  "icon": "retail",
  "idx": 0,
+ "is_hidden": 0,
  "label": "POS Plus",
  "links": [
   {
@@ -144,7 +145,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Extra",
-   "link_count": 1,
+   "link_count": 3,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -157,9 +158,29 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Restaurant Table",
+   "link_count": 0,
+   "link_to": "POS Restaurant Table",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Tag",
+   "link_count": 0,
+   "link_to": "POS Tag",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-16 12:06:12.046095",
+ "modified": "2023-02-06 10:13:18.886886",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",
