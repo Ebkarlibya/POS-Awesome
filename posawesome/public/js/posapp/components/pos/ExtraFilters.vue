@@ -1,41 +1,57 @@
 <template>
   <div>
-    <v-btn
-    primary
-    small
-    >
-      <div>
-        {{ __("Select Table") }}
-      </div>
-      <v-icon mx-3 style="margin: 0px 8px 0px 8px;">mdi-silverware</v-icon>
+    <v-btn icon color="black" @click="openPosTags" class="mx-0">
+      <v-badge
+          color="primary"
+          dot
+          style="position: absolute; top: 2px; left: 2px;"
+          v-if="isTagsFilterActive"
+        >
+        </v-badge>
+      <v-icon>mdi-filter-variant</v-icon>
     </v-btn>
-    <v-dialog v-model="tablesDialog" max-width="600px">
-      <v-card min-height="500px">
-        <v-card-title>
-          <span class="headline primary--text">{{ __("Select Table") }}</span>
+
+    <v-dialog v-model="posTagsDialog" persistent width="600">
+      <v-card elevation="2" outlined shaped>
+        <v-card-title>{{ __("POS Tags") }}</v-card-title>
+        <!-- <v-card-actions>
+          <v-btn color="primary" @click="applyPosTags">{{
+            __("Clear")
+          }}</v-btn>
           <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            dark
-            @click="selectTable"
-            :disabled="!posa_pos_restaurant_table"
-            style="margin-left: 5px; margin-right: 5px"
-            >{{ __("UnSelect") }}</v-btn
-          >
-          <v-btn color="error" dark @click="tablesDialog = false">{{
+          <v-btn color="error" @click="closePosTags">{{
             __("Close")
           }}</v-btn>
-        </v-card-title>
-        <v-card-subtitle v-if="posa_pos_restaurant_table">
-          <p>
-            {{ __("extra filters") }} <span>: {{ posa_pos_restaurant_table }}</span>
-          </p>
-        </v-card-subtitle>
-        <v-card-text class="pa-0">
-          <v-container>
-            extra filters
-          </v-container>
+        </v-card-actions> -->
+        <!-- <v-card-subtitle v-if="false"
+          style="margin: 5px 3px 0px 3px; color: #0097a7 !important; font-size: 18px">
+          {{ descriptionItem.item_name }}</v-card-subtitle>
+        <br> -->
+
+        <v-card-text>
+          <v-row dense>
+            <v-col class="variants-qty_controls">
+              <v-btn v-for="posTag in pos_tags" :key="posTag.name" medium
+                :color="posTag.selected ? 'warning' : 'white'" @click="selectPosTag(posTag)"
+                class="ms-2 mb-2">
+                <strong>{{ posTag.name }}</strong>
+              </v-btn>
+
+            </v-col>
+          </v-row>
         </v-card-text>
+
+        <br><br>
+
+        <v-card-actions>
+          <v-btn color="warning" @click="clearPosTags">{{
+            __("Clear")
+          }}</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="info" @click="closePosTags">{{
+            __("Ok")
+          }}</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -43,28 +59,60 @@
 
 <script>
 import { evntBus } from '../../bus';
+
 export default {
-  props: ['posa_pos_restaurant_table'],
   data: () => ({
-    extraFiltersDialog: false,
-    pos_profile: null
+    posTagsDialog: false,
+    pos_profile: null,
+    pos_tags: []
   }),
   methods: {
-    openRestaurantTablesDialog() {
-      this.extraFiltersDialog = true;
+    openPosTags() {
+      this.posTagsDialog = true;
     },
+    closePosTags() {
+      this.posTagsDialog = false;
+    },
+    selectPosTag(posTag) {
+      posTag.selected = !posTag.selected
+      this.applyPosTags()
+    },
+    applyPosTags() {
+      evntBus.$emit("set_pos_tags_filters", this.selectedTags)
+    },
+    clearPosTags() {
+      this.pos_tags.forEach(posTag => posTag.selected = 0)
+      this.applyPosTags()
+    }
   },
-  computed: {},
+  computed: {
+    selectedTags() {
+      return this.pos_tags.filter(tag => tag.selected === true)
+    },
+    isTagsFilterActive(){
+      return this.selectedTags.length > 0 ? true : false
+    }
+  },
   created: function () {
     this.$nextTick(function () {
       evntBus.$on('register_pos_profile', (pos_profile) => {
         this.pos_profile = pos_profile;
-        // this.get_customer_names();
-      });
-      evntBus.$on('open_extra_filters_dialog', (customer) => {
-        this.extraFiltersDialog = true
       });
     });
+    // fetch pos tags
+    frappe.call(
+      {
+        method: "posawesome.api.get_pos_tags",
+        callback: (r) => {
+          if(r.message) {
+            this.pos_tags = r.message.map(tag => {
+              tag["selected"] = 0
+              return tag
+            })
+          }
+        }
+      }
+    )
   },
 
   watch: {
