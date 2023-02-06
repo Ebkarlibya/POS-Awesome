@@ -654,7 +654,9 @@ export default {
       let filtred_group_list = [];
       if (this.item_group != "ALL") {
         filtred_group_list = this.items.filter((item) =>
-          item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
+          // item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
+          // exact match
+          item.item_group.toLowerCase() === this.item_group.toLowerCase()
         );
       } else {
         filtred_group_list = this.items;
