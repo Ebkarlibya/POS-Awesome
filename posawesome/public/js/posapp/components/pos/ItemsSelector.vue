@@ -124,14 +124,11 @@
     <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
       <v-row v-if="showFastGroupFilters" class="pb-3">
-        <v-btn
-          v-for="groupName in items_group"
-          :key="groupName"
-          medium
-          color="primary"
-          @click="item_group = groupName"
-          class="ms-2 mb-2"
-        >
+        <v-btn v-for="groupName in items_group" 
+          :key="groupName" medium color="primary" 
+          ref="gBtnRef"
+          @click="setFastItemGroupFilter($event, groupName)"
+          class="ms-2 mb-2">
           {{ groupName }}
         </v-btn>
       </v-row>
@@ -383,7 +380,85 @@ export default {
 
       return items_headers;
     },
+    setFastItemGroupFilter(event, groupName) {
+      this.$refs.gBtnRef.forEach(ref => {
+        let gBtn = ref.$el;
+        let gSpan = gBtn.children[0];
+        
+        if(gSpan.innerText === groupName) {
+            // if already selected deselect
+            if(gBtn.classList.contains("warning")) {
+              gBtn.classList.remove("warning")
+              gBtn.classList.add("primary")
+              this.item_group = "ALL"
+            } else {
+              gBtn.classList.remove("primary")
+              gBtn.classList.add("warning")
+              this.item_group = groupName
+            }
+        } else {
+            gBtn.classList.remove("warning")
+            gBtn.classList.add("primary")  
+        }
+      })
+    },
+    incDescItemQty(itemDesc) {
+      itemDesc.selected_qty += 1;
+      this.descriptionItem.descriptionTotalQty += 1;
+      this.$forceUpdate();
+    },
+    fastIncDescItemQty(itemDesc) {
+      this.clearTimers();
+      this.timeout = setTimeout(() => {
+        this.interval = setInterval(() => {
+          this.incDescItemQty(itemDesc);
+        }, 40);
+      }, 1000);
+    },
+    decDescItemQty(itemDesc) {
+      if (itemDesc.selected_qty > 0) {
+        itemDesc.selected_qty -= 1;
+        this.descriptionItem.descriptionTotalQty -= 1;
+      }
+      this.$forceUpdate();
+    },
+    fastDecDescItemQty(itemDesc) {
+      this.clearTimers();
+      this.timeout = setTimeout(() => {
+        this.interval = setInterval(() => {
+          this.decDescItemQty(itemDesc);
+        }, 40);
+      }, 1000);
+    },
+    clearTimers() {
+      clearTimeout(this.timeout);
+      clearInterval(this.interval);
+    },
     selectItemDescription(item_desc) {
+      
+      if(this.descriptionItem.posa_force_selecting_only_one_option){
+
+        for(let i = 0; i < this.additional_item_descriptions.length; i++){
+          if(this.additional_item_descriptions[i].description === item_desc.description) {
+            this.additional_item_descriptions[i].selected = true;
+              } else {
+                this.additional_item_descriptions[i].selected = false;
+              }
+        }
+
+
+        this.$forceUpdate();
+        return
+      }
+      
+
+      item_desc.selected = !item_desc.selected;
+
+      this.$forceUpdate();
+    },
+    addDescriptionItem(skipQtyValidation = false) {
+      // if (this.descriptionItemQty < 0) return;
+      let total_qty = 0;
       
       if(this.descriptionItem.posa_force_selecting_only_one_option){
 
@@ -589,7 +664,7 @@ export default {
       let filtred_group_list = [];
       if (this.item_group != "ALL") {
         filtred_group_list = this.items.filter((item) =>
-          item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
+          item.item_group.toLowerCase() === this.item_group.toLowerCase()
         );
       } else {
         filtred_group_list = this.items;
