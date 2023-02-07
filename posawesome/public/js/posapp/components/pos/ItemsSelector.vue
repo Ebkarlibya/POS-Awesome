@@ -42,6 +42,11 @@
             @keydown.esc="esc_event"
           ></v-text-field>
         </v-col>
+        <v-col cols="1" class="pb-0 mx-0"
+          v-if="pos_profile.posa_enable_pos_tags === 1"
+        >
+          <ExtraFilters />
+        </v-col>
         <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
           <v-checkbox
             v-model="new_line"
@@ -242,7 +247,12 @@
 <script>
 import { evntBus } from "../../bus";
 import _ from "lodash";
+import ExtraFilters from "./ExtraFilters.vue";
+
 export default {
+  components: {
+    ExtraFilters
+  },
   data: () => ({
     pos_profile: "",
     flags: {},
@@ -251,8 +261,10 @@ export default {
     loading: false,
     items_group: ["ALL"],
     items: [],
+    tmp_items: [],
     search: "",
     first_search: "",
+    pos_tags_filters: [],
     itemsPerPage: 1000,
     offersCount: 0,
     appliedOffersCount: 0,
@@ -582,6 +594,14 @@ export default {
       } else {
         filtred_group_list = this.items;
       }
+
+      if(this.pos_tags_filters && this.pos_tags_filters.length > 0) {
+        filtred_group_list = filtred_group_list.filter(fItem => {
+          return fItem.pos_tags.some(itemPosTag => {
+            return this.pos_tags_filters.some( filterPosTag => filterPosTag.name === itemPosTag.tag_name)
+          })
+        })
+      }
       if (!this.search || this.search.length < 3) {
         if (
           this.pos_profile.posa_show_template_items &&
@@ -632,6 +652,7 @@ export default {
           }
         }
       }
+
       if (
         this.pos_profile.posa_show_template_items &&
         this.pos_profile.posa_hide_variants_items
@@ -679,6 +700,12 @@ export default {
     });
     evntBus.$on("update_customer_price_list", (data) => {
       this.customer_price_list = data;
+    });
+    evntBus.$on("set_pos_tags_filters", (pos_tags) => {
+      this.pos_tags_filters = pos_tags; 
+    });
+    evntBus.$on("clear_pos_tags_filters", () => {
+      this.pos_tags_filters.length = 0;
     });
   },
 

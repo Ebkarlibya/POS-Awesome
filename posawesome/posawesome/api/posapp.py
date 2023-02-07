@@ -230,6 +230,13 @@ def get_items(pos_profile, price_list=None):
                     )
                     item.update({"additional_item_descriptions": additional_item_descriptions})
 
+                pos_tags = frappe.get_all(
+                    "POS Tag Item Table",
+                    fields=["tag_name"],
+                    filters={"parent": item_code},
+                )
+                item.update({"pos_tags": pos_tags})
+
                 row.update(item)
                 row.update(
                     {

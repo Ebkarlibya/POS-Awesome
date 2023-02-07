@@ -243,11 +243,15 @@ fixtures = [
                     "POS Profile-posa_show_fast_item_group_search_filters", # checkbox
                     "POS Profile-posa_enable_pos_restaurant_table", # checkbox
                     "POS Profile-posa_disable_payment_print_popup", # checkbox
+                    "POS Profile-posa_enable_pos_tags", # checkbox
                     # Item
                     "ITem-posa_pos_description_tab", # tab break
                     "Item-posa_enable_pos_additional_item_description", # checkbox
                     "Item-posa_force_selecting_only_one_option", # checkbox
                     "Item-posa_pos_additional_item_description", # table
+                    "Item-posa_pos_tag", # tab break
+                    "Item-posa_pos_tags", # table
+
                     # (POS Profile) & (Item)
                     "POS Profile-posa_enable_pos_additional_item_description", # checkbox
                     # Sales Invoice

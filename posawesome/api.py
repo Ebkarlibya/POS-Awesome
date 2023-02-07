@@ -2,23 +2,30 @@ import frappe
 
 @frappe.whitelist()
 def get_additional_item_descriptions(item_code: str):
-    additional_item_descriptions = frappe.get_all(
-        "POS Additional Item Description Table",
-        fields=["description"],
-        filters={"parent": item_code}    
-    )
+    try:
+        additional_item_descriptions = frappe.get_all(
+            "POS Additional Item Description Table",
+            fields=["description"],
+            filters={"parent": item_code}    
+        )
 
-    return additional_item_descriptions
+        return additional_item_descriptions
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())
 
 @frappe.whitelist()
 def get_restaurant_tables():
-    tables =  frappe.get_all(
-        "POS Restaurant Table",
-        order_by="table_number desc"
-    )
+    try:
+        tables =  frappe.get_all(
+            "POS Restaurant Table",
+            order_by="table_number desc"
+        )
 
-    return tables
-
+        return tables
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())
 
 @frappe.whitelist()
 def get_companies_pos_offers_names(offer_name: str, exclude_company: str):
@@ -78,3 +85,17 @@ def make_multi_company_pos_offers(current_pos_offer_name: str, for_companies):
     except:
         print(frappe.get_traceback())
         
+
+@frappe.whitelist()
+def get_pos_tags():
+    try:
+        tags =  frappe.get_all(
+            "POS Tag",
+            fields=["name"],
+            order_by="name asc"
+        )
+
+        return tags
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())
