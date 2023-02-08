@@ -126,8 +126,26 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "POS",
+   "link_count": 1,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Plus App",
+   "link_count": 0,
+   "link_to": "posapp",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Extra",
-   "link_count": 2,
+   "link_count": 3,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -154,24 +172,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "POS",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Plus App",
+   "label": "POS Tag",
    "link_count": 0,
-   "link_to": "posapp",
-   "link_type": "Page",
+   "link_to": "POS Tag",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2023-01-29 10:32:01.175939",
- "modified_by": "etms.sysuser@ebkar.ly",
+ "modified": "2023-02-08 12:23:37.600637",
+ "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",
  "owner": "Administrator",

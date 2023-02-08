@@ -4269,7 +4269,7 @@
   "insert_after": "posa_pos_tag",
   "is_system_generated": 0,
   "is_virtual": 0,
-  "label": "posa POS Tags",
+  "label": "POS Tags",
   "length": 0,
   "mandatory_depends_on": null,
   "modified": "2023-02-06 08:25:20.693014",
