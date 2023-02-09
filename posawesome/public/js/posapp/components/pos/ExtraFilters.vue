@@ -1,17 +1,31 @@
 <template>
-  <div>
-    <v-btn icon color="black" @click="openPosTags" class="mx-0">
-      <v-badge
-          color="primary"
-          dot
-          style="position: absolute; top: 2px; left: 2px;"
-          v-if="isTagsFilterActive"
-        >
-        </v-badge>
-      <v-icon>mdi-filter-variant</v-icon>
-    </v-btn>
+  <div class="extra-filters-main">
+    <div class="extra-filters-outside-controls" style="display: flex;">
+      <v-btn
+        color="primary"
+        @click="openPosTags"
+        class="">
+        <v-badge
+            color="error"
+            dot
+            style="position: absolute; top: 2px; left: 3px;"
+            v-if="isTagsFilterActive"
+          >
+          </v-badge>
+        <v-icon>mdi-filter-variant</v-icon>
+      </v-btn>
 
-    <v-dialog v-model="posTagsDialog" persistent width="600">
+      <v-btn
+        class="mx-3"
+        color="error"
+        @click="clearPosTags"
+        v-if="isTagsFilterActive"
+      >
+      <v-icon>mdi-close-thick</v-icon>
+      </v-btn>
+    </div>
+
+    <v-dialog v-model="posTagsDialog" width="600">
       <v-card elevation="2" outlined shaped>
         <v-card-title>{{ __("POS Tags") }}</v-card-title>
         <!-- <v-card-actions>
@@ -44,7 +58,7 @@
         <br><br>
 
         <v-card-actions>
-          <v-btn color="warning" @click="clearPosTags">{{
+          <v-btn color="error" @click="clearPosTags">{{
             __("Clear")
           }}</v-btn>
           <v-spacer></v-spacer>
