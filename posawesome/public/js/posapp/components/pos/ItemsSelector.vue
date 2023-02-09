@@ -3,22 +3,22 @@
     <v-card class="selection mx-auto grey lighten-5 mt-5">
       <v-progress-linear :active="loading" :indeterminate="loading" absolute top color="info"></v-progress-linear>
       <v-row class="items px-2 py-1">
-        <v-col class="pb-0 mb-2">
+        <v-col cols="6" class="pb-0 mb-2">
           <v-text-field dense clearable autofocus outlined color="primary" :label="frappe._('Search Items')"
             hint="Search by item code, serial number, batch no or barcode" background-color="white" hide-details
             v-model="debounce_search" @keydown.esc="esc_event" @keydown.enter="enter_event"
             ref="debounce_search"></v-text-field>
         </v-col>
-        <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
+        <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
           <v-text-field dense outlined color="primary" :label="frappe._('QTY')" background-color="white" hide-details
             v-model.number="qty" type="number" @keydown.enter="enter_event" @keydown.esc="esc_event"></v-text-field>
         </v-col>
-        <v-col cols="1" class="pb-0 mx-0"
+        <v-col cols="2" 
           v-if="pos_profile.posa_enable_pos_tags === 1"
         >
           <ExtraFilters />
         </v-col>
-        <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
+        <v-col cols="1" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
           <v-checkbox v-model="new_line" color="accent" value="true" :label="__('NLine')" dense
             hide-details></v-checkbox>
         </v-col>
