@@ -429,30 +429,30 @@ export default {
 
       this.$forceUpdate();
     },
-    addDescriptionItem(skipQtyValidation = false) {
-      // if (this.descriptionItemQty < 0) return;
-      let total_qty = 0;
+    // addDescriptionItem(skipQtyValidation = false) {
+    //   // if (this.descriptionItemQty < 0) return;
+    //   let total_qty = 0;
       
-      if(this.descriptionItem.posa_force_selecting_only_one_option){
+    //   if(this.descriptionItem.posa_force_selecting_only_one_option){
 
-        for(let i = 0; i < this.additional_item_descriptions.length; i++){
-          if(this.additional_item_descriptions[i].description === item_desc.description) {
-            this.additional_item_descriptions[i].selected = true;
-              } else {
-                this.additional_item_descriptions[i].selected = false;
-              }
-        }
+    //     for(let i = 0; i < this.additional_item_descriptions.length; i++){
+    //       if(this.additional_item_descriptions[i].description === item_desc.description) {
+    //         this.additional_item_descriptions[i].selected = true;
+    //           } else {
+    //             this.additional_item_descriptions[i].selected = false;
+    //           }
+    //     }
 
 
-        this.$forceUpdate();
-        return
-      }
+    //     this.$forceUpdate();
+    //     return
+    //   }
       
 
-      item_desc.selected = !item_desc.selected;
+    //   item_desc.selected = !item_desc.selected;
 
-      this.$forceUpdate();
-    },
+    //   this.$forceUpdate();
+    // },
     addDescriptionItem() {
       if(this.descriptionItemQty < 0) return;
       let descriptionText = " | ";
