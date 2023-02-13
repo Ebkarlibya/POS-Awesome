@@ -2,6 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5 mt-5"
+      ref="itemSelectorCard1"
     >
       <v-progress-linear
         :active="loading"
@@ -32,7 +33,7 @@
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
-            <v-row dense class="overflow-y-auto" style="max-height: 63vh">
+            <v-row dense class="overflow-y-auto"  ref="itemsRowRef">
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
@@ -41,7 +42,6 @@
                 md="3"
                 sm="3"
                 cols="10"
-                min-height="50"
               >
                 <v-card hover="hover" @click="add_item(item)">
                   <v-img
@@ -94,7 +94,7 @@
       </v-row>
     </v-card>
     <!-- Item Group Filter -->
-    <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
+    <v-card ref="itemSelectorCard2" class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
       <v-row v-if="showFastGroupFilters" class="pb-3">
         <v-btn v-for="groupName in items_group" 
@@ -625,6 +625,16 @@ export default {
         .toFixed(this.float_precision)
         .replace(/\d(?=(\d{3})+\.)/g, "$&,");
     },
+    winResize() {
+      setTimeout(()=> {
+        if(this.$refs && this.$refs.itemsRowRef) {
+          let dynamic_height = (80 - Math.round((this.$refs.itemSelectorCard2.$el.clientHeight / document.body.clientHeight) * 100))
+
+          this.$refs.itemsRowRef.style.maxHeight = dynamic_height + "vh"
+          this.$refs.itemsRowRef.style.height = dynamic_height + "vh"
+        }
+      }, 300)
+    }
   },
 
   computed: {
@@ -719,6 +729,9 @@ export default {
       }, 200),
     },
     showFastGroupFilters() {
+      if(this.pos_profile.posa_show_fast_item_group_search_filters) {
+        this.winResize()
+      }
       return this.pos_profile.posa_show_fast_item_group_search_filters;
     },
   },
@@ -759,6 +772,9 @@ export default {
 
   mounted() {
     this.scan_barcoud();
+    window.addEventListener("resize", () => {
+      this.winResize()
+    })
   },
 };
 </script>
