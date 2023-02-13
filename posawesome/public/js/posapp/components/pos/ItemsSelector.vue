@@ -2,6 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5 mt-5"
+      style="max-height: 59vh; height: 59vh"
     >
       <v-progress-linear
         :active="loading"
@@ -32,7 +33,7 @@
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
-            <v-row dense class="overflow-y-auto" style="max-height: 63vh">
+            <v-row dense class="overflow-y-auto" style="max-height: 50vh">
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
@@ -69,7 +70,7 @@
             </v-row>
           </div>
           <div fluid class="items" v-if="items_view == 'list'">
-            <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
+            <div class="my-0 py-0 overflow-y-auto" style="max-height: 50vh">
               <template>
                 <v-data-table
                   :headers="getItmesHeaders()"
@@ -96,7 +97,7 @@
     <!-- Item Group Filter -->
     <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
-      <v-row v-if="showFastGroupFilters" class="pb-3">
+      <v-row v-if="showFastGroupFilters" class="pb-3" style="height: 180px; overflow-y: auto; background: #d3d3d359; padding: 5px;">
         <v-btn v-for="groupName in items_group" 
           :key="groupName" medium color="primary" 
           ref="gBtnRef"
