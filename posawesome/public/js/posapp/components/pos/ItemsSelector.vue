@@ -1,7 +1,16 @@
 <template>
   <div>
-    <v-card class="selection mx-auto grey lighten-5 mt-5">
-      <v-progress-linear :active="loading" :indeterminate="loading" absolute top color="info"></v-progress-linear>
+    <v-card
+      class="selection mx-auto grey lighten-5 mt-5"
+      style="max-height: 61vh; height: 61vh"
+    >
+      <v-progress-linear
+        :active="loading"
+        :indeterminate="loading"
+        absolute
+        top
+        color="info"
+      ></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col cols="6" class="pb-0 mb-2">
           <v-text-field dense clearable autofocus outlined color="primary" :label="frappe._('Search Items')"
@@ -24,9 +33,17 @@
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
-            <v-row dense class="overflow-y-auto" style="max-height: 67vh">
-              <v-col v-for="(item, idx) in filtred_items" :key="idx" xl="3" lg="3" md="3" sm="3" cols="10"
-                min-height="50">
+            <v-row dense class="overflow-y-auto" style="max-height: 50vh">
+              <v-col
+                v-for="(item, idx) in filtred_items"
+                :key="idx"
+                xl="3"
+                lg="3"
+                md="3"
+                sm="3"
+                cols="10"
+                min-height="50"
+              >
                 <v-card hover="hover" @click="add_item(item)">
                   <v-img :src="
                     item.image ||
@@ -45,7 +62,7 @@
             </v-row>
           </div>
           <div fluid class="items" v-if="items_view == 'list'">
-            <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
+            <div class="my-0 py-0 overflow-y-auto" style="max-height: 50vh">
               <template>
                 <v-data-table :headers="getItmesHeaders()" :items="filtred_items" item-key="item_code"
                   class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer @click:row="add_item">
@@ -65,7 +82,7 @@
     <!-- Item Group Filter -->
     <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
-      <v-row v-if="showFastGroupFilters" class="pb-3">
+      <v-row v-if="showFastGroupFilters" class="pb-3" style="height: 180px; overflow-y: auto; background: #d3d3d359; padding: 5px;">
         <v-btn v-for="groupName in items_group" 
           :key="groupName" medium color="primary" 
           ref="gBtnRef"

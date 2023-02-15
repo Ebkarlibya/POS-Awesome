@@ -19,7 +19,7 @@ def get_restaurant_tables():
     try:
         tables =  frappe.get_all(
             "POS Restaurant Table",
-            order_by="table_number desc"
+            order_by="name desc"
         )
 
         return tables
