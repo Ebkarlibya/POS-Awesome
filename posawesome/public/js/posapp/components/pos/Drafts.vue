@@ -110,6 +110,7 @@ export default {
   created: function () {
     evntBus.$on('open_drafts', (data) => {
       this.draftsDialog = true;
+      this.selected = [];
       this.dialog_data = data;
     });
   },

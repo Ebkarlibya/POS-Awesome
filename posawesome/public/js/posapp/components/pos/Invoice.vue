@@ -34,6 +34,7 @@
         <RestaurantTable 
           v-if="pos_profile.posa_enable_pos_restaurant_table"
           ref="restaurantTable"
+          :invoice_doc="invoice_doc"
           @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
           @selectRestaurantTable="selectRestaurantTable"
           :posa_pos_restaurant_table="posa_pos_restaurant_table"
@@ -53,6 +54,7 @@
             <RestaurantTable 
               v-if="pos_profile.posa_enable_pos_restaurant_table"
               ref="restaurantTable"
+              :invoice_doc="invoice_doc"
               @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
               @selectRestaurantTable="selectRestaurantTable"
               :posa_pos_restaurant_table="posa_pos_restaurant_table"
@@ -693,6 +695,7 @@
                 color="accent"
                 dark
                 @click="new_invoice"
+                :disabled="invoice_doc.is_return === 1"
                 >{{ __('Save/New') }}</v-btn
               >
             </v-col>
@@ -989,6 +992,7 @@ export default {
       this.selcted_delivery_charges = {};
       evntBus.$emit('set_customer_readonly', false);
       this.cancel_dialog = false;
+      evntBus.$emit('etms_pos__cancel_invoice', doc);
     },
 
     new_invoice(data = {}) {
@@ -1000,7 +1004,6 @@ export default {
       this.posa_coupons = [];
       this.return_doc = '';
       const doc = this.get_invoice_doc();
-      // doc.posa_pos_restaurant_table = this.posa_pos_restaurant_table;
       
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
@@ -1021,6 +1024,8 @@ export default {
         this.additional_discount_percentage = 0;
         this.invoiceType = 'Invoice';
         this.invoiceTypes = ['Invoice', 'Order'];
+        evntBus.$emit('etms_pos__save_new_invoice', data, doc);
+
       } else {
         if (data.is_return) {
           evntBus.$emit('set_customer_readonly', true);
@@ -1056,6 +1061,7 @@ export default {
             item.serial_no_selected_count = item.serial_no_selected.length;
           }
         });
+        evntBus.$emit('etms_pos__restore_return_invoice', data, doc);
       }
       return old_invoice;
     },
@@ -2506,6 +2512,7 @@ export default {
       });
     });
     evntBus.$on('load_return_invoice', (data) => {
+      data.invoice_doc.posa_pos_restaurant_table = data.return_doc.posa_pos_restaurant_table;
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
       this.additional_discount_percentage =
@@ -2515,6 +2522,20 @@ export default {
     evntBus.$on('set_new_line', (data) => {
       this.new_line = data;
     });
+    // restaurant table
+    evntBus.$on('etms_pos__save_new_invoice', (data, doc) => {
+      this.posa_pos_restaurant_table = '';
+    });
+    evntBus.$on('etms_pos__restore_return_invoice', (data, doc) => {
+      this.posa_pos_restaurant_table = data.posa_pos_restaurant_table;
+    });
+    evntBus.$on('etms_pos__submitted_invoice', (data, doc) => {
+      this.posa_pos_restaurant_table = '';
+    });
+    evntBus.$on('etms_pos__cancel_invoice', (doc) => {
+      this.posa_pos_restaurant_table = '';
+    });
+
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));
     document.addEventListener('keydown', this.shortOpenFirstItem.bind(this));

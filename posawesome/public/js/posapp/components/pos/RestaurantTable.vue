@@ -1,8 +1,10 @@
 <template>
   <div>
+    
     <v-btn
     primary
     small
+    :disabled="invoice_doc.is_return === 1"
     >
       <div v-if="posa_pos_restaurant_table">
         <span style="font-size: 20px; font-weight: bolder;">
@@ -14,6 +16,7 @@
       </div>
       <v-icon mx-3 style="margin: 0px 8px 0px 8px;">mdi-silverware</v-icon>
     </v-btn>
+
     <v-dialog v-model="tablesDialog" max-width="600px">
       <v-card min-height="500px">
         <v-card-title>
@@ -37,6 +40,15 @@
           </p>
         </v-card-subtitle>
         <v-card-text class="pa-0">
+          <v-text-field
+              color="primary"
+              :label="frappe._('Search Tables')"
+              background-color="white"
+              hide-details
+              @input="search_table"
+              dense
+              class="mx-4"
+            ></v-text-field>
           <v-container>
             <div>
               <v-row dense class="overflow-y-auto" style="max-height: 800px">
@@ -74,22 +86,30 @@
 <script>
 import { evntBus } from '../../bus';
 export default {
-  props: ['posa_pos_restaurant_table'],
+  props: ['posa_pos_restaurant_table', 'invoice_doc'],
   data: () => ({
     tablesDialog: false,
     pos_profile: {},
     customers: [],
     customer: '',
     readonly: false,
+    searchRestaurantTables: [],
     restaurantTables: []
   }),
   methods: {
     openRestaurantTablesDialog() {
+      if(this.invoice_doc.is_return === 1 ) return;
+
       this.tablesDialog = true;
     },
     selectTable(table) {
       this.tablesDialog = false;
       this.$emit('selectRestaurantTable', table);
+    },
+    search_table(value) {
+        this.restaurantTables = this.searchRestaurantTables.filter(rt => {
+          return rt.name.includes(value);
+        })
     }
   },
 
@@ -110,23 +130,23 @@ export default {
       evntBus.$on('set_customer_readonly', (value) => {
         this.readonly = value;
       });
-
+      // evntBus.$on('etms_pos__new_invoice', (value) => {
+      //   this.readonly = value;
+      // });
+      evntBus.$on('set_customer_readonly', (value) => {
+        this.readonly = value;
+      });
       frappe.call(
         {
           method: 'posawesome.api.get_restaurant_tables',
           callback: (r) => {
             this.restaurantTables = r.message;
+            this.searchRestaurantTables = r.message
           }
         }
       )
 
     });
-  },
-
-  watch: {
-    // customer() {
-    //   evntBus.$emit('update_customer', this.customer);
-    // },
-  },
+  }
 };
 </script>
