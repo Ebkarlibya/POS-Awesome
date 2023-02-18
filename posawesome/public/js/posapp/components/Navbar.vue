@@ -1,5 +1,6 @@
 <template>
   <nav>
+    <ListInvoices></ListInvoices>
     <v-app-bar app height="40" class="elevation-2">
       <v-app-bar-nav-icon
         @click.stop="drawer = !drawer"
@@ -65,6 +66,16 @@
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
+                
+                <v-list-item @click="openInvoicesList">
+                  <v-list-item-icon>
+                    <v-icon>mdi-menu</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ __("Invoices List") }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+
                 <v-list-item @click="openDesk">
                   <v-list-item-icon>
                     <v-icon>mdi-menu</v-icon>
@@ -73,6 +84,7 @@
                     <v-list-item-title>{{ __("Desk") }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
+                
                 <v-list-item @click="logOut">
                   <v-list-item-icon>
                     <v-icon>mdi-logout</v-icon>
@@ -146,9 +158,10 @@
 
 <script>
 import { evntBus } from "../bus";
+import ListInvoices from "./pos/ListInvoices.vue";
 
 export default {
-  // components: {MyPopup},
+  components: {ListInvoices},
   data() {
     return {
       drawer: false,
@@ -180,6 +193,9 @@ export default {
     go_desk() {
       frappe.set_route("/");
       location.reload();
+    },
+    openInvoicesList() {
+      evntBus.$emit('open_invoices_list')
     },
     go_about() {
       const win = window.open(

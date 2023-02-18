@@ -98,3 +98,38 @@ def get_pos_tags():
     except:
         tb = frappe.get_traceback()
         print(frappe.get_traceback())
+
+@frappe.whitelist()
+def get_invoices_list():
+    try:
+        term_sql_cond = ""
+
+        if "term" in frappe.form_dict and len(frappe.form_dict["term"]) > 0:
+            escaped_input = frappe.db.escape(f"%{frappe.form_dict['term']}%")
+            term_sql_cond = f"""
+                and name like {escaped_input}
+                or posa_pos_restaurant_table like {escaped_input}
+                or grand_total like {escaped_input}
+            """
+            # cond_filters["name"] = ["like", f"%{frappe.form_dict['term']}%"]
+            # cond_filters["posa_pos_restaurant_table"] = ["like", f"%{frappe.form_dict['term']}%"]
+
+        invoices = frappe.db.sql(
+            f"""
+                select name, customer, posting_date, grand_total, posa_pos_restaurant_table,
+                docstatus
+                from `tabSales Invoice`
+                    
+                where docstatus in (1)
+                and is_return = 0
+                {term_sql_cond}
+                order by creation desc
+                limit 20
+            """,
+            as_dict=True,
+            debug=True
+        )
+        return invoices
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())
