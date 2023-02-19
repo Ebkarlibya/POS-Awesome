@@ -18,10 +18,9 @@ def get_additional_item_descriptions(item_code: str):
 def get_restaurant_tables():
     try:
         tables =  frappe.get_all(
-            "POS Restaurant Table",
-            order_by="name desc"
+            "POS Restaurant Table"
         )
-
+        sorted(tables, key=lambda x: x["name"], reverse=True)
         return tables
     except:
         tb = frappe.get_traceback()

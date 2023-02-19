@@ -18,13 +18,49 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5 mt-5">
-      <v-row align="center" class="items px-2 py-1">
-        <v-col v-if="pos_profile.posa_allow_sales_order" cols="9" class="pb-2 pr-0">
-          <Customer></Customer>
+    <v-card
+      style="max-height: 70vh; height: 70vh"
+      class="cards my-0 py-0 grey lighten-5 mt-5"
+    >
+      <v-row align="center" class="items px-2 py-1 mb-1">
+        <v-col
+          v-if="pos_profile.posa_allow_sales_order"
+          cols="9"
+          class="px-6 pt-3"
+          style="display: flex;"
+        >
+        <Customer></Customer>
+        <v-spacer></v-spacer>
+        <RestaurantTable 
+          v-if="pos_profile.posa_enable_pos_restaurant_table"
+          ref="restaurantTable"
+          :invoice_doc="invoice_doc"
+          @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
+          @selectRestaurantTable="selectRestaurantTable"
+          :posa_pos_restaurant_table="posa_pos_restaurant_table"
+          class=""
+          >
+        </RestaurantTable>
         </v-col>
-        <v-col v-if="!pos_profile.posa_allow_sales_order" cols="12" class="pb-2">
-          <Customer></Customer>
+
+        <v-col
+          v-if="!pos_profile.posa_allow_sales_order"
+          cols="12"
+          class="px-6 pt-6"
+          >
+          <v-row justify-space-between>
+            <Customer></Customer>
+            <v-spacer></v-spacer>
+            <RestaurantTable 
+              v-if="pos_profile.posa_enable_pos_restaurant_table"
+              ref="restaurantTable"
+              :invoice_doc="invoice_doc"
+              @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
+              @selectRestaurantTable="selectRestaurantTable"
+              :posa_pos_restaurant_table="posa_pos_restaurant_table"
+              >
+            </RestaurantTable>
+          </v-row>
         </v-col>
         <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2">
           <v-select dense hide-details outlined color="primary" background-color="white" :items="invoiceTypes"
@@ -318,7 +354,15 @@
               <v-btn block class="pa-0" color="error" dark @click="cancel_dialog = true">{{ __('Cancel') }}</v-btn>
             </v-col>
             <v-col cols="6" class="pa-1">
-              <v-btn block class="pa-0" color="accent" dark @click="new_invoice">{{ __('Save/New') }}</v-btn>
+              <v-btn
+                block
+                class="pa-0"
+                color="accent"
+                dark
+                @click="new_invoice"
+                :disabled="invoice_doc.is_return === 1"
+                >{{ __('Save/New') }}</v-btn
+              >
             </v-col>
             <v-col class="pa-1">
               <v-btn block class="pa-0" color="success" @click="show_payment" dark>{{ __('PAY') }}</v-btn>
@@ -647,6 +691,7 @@ export default {
       evntBus.$emit('set_customer_readonly', false);
       evntBus.$emit("reset_desc_items");
       this.cancel_dialog = false;
+      evntBus.$emit('etms_pos__cancel_invoice', doc);
     },
 
     new_invoice(data = {}) {
@@ -660,6 +705,7 @@ export default {
       const doc = this.get_invoice_doc();
       evntBus.$emit("reset_desc_items");
 
+      
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
       } else {
@@ -682,6 +728,8 @@ export default {
         this.additional_discount_percentage = 0;
         this.invoiceType = 'Invoice';
         this.invoiceTypes = ['Invoice', 'Order'];
+        evntBus.$emit('etms_pos__save_new_invoice', data, doc);
+
       } else {
         if (data.is_return) {
           evntBus.$emit('set_customer_readonly', true);
@@ -724,6 +772,7 @@ export default {
             item.serial_no_selected_count = item.serial_no_selected.length;
           }
         });
+        evntBus.$emit('etms_pos__restore_return_invoice', data, doc);
       }
       return old_invoice;
     },
@@ -2172,6 +2221,7 @@ export default {
       });
     });
     evntBus.$on('load_return_invoice', (data) => {
+      data.invoice_doc.posa_pos_restaurant_table = data.return_doc.posa_pos_restaurant_table;
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
       this.additional_discount_percentage =
@@ -2181,6 +2231,20 @@ export default {
     evntBus.$on('set_new_line', (data) => {
       this.new_line = data;
     });
+    // restaurant table
+    evntBus.$on('etms_pos__save_new_invoice', (data, doc) => {
+      this.posa_pos_restaurant_table = '';
+    });
+    evntBus.$on('etms_pos__restore_return_invoice', (data, doc) => {
+      this.posa_pos_restaurant_table = data.posa_pos_restaurant_table;
+    });
+    evntBus.$on('etms_pos__submitted_invoice', (data, doc) => {
+      this.posa_pos_restaurant_table = '';
+    });
+    evntBus.$on('etms_pos__cancel_invoice', (doc) => {
+      this.posa_pos_restaurant_table = '';
+    });
+
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));
     document.addEventListener('keydown', this.shortOpenFirstItem.bind(this));
