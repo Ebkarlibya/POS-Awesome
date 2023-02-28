@@ -155,8 +155,9 @@ export default {
     evntBus.$on('open_invoices_list', (data) => {
       this.invoicesListDialog = true;
       this.selected = [];
+      this.search_invoice();
     });
     this.search_invoice();
-  },
+  }
 };
 </script>

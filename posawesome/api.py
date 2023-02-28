@@ -126,8 +126,7 @@ def get_invoices_list():
                 order by creation desc
                 limit 20
             """,
-            as_dict=True,
-            debug=True
+            as_dict=True
         )
         return invoices
     except:
