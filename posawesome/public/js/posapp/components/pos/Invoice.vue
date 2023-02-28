@@ -93,8 +93,18 @@
 
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 60vh">
         <template @mouseover="style = 'cursor: pointer'">
-          <v-data-table :headers="items_headers" :items="items" :single-expand="singleExpand" :expanded.sync="expanded"
-            show-expand item-key="posa_row_id" class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
+          <v-data-table
+            :headers="items_headers"
+            :items="items"
+            :single-expand="singleExpand"
+            :expanded.sync="expanded"
+            show-expand
+            item-key="posa_row_id"
+            class="elevation-1"
+            :items-per-page="itemsPerPage"
+            hide-default-footer
+            :item-class="posa_data_table_rows"
+          >
             <template v-slot:item.qty="{ item }">{{
               formtFloat(item.qty)
             }}</template>
@@ -420,6 +430,8 @@ export default {
       delivery_charges: [],
       delivery_charges_rate: 0,
       selcted_delivery_charges: {},
+      posa_pos_restaurant_table: '',
+      posa_last_active_item_row_id: null,
       items_headers: [
         {
           text: __('Name'),
@@ -476,6 +488,16 @@ export default {
   },
 
   methods: {
+    posa_data_table_rows(item) {
+        if(this.posa_last_active_item_row_id === item.item_code) {
+          return "theme--light warning"
+        } else {
+          return ""
+        }
+    },
+    selectRestaurantTable(table) {
+      this.posa_pos_restaurant_table = table.name;
+    },
     remove_item(item) {
       if(this.is_item_description_enabled(item)) {
         this.remove_desc_item(item);
@@ -552,6 +574,8 @@ export default {
       return txt;
     },
     add_item(item, resetQty, extra_notes) {
+      this.posa_last_active_item_row_id = item.item_code;
+
       if (!item.uom) {
         item.uom = item.stock_uom;
       }
