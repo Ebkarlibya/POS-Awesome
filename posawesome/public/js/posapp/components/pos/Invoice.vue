@@ -2320,6 +2320,47 @@ export default {
       if (!offer.name) {
         offer = this.posOffers.find((el) => el.name == offer.offer_name);
       }
+
+      if(offer.discount_type === "Based On Cheapest Select Items (1:1)") {
+        let itemsRowID;
+        if (typeof offer.items === 'string') {
+          itemsRowID = JSON.parse(offer.items);
+        } else {
+          itemsRowID = offer.items;
+        }
+        let itemsList = [];
+        itemsRowID.forEach((row_id) => {
+          itemsList.push(this.getItemFromRowID(row_id));
+        });
+
+        itemsList = itemsList.sort((a, b) => a.rate - b.rate);
+
+        let totalDiscount = 0;
+        let itemsRates = [];
+        let discountItemsRates = [];
+
+        for(let item of itemsList) {
+          for(let q = 0; q < item.qty; q++) {
+            itemsRates.push(item.rate)
+          }
+        }
+
+        discountItemsRates = itemsRates.slice(0, (Math.floor(itemsRates.length / 2)));
+
+        for(let dItemRate of discountItemsRates) {
+          totalDiscount += dItemRate;
+        }
+        console.log("Items Rates: ", itemsRates);
+        console.log("Discount Rates: ", discountItemsRates);
+        console.log(`Discount: ${totalDiscount}`)
+        console.log(`Total With Discount: ${this.Total - totalDiscount}`)
+        console.log(`Total Without Discount: ${this.Total}`)
+
+
+        this.discount_amount = totalDiscount.toFixed(this.currency_precision);
+        return;
+      }
+      
       if (
         (!this.discount_percentage_offer_name ||
           this.discount_percentage_offer_name == offer.name) &&
