@@ -204,7 +204,7 @@
    "fieldname": "discount_type",
    "fieldtype": "Select",
    "label": "Discount Type",
-   "options": "\nRate\nDiscount Percentage\nDiscount Amount"
+   "options": "\nRate\nDiscount Percentage\nBased On Cheapest Select Items (1:1)\nDiscount Amount"
   },
   {
    "fieldname": "column_break_26",
@@ -324,7 +324,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-31 17:02:14.290278",
+ "modified": "2023-03-18 11:14:08.499425",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",

@@ -181,9 +181,19 @@ const controllers = (frm) => {
 	frm.toggle_reqd('loyalty_points', frm.doc.offer === 'Loyalty Point');
 
 	if (frm.doc.offer === 'Grand Total') {
-		frm.set_df_property('discount_type', 'options', ['Discount Percentage']);
+		if(frm.doc.discount_type === "Based On Cheapest Select Items (1:1)") {
+			frm.set_df_property('discount_type', 'description', `
+			Example:
+			- If item selected with the following prices and odd number quantity (10, 15, 20 USD) discount will be 10 USD.
+			- If item selected with the following prices and even number quantity (10, 15, 20, 25 USD) discount will be 25 USD (10+15).
+			`);	
+		} else {
+			frm.set_df_property('discount_type', 'description', '');	
+		}
+		frm.set_df_property('discount_type', 'options', ['Discount Percentage', 'Based On Cheapest Select Items (1:1)']);
 	} else {
 		frm.set_df_property('discount_type', 'options', ['', 'Rate', 'Discount Percentage', 'Discount Amount']);
+		frm.set_df_property('discount_type', 'description', '');
 	}
 
 	if (frm.doc.apply_on === 'Transaction') {
