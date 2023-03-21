@@ -358,8 +358,8 @@ export default {
       this.$refs.gBtnRef.forEach(ref => {
         let gBtn = ref.$el;
         let gSpan = gBtn.children[0];
-        
-        if(gSpan.innerText === groupName) {
+
+        if(gSpan.innerText.toLowerCase() === groupName.toLowerCase()) {
             // if already selected deselect
             if(gBtn.classList.contains("warning")) {
               gBtn.classList.remove("warning")
