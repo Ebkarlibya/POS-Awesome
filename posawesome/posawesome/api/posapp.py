@@ -419,6 +419,10 @@ def submit_invoice(invoice, data):
     invoice_doc.update(invoice)
     if invoice.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
+
+    if frappe.db.get_value("POS Profile", {"name": invoice_doc.get("pos_profile")}, fieldname="posa_disable_update_stock"):
+        invoice_doc.update_stock = 0
+
     mop_cash_list = [
         i.mode_of_payment
         for i in invoice_doc.payments

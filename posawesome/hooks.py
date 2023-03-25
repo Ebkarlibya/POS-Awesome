@@ -254,6 +254,7 @@ fixtures = [
 
                     # (POS Profile) & (Item)
                     "POS Profile-posa_enable_pos_additional_item_description", # checkbox
+                    "POS Profile-posa_disable_update_stock", # checkbox
                     # Sales Invoice
                     "Sales Invoice-posa_pos_restaurant_table"
                 ),
