@@ -561,6 +561,16 @@
                       :value="item.posa_notes"
                     ></v-textarea>
                   </v-col>
+                  <v-col v-if="pos_profile.posa_enable_pos_additional_item_description">
+                    <v-btn
+                      block
+                      class="pa-0"
+                      style="background-color: gray; padding-left: 10px; padding-right: 10px;"
+                      @click="openAdditionalItemDescriptionDialog(item)"
+                      >{{ __('Descriptions') }}</v-btn>
+                      <AdditionalDescriptionItem 
+                        :addOne="add_one" :subtractOne="subtract_one" />
+                  </v-col>
                 </v-row>
               </td>
             </template>
@@ -733,6 +743,7 @@
 
 <script>
 import { evntBus } from '../../bus';
+import AdditionalDescriptionItem from './AdditionalDescriptionItem.vue'
 import Customer from './Customer.vue';
 import RestaurantTable from './RestaurantTable.vue';
 
@@ -786,6 +797,7 @@ export default {
   },
 
   components: {
+    AdditionalDescriptionItem,
     Customer,
     RestaurantTable
 },
@@ -826,6 +838,9 @@ export default {
   },
 
   methods: {
+    openAdditionalItemDescriptionDialog(item){
+      evntBus.$emit('open_additional_item_descriptions', item);
+    },
     posa_data_table_rows(item) {
         if(this.posa_last_active_item_row_id === item.item_code) {
           return "theme--light warning"
@@ -870,7 +885,7 @@ export default {
 
     add_item(item) {
       this.posa_last_active_item_row_id = item.item_code;
-
+      item["haha123"]= 788787787;
       if (!item.uom) {
         item.uom = item.stock_uom;
       }
@@ -891,6 +906,9 @@ export default {
           new_item.serial_no_selected.push(item.to_set_serial_no);
           item.to_set_serial_no = null;
         }
+        this.getAdditionalItemDescriptions(item).then(res=>{
+          new_item.additional_item_descriptions = res.message.slice();
+        });
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
       } else {
@@ -933,7 +951,24 @@ export default {
       }
       this.$forceUpdate();
     },
-
+    getAdditionalItemDescriptions(item) {
+      let res = frappe.call(
+          {
+              method: "posawesome.api.get_additional_item_descriptions",
+              args: { item_code: item.item_code },
+              callback: (r) => {
+                  if (r.message) {
+                      r.message.forEach(descItem => {
+                          descItem["selected_qty"] = 0;
+                      });
+                      this.itemAdditionalDescriptions = r.message;
+                      this.$forceUpdate()
+                  }
+              }
+          }
+      );
+      return res;
+    },
     get_new_item(item) {
       const new_item = { ...item };
       if (!item.qty) {

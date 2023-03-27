@@ -222,14 +222,6 @@ def get_items(pos_profile, price_list=None):
             else:
                 row = {}
 
-                if item.get("posa_enable_pos_additional_item_description") == 1:
-                    additional_item_descriptions = frappe.get_all(
-                        "POS Additional Item Description Table",
-                        fields=["description"],
-                        filters={"parent": item_code},
-                    )
-                    item.update({"additional_item_descriptions": additional_item_descriptions})
-
                 pos_tags = frappe.get_all(
                     "POS Tag Item Table",
                     fields=["tag_name"],
@@ -818,6 +810,13 @@ def get_items_details(pos_profile, items_data):
                     "has_serial_no": has_serial_no,
                 }
             )
+            # get additional item descriptions
+            additional_item_descriptions = frappe.get_all(
+                "POS Additional Item Description Table",
+                fields=["description"],
+                filters={"parent": item_code}    
+            )
+            row.update({"additional_item_descriptions": additional_item_descriptions})
 
             result.append(row)
 

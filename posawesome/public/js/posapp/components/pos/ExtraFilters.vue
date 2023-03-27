@@ -43,6 +43,15 @@
         <br> -->
 
         <v-card-text>
+          <v-row dense class="mx-5 mb-6">
+            <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                :label="__('Search POS Tags')"
+                single-line
+                hide-details
+              ></v-text-field>
+          </v-row>
           <v-row dense>
             <v-col class="variants-qty_controls">
               <v-btn v-for="posTag in pos_tags" :key="posTag.name" medium
@@ -78,6 +87,8 @@ export default {
   data: () => ({
     posTagsDialog: false,
     pos_profile: null,
+    search: '',
+    _pos_tags: [],
     pos_tags: []
   }),
   methods: {
@@ -119,10 +130,11 @@ export default {
         method: "posawesome.api.get_pos_tags",
         callback: (r) => {
           if(r.message) {
-            this.pos_tags = r.message.map(tag => {
+            this._pos_tags = r.message.map(tag => {
               tag["selected"] = 0
               return tag
             })
+            this.pos_tags = this._pos_tags;
           }
         }
       }
@@ -130,9 +142,14 @@ export default {
   },
 
   watch: {
-    // customer() {
-    //   evntBus.$emit('update_customer', this.customer);
-    // },
+    search(value) {
+      // this.clearPosTags();
+      if(value) {
+        this.pos_tags = [...this._pos_tags.filter(tag => tag.name.toLowerCase().includes(value.toLowerCase()))];
+      } else {
+        this.pos_tags = [...this._pos_tags]
+      }
+    }
   },
 };
 </script>

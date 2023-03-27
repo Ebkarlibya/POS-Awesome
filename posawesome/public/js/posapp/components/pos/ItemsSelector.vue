@@ -145,72 +145,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <!-- additional item description dialog -->
-    <v-dialog v-model="showItemDescDialog" persistent width="600">
-      <v-card elevation="2" outlined shaped>
-        <v-card-title>{{ __("Select Item Descriptions") }}</v-card-title>
-        <v-card-subtitle v-if="descriptionItem"
-          style="margin: 5px 3px 0px 3px; color: #0097a7 !important; font-size: 18px"
-          >
-        {{ descriptionItem.item_name }}</v-card-subtitle>
-        <br>
-        <v-card-text>
-          <v-row dense>
-            <v-col class="variants-qty_controls">
-              <v-btn
-                v-for="itemDesc in additional_item_descriptions"
-                :key="itemDesc.description"
-                medium
-                :color="itemDesc.selected ? 'warning' : 'white'"
-                @click="selectItemDescription(itemDesc)"
-                class="ms-2 mb-2"
-              >
-                <strong>{{ itemDesc.description }}</strong>
-              </v-btn>
-              
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <br><br>
-        <v-col class="desc-item_controls">
-              <v-btn
-                icon
-                color="secondary"
-                @click.stop="descriptionItemQty -= 1"
-                style="margin-right: 30px; margin-left: 30px"
-              >
-                <v-icon>mdi-minus-circle-outline</v-icon>
-              </v-btn>
-              <v-text-field
-                :label="__('Qty')"
-                hide-details="auto"
-                v-model.number="descriptionItemQty"
-              >
-              </v-text-field>
-              <v-btn
-                icon
-                color="secondary"
-                @click.stop="descriptionItemQty += 1"
-                style="margin-right: 30px; margin-left: 30px"
-              >
-                <v-icon>mdi-plus-circle-outline</v-icon>
-              </v-btn>
-            </v-col>
-        <br>
-        <v-card-actions>
-          <v-btn
-            color="primary"
-            @click="addDescriptionItem"
-            :disabled="descriptionItemQty <= 0"
-            >{{ __("Insert") }}</v-btn
-          >
-          <v-spacer></v-spacer>
-          <v-btn color="error" @click="showItemDescDialog = false">{{
-            __("Close")
-          }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    
   </div>
 </template>
 
@@ -245,11 +180,7 @@ export default {
     float_precision: 2,
     currency_precision: 2,
     new_line: false,
-    qty: 1,
-    showItemDescDialog: false,
-    descriptionItem: null,
-    descriptionItemQty: 1,
-    additional_item_descriptions: []
+    qty: 1
   }),
 
   watch: {
@@ -376,120 +307,10 @@ export default {
         }
       })
     },
-    incDescItemQty(itemDesc) {
-      itemDesc.selected_qty += 1;
-      this.descriptionItem.descriptionTotalQty += 1;
-      this.$forceUpdate();
-    },
-    fastIncDescItemQty(itemDesc) {
-      this.clearTimers();
-      this.timeout = setTimeout(() => {
-        this.interval = setInterval(() => {
-          this.incDescItemQty(itemDesc);
-        }, 40);
-      }, 1000);
-    },
-    decDescItemQty(itemDesc) {
-      if (itemDesc.selected_qty > 0) {
-        itemDesc.selected_qty -= 1;
-        this.descriptionItem.descriptionTotalQty -= 1;
-      }
-      this.$forceUpdate();
-    },
-    fastDecDescItemQty(itemDesc) {
-      this.clearTimers();
-      this.timeout = setTimeout(() => {
-        this.interval = setInterval(() => {
-          this.decDescItemQty(itemDesc);
-        }, 40);
-      }, 1000);
-    },
-    clearTimers() {
-      clearTimeout(this.timeout);
-      clearInterval(this.interval);
-    },
-    selectItemDescription(item_desc) {
-      
-      if(this.descriptionItem.posa_force_selecting_only_one_option){
-
-        for(let i = 0; i < this.additional_item_descriptions.length; i++){
-          if(this.additional_item_descriptions[i].description === item_desc.description) {
-            this.additional_item_descriptions[i].selected = true;
-              } else {
-                this.additional_item_descriptions[i].selected = false;
-              }
-        }
-
-
-        this.$forceUpdate();
-        return
-      }
-      
-
-      item_desc.selected = !item_desc.selected;
-
-      this.$forceUpdate();
-    },
-    // addDescriptionItem(skipQtyValidation = false) {
-    //   // if (this.descriptionItemQty < 0) return;
-    //   let total_qty = 0;
-      
-    //   if(this.descriptionItem.posa_force_selecting_only_one_option){
-
-    //     for(let i = 0; i < this.additional_item_descriptions.length; i++){
-    //       if(this.additional_item_descriptions[i].description === item_desc.description) {
-    //         this.additional_item_descriptions[i].selected = true;
-    //           } else {
-    //             this.additional_item_descriptions[i].selected = false;
-    //           }
-    //     }
-
-
-    //     this.$forceUpdate();
-    //     return
-    //   }
-      
-
-    //   item_desc.selected = !item_desc.selected;
-
-    //   this.$forceUpdate();
-    // },
-    addDescriptionItem() {
-      if(this.descriptionItemQty < 0) return;
-      let descriptionText = " | ";
-
-      this.descriptionItem.additional_item_descriptions.forEach((item_desc) => {
-        if(item_desc.selected) {
-          descriptionText += item_desc.description + " | ";
-        }
-      });
-
-      this.descriptionItem.posa_notes = descriptionText;
-      this.descriptionItem.qty = parseInt(this.descriptionItemQty);
-
-      evntBus.$emit("add_item", this.descriptionItem, true);
-
-      // reset
-      this.descriptionItem = null;
-      this.descriptionItemQty = 1;
-      this.additional_item_descriptions = [];
-      this.showItemDescDialog = false;
-    },
     add_item(item) {
       if (item.has_variants) {
         evntBus.$emit("open_variants_model", item, this.items);
-      } else if(
-          this.pos_profile.posa_enable_pos_additional_item_description ===  1 &&
-          item.posa_enable_pos_additional_item_description === 1
-        ) {
-        this.additional_item_descriptions = item.additional_item_descriptions;
-        this.additional_item_descriptions.map(el => {
-          el["selected"] = false;
-        });
-        this.descriptionItem = item;
-        this.showItemDescDialog = true;
-      } 
-      else {
+      } else {
         if (!item.qty || item.qty === 1) {
           item.qty = Math.abs(this.qty);
         }
