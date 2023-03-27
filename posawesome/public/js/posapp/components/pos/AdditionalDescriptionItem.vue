@@ -1,35 +1,41 @@
 <template>
     <v-row justify="center">
         <!-- additional item description dialog -->
-        <v-dialog v-model="showItemDescDialog" v-if="item" persistent width="600">
+        <v-dialog v-model="showItemDescDialog" v-if="item" width="600">
             <v-card elevation="2" outlined shaped>
                 <v-card-title>{{ __("Select Item Descriptions") }}</v-card-title>
+
                 <v-card-subtitle v-if="item" style="margin: 5px 3px 0px 3px; color: #0097a7 !important; font-size: 18px">
-                    {{ item.item_name }}</v-card-subtitle>
-                    <v-card-subtitle>
-                       {{ getTotalDescriptionsQty() }}/{{ item.qty }}
-                    </v-card-subtitle>
-                <br>
+                    <v-row class="mx-3">
+                        <p>{{ item.item_name }}</p>
+                        <v-spacer></v-spacer>
+                        <b>{{ getTotalDescriptionsQty() }}/{{ item.qty }}</b>
+                    </v-row>
+                </v-card-subtitle>
+  
                 <v-card-text>
                     <v-data-table :headers="tableHeaders" :items="item.additional_item_descriptions" class="elevation-1"
                         item-key="description" loading="true" :hide-default-footer="false" :items-per-page="4">
                         <template v-slot:item.description="{ item }">
-                            <v-chip @click="incDescItemQty(item)">
+                            <v-chip style="font-size: 20px;" @click="incDescItemQty(item)">
                                 {{ item.description }}
                             </v-chip>
                         </template>
                         <template v-slot:item.selected_qty="{ item }">
-                            <v-chip @click="decDescItemQty(item)">
+                            <v-chip class="px-5" style="font-size: 20px;" @click="decDescItemQty(item)">
                                 {{ item.selected_qty }}
                             </v-chip>
                         </template>
                     </v-data-table>
                 </v-card-text>
-
+                <br>
                 <v-card-actions>
                     <v-btn color="primary" @click="editDescItemNote">{{ __("Apply")
                     }}</v-btn>
                     <v-spacer></v-spacer>
+                    <v-btn color="warning" @click="resetItemSelectedDescs">{{
+                        __("Reset")
+                    }}</v-btn>
                     <v-btn color="error" @click="showItemDescDialog = false">{{
                         __("Close")
                     }}</v-btn>
@@ -81,6 +87,12 @@ export default {
         },
         getTotalDescriptionsQty() {
             return this.item.additional_item_descriptions.reduce((acc, cur) => acc += cur.selected_qty, 0);
+        },
+        resetItemSelectedDescs() {
+            for(let i = 0 ; i < this.item.additional_item_descriptions.length; i++) {
+                const dItem = this.item.additional_item_descriptions[i];
+                dItem.selected_qty = 0;
+            }
         },
         editDescItemNote() {
             let descriptionText = "";
