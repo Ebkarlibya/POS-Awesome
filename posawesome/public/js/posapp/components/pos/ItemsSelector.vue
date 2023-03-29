@@ -87,6 +87,7 @@
           :key="groupName" medium color="primary" 
           ref="gBtnRef"
           @click="setFastItemGroupFilter($event, groupName)"
+          style="padding: 4px"
           class="ms-2 mb-2">
           {{ groupName }}
         </v-btn>

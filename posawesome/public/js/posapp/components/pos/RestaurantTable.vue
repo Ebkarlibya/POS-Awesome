@@ -42,11 +42,11 @@
         <v-card-text class="pa-0">
           <v-text-field
               color="primary"
+              clearable
               :label="frappe._('Search Tables')"
               background-color="white"
               hide-details
               @input="search_table"
-              dense
               class="mx-4"
             ></v-text-field>
           <v-container>
