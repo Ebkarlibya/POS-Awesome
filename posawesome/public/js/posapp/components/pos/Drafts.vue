@@ -16,6 +16,7 @@
               <v-col cols="12" class="pa-1">
                 <div class="mx-2 my-5">
                   <v-text-field
+                    clearable
                     v-model="search"
                     append-icon="mdi-magnify"
                     :label="__('Search Helds')"

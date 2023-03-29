@@ -45,6 +45,7 @@
         <v-card-text>
           <v-row dense class="mx-5 mb-6">
             <v-text-field
+                clearable
                 v-model="search"
                 append-icon="mdi-magnify"
                 :label="__('Search POS Tags')"
