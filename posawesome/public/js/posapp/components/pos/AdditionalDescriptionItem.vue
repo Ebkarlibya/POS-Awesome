@@ -79,10 +79,12 @@ export default {
             if(this.getTotalDescriptionsQty() >= this.item.qty) return;
 
             descItem.selected_qty++;
+            this.$forceUpdate();
         },
         decDescItemQty(descItem) {
             if (descItem.selected_qty > 0) {
                 descItem.selected_qty--;
+                this.$forceUpdate();
             }
         },
         getTotalDescriptionsQty() {
