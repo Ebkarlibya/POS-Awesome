@@ -1,27 +1,14 @@
 <template>
   <div class="extra-filters-main">
     <div class="extra-filters-outside-controls" style="display: flex;">
-      <v-btn
-        color="primary"
-        @click="openPosTags"
-        class="">
-        <v-badge
-            color="error"
-            dot
-            style="position: absolute; top: 2px; left: 3px;"
-            v-if="isTagsFilterActive"
-          >
-          </v-badge>
+      <v-btn color="primary" @click="openPosTags" class="">
+        <v-badge color="error" dot style="position: absolute; top: 2px; left: 3px;" v-if="isTagsFilterActive">
+        </v-badge>
         <v-icon>mdi-filter-variant</v-icon>
       </v-btn>
 
-      <v-btn
-        class="mx-3"
-        color="error"
-        @click="clearPosTags"
-        v-if="isTagsFilterActive"
-      >
-      <v-icon>mdi-close-thick</v-icon>
+      <v-btn class="mx-3" color="error" @click="clearPosTags" v-if="isTagsFilterActive">
+        <v-icon>mdi-close-thick</v-icon>
       </v-btn>
     </div>
 
@@ -44,25 +31,23 @@
 
         <v-card-text>
           <v-row dense class="mx-5 mb-6">
-            <v-text-field
-                clearable
-                v-model="search"
-                append-icon="mdi-magnify"
-                :label="__('Search POS Tags')"
-                single-line
-                hide-details
-              ></v-text-field>
+            <v-text-field clearable v-model="search" append-icon="mdi-magnify" :label="__('Search POS Tags')" single-line
+              hide-details></v-text-field>
           </v-row>
-          <v-row dense>
-            <v-col class="variants-qty_controls">
-              <v-btn v-for="posTag in pos_tags" :key="posTag.name" medium
-                :color="posTag.selected ? 'warning' : 'white'" @click="selectPosTag(posTag)"
+          <br>
+          <template v-for="(posTag, index) in pos_tags">
+            <span>
+              <v-btn medium :color="posTag.selected ? 'warning' : 'white'"
+                style="padding: 4px;"
+                @click="selectPosTag(posTag)"
                 class="ms-2 mb-2">
                 <strong>{{ posTag.name }}</strong>
               </v-btn>
 
-            </v-col>
-          </v-row>
+            </span>
+            <template v-if="posTag.order_weight.includes('break')"><br><hr></template>
+          </template>
+
         </v-card-text>
 
         <br><br>
@@ -115,7 +100,7 @@ export default {
     selectedTags() {
       return this.pos_tags.filter(tag => tag.selected === true)
     },
-    isTagsFilterActive(){
+    isTagsFilterActive() {
       return this.selectedTags.length > 0 ? true : false
     }
   },
@@ -130,7 +115,7 @@ export default {
       {
         method: "posawesome.api.get_pos_tags",
         callback: (r) => {
-          if(r.message) {
+          if (r.message) {
             this._pos_tags = r.message.map(tag => {
               tag["selected"] = 0
               return tag
@@ -145,7 +130,7 @@ export default {
   watch: {
     search(value) {
       // this.clearPosTags();
-      if(value) {
+      if (value) {
         this.pos_tags = [...this._pos_tags.filter(tag => tag.name.toLowerCase().includes(value.toLowerCase()))];
       } else {
         this.pos_tags = [...this._pos_tags]

@@ -66,7 +66,16 @@
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
-                
+
+                <v-list-item @click="openClosingShiftsList">
+                  <v-list-item-icon>
+                    <v-icon>mdi-menu</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ __("Closing Shift List") }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+
                 <v-list-item @click="openInvoicesList">
                   <v-list-item-icon>
                     <v-icon>mdi-menu</v-icon>
@@ -202,6 +211,10 @@ export default {
         "https://github.com/yrestom/POS-Awesome",
         "_blank"
       );
+      win.focus();
+    },
+    openClosingShiftsList(){
+      const win = window.open("/app/pos-closing-shift", "_blank");
       win.focus();
     },
     openDesk() {
