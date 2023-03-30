@@ -90,10 +90,9 @@ def get_pos_tags():
     try:
         tags =  frappe.get_all(
             "POS Tag",
-            fields=["name"],
-            order_by="name asc"
+            fields=["name", "order_weight"],
+            order_by="order_weight asc"
         )
-
         return tags
     except:
         tb = frappe.get_traceback()
