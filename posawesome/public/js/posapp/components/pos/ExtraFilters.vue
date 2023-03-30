@@ -45,7 +45,9 @@
               </v-btn>
 
             </span>
-            <template v-if="posTag.order_weight.includes('break')"><br><hr></template>
+            <template v-if="posTag.order_weight">
+              <template v-if="posTag.order_weight.includes('break')"><br><hr></template>
+            </template>
           </template>
 
         </v-card-text>
