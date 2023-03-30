@@ -72,7 +72,7 @@
                     <v-icon>mdi-menu</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>{{ __("Closing Shift List") }}</v-list-item-title>
+                    <v-list-item-title>{{ __("Previuse Closing Shifts") }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
 
