@@ -174,6 +174,15 @@
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
+                  <v-col v-if="pos_profile.posa_enable_pos_additional_item_description">
+                    <v-btn
+                      class="pa-2"
+                      style="background-color: gray; padding-left: 10px; padding-right: 10px;"
+                      @click="openAdditionalItemDescriptionDialog(item)"
+                      >{{ __('Descriptions') }}</v-btn>
+                      <AdditionalDescriptionItem 
+                        :addOne="add_one" :subtractOne="subtract_one" />
+                  </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="1">
                     <v-btn
@@ -560,16 +569,6 @@
                       v-model="item.posa_notes"
                       :value="item.posa_notes"
                     ></v-textarea>
-                  </v-col>
-                  <v-col v-if="pos_profile.posa_enable_pos_additional_item_description">
-                    <v-btn
-                      block
-                      class="pa-0"
-                      style="background-color: gray; padding-left: 10px; padding-right: 10px;"
-                      @click="openAdditionalItemDescriptionDialog(item)"
-                      >{{ __('Descriptions') }}</v-btn>
-                      <AdditionalDescriptionItem 
-                        :addOne="add_one" :subtractOne="subtract_one" />
                   </v-col>
                 </v-row>
               </td>

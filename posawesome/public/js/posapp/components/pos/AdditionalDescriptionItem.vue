@@ -15,7 +15,7 @@
   
                 <v-card-text>
                     <v-data-table :headers="tableHeaders" :items="item.additional_item_descriptions" class="elevation-1"
-                        item-key="description" loading="true" :hide-default-footer="false" :items-per-page="4">
+                        item-key="description" loading="true" :hide-default-footer="false" :items-per-page="8" >
                         <template v-slot:item.description="{ item }">
                             <v-chip style="font-size: 20px;" @click="incDescItemQty(item)">
                                 {{ item.description }}
