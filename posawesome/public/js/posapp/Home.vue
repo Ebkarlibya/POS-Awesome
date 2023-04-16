@@ -13,10 +13,72 @@
 import Navbar from './components/Navbar.vue';
 import POS from './components/pos/Pos.vue';
 
+frappe.pos_show_alert = frappe.toast = function (message, actions = {}) {
+	let indicator_icon_map = {
+		orange: "solid-warning",
+		yellow: "solid-warning",
+		blue: "solid-info",
+		green: "solid-success",
+		red: "solid-error",
+	};
+
+	if (typeof message === "string") {
+		message = {
+			message: message,
+		};
+	}
+
+	if (!$("#dialog-container").length) {
+		$('<div id="dialog-container"><div id="alert-container"></div></div>').appendTo("body");
+	}
+
+	let icon;
+	if (message.indicator) {
+		icon = indicator_icon_map[message.indicator.toLowerCase()] || "solid-" + message.indicator;
+	} else {
+		icon = "solid-info";
+	}
+
+	const indicator = message.indicator || "red";
+
+	const div = $(`
+		<div class="alert desk-alert ${indicator}" role="alert">
+			<div class="alert-message-container">
+				<div class="alert-title-container">
+					<div>${frappe.utils.icon(icon, "lg")}</div>
+					<div class="alert-message">${message.message}</div>
+				</div>
+				<div class="alert-subtitle">${message.subtitle || ""}</div>
+			</div>
+			<div class="alert-body" style="display: none"></div>
+			<a class="close">${frappe.utils.icon("close-alt")}</a>
+		</div>
+	`);
+
+	div.hide().appendTo("#alert-container").show();
+
+	if (message.body) {
+		div.find(".alert-body").show().html(message.body);
+	}
+
+	div.find(".close, button").click(function () {
+		div.addClass("out");
+		setTimeout(() => div.remove(), 800);
+		return false;
+	});
+
+	Object.keys(actions).map((key) => {
+		div.find(`[data-action=${key}]`).on("click", actions[key]);
+	});
+
+	return div;
+};
+
 export default {
   data: function () {
     return {
       page: 'POS',
+      posAlert: null
     };
   },
   components: {
@@ -33,15 +95,47 @@ export default {
         $('.navbar.navbar-default.navbar-fixed-top').remove();
       });
     },
+    updateOnlineStatus(status) {
+      this.onLine = status
+      if(this.posAlert) {
+        this.posAlert.remove()
+      }
+
+      if(status) {
+        let posAlert = frappe.pos_show_alert(__("POS Plus: <strong>Online</strong>."))
+        setTimeout(()=> posAlert.remove(), 3000)
+      } else {
+        this.posAlert = frappe.pos_show_alert({
+          message: __("POS Plus: <string>Offline!</string>, Internet is Required for the POS to work properly !"),
+          title: __("ETMS POS: Connectivity"),
+          indicator: "red"}
+        )
+      }
+    }
   },
   mounted() {
     this.remove_frappe_nav();
+    setTimeout(() => {
+      window.addEventListener("online", () => {
+        console.log('go online');
+        this.updateOnlineStatus(true)
+      });
+      
+      window.addEventListener("offline", () => {
+        console.log('go offline');
+        this.updateOnlineStatus(false)
+      });
+      this.updateOnlineStatus(navigator.onLine)
+    }, 3000)
   },
   updated() {},
   created: function () {
     setTimeout(() => {
       this.remove_frappe_nav();
     }, 1000);
+    setInterval(() => {
+      this.updateOnlineStatus(navigator.onLine)
+    }, 60000);
   },
 };
 </script>
