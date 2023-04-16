@@ -378,6 +378,8 @@ def update_invoice(data):
     allow_zero_rated_items = frappe.get_cached_value(
         "POS Profile", invoice_doc.pos_profile, "posa_allow_zero_rated_items"
     )
+    if frappe.db.get_value("POS Profile", {"name": invoice_doc.get("pos_profile")}, fieldname="posa_disable_update_stock"):
+            invoice_doc.update_stock = 0
     for item in invoice_doc.items:
         if not item.rate or item.rate == 0:
             if allow_zero_rated_items:
