@@ -132,3 +132,16 @@ def get_invoices_list():
     except:
         tb = frappe.get_traceback()
         print(frappe.get_traceback())
+
+@frappe.whitelist()
+def check_connection():
+    import requests
+
+    try:
+        res = requests.get("https://google.com")
+
+        return True
+    
+    except:
+        print(frappe.get_traceback())
+        return False
