@@ -101,11 +101,12 @@ export default {
         // let res = await fetch(`https://cdn.jsdelivr.net/npm/ci-info@3.8.0/LICENSE?timestamp=${timestamp}`)
         let res = await frappe.call({ method: "posawesome.api.check_connection" })
 
+        if (this.posAlert) {
+          this.posAlert.remove()
+        }
+
         if (res.message) {
           this.onLine = true
-          if (this.posAlert) {
-            this.posAlert.remove()
-          }
           let posAlert = frappe.pos_show_alert(__("POS Plus: <strong>Online</strong>."))
           setTimeout(() => posAlert.remove(), 3000)
         }
