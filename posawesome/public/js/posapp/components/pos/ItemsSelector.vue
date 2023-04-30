@@ -1,16 +1,7 @@
 <template>
   <div>
-    <v-card
-      class="selection mx-auto grey lighten-5 mt-5"
-      style="max-height: 59vh; height: 59vh"
-    >
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="loading"
-        absolute
-        top
-        color="info"
-      ></v-progress-linear>
+    <v-card class="selection mx-auto grey lighten-5 mt-5" style="max-height: 59vh; height: 59vh">
+      <v-progress-linear :active="loading" :indeterminate="loading" absolute top color="info"></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col cols="6" class="pb-0 mb-2">
           <v-text-field dense clearable autofocus outlined color="primary" :label="frappe._('Search Items')"
@@ -18,46 +9,31 @@
             v-model="debounce_search" @keydown.esc="esc_event" @keydown.enter="enter_event"
             ref="debounce_search"></v-text-field>
         </v-col>
+        <v-col cols="3" v-if="pos_profile.posa_enable_item_compatibility">
+          <LinkField v-model="compatibilityItemSearch" @update="compatibilityItemSearch = $event"
+            doctype="POS Item Compatibility" :filters="{}"></LinkField>
+        </v-col>
         <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
           <v-text-field dense outlined color="primary" :label="frappe._('QTY')" background-color="white" hide-details
             v-model.number="qty" type="number" @keydown.enter="enter_event" @keydown.esc="esc_event"></v-text-field>
         </v-col>
-        <v-col cols="2" 
-          v-if="pos_profile.posa_enable_pos_tags === 1"
-        >
+        <v-col cols="2" v-if="pos_profile.posa_enable_pos_tags === 1">
           <ExtraFilters />
         </v-col>
         <v-col cols="1" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
-          <v-checkbox v-model="new_line" color="accent" value="true" :label="__('NLine')" dense
-            hide-details></v-checkbox>
+          <v-checkbox v-model="new_line" color="accent" value="true" :label="__('NLine')" dense hide-details></v-checkbox>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
             <v-row dense class="overflow-y-auto" style="max-height: 50vh">
-              <v-col
-                v-for="(item, idx) in filtred_items"
-                :key="idx"
-                xl="3"
-                lg="3"
-                md="3"
-                sm="3"
-                cols="10"
-                min-height="50"
-              >
+              <v-col v-for="( item, idx ) in  filtred_items " :key="idx" xl="3" lg="3" md="3" sm="3" cols="10"
+                min-height="50">
                 <v-card hover="hover" @click="add_item(item)">
-                  <v-img
-                    :src="
-                      item.image ||
-                      '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
-                    "
-                    class="white--text align-end"
-                    gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
-                    height="100px"
-                  >
-                    <v-card-text
-                      v-text="item.item_name"
-                      class="text-subtitle-2 px-1 pb-2"
-                    ></v-card-text>
+                  <v-img :src="item.image ||
+                    '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
+                    " class="white--text align-end" gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
+                    height="100px">
+                    <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
                     <div class="text-caption primary--text">
@@ -72,15 +48,8 @@
           <div fluid class="items" v-if="items_view == 'list'">
             <div class="my-0 py-0 overflow-y-auto" style="max-height: 50vh">
               <template>
-                <v-data-table
-                  :headers="getItmesHeaders()"
-                  :items="filtred_items"
-                  item-key="item_code"
-                  class="elevation-1"
-                  :items-per-page="itemsPerPage"
-                  hide-default-footer
-                  @click:row="add_item"
-                >
+                <v-data-table :headers="getItmesHeaders()" :items="filtred_items" item-key="item_code" class="elevation-1"
+                  :items-per-page="itemsPerPage" hide-default-footer @click:row="add_item">
                   <template v-slot:item.rate="{ item }">
                     {{ formtCurrency(item.rate) }}
                   </template>
@@ -97,56 +66,38 @@
     <!-- Item Group Filter -->
     <v-card class="cards mt-6 px-3 pt-5 grey lighten-5">
       <!-- fast item group filters -->
-      <v-row v-if="showFastGroupFilters" class="pb-3" style="height: 180px; overflow-y: auto; background: #d3d3d359; padding: 5px;">
-        <v-btn v-for="groupName in items_group" 
-          :key="groupName" medium color="primary" 
-          ref="gBtnRef"
-          @click="setFastItemGroupFilter($event, groupName)"
-          style="padding: 4px"
-          class="ms-2 mb-2">
+      <v-row v-if="showFastGroupFilters" class="pb-3"
+        style="height: 180px; overflow-y: auto; background: #d3d3d359; padding: 5px;">
+        <v-btn v-for=" groupName  in  items_group " :key="groupName" medium color="primary" ref="gBtnRef"
+          @click="setFastItemGroupFilter($event, groupName)" style="padding: 4px" class="ms-2 mb-2">
           {{ groupName }}
         </v-btn>
       </v-row>
       <!-- default item group filters -->
       <v-row v-else no-gutters align="center">
         <v-col cols="12">
-          <v-select
-            :items="items_group"
-            :label="frappe._('Items Group')"
-            dense
-            outlined
-            hide-details
-            v-model="item_group"
-          ></v-select>
+          <v-select :items="items_group" :label="frappe._('Items Group')" dense outlined hide-details
+            v-model="item_group"></v-select>
         </v-col>
       </v-row>
       <v-row no-gutters align="center">
         <v-col cols="3" class="mt-1">
-          <v-btn-toggle
-            v-model="items_view"
-            color="primary"
-            group
-            dense
-            rounded
-          >
+          <v-btn-toggle v-model="items_view" color="primary" group dense rounded>
             <v-btn small value="list">{{ __("List") }}</v-btn>
             <v-btn small value="card">{{ __("Card") }}</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-2">
-          <v-btn small block color="primary" text @click="show_coupons"
-            >{{ couponsCount }} {{ __("Coupons") }}</v-btn
-          >
+          <v-btn small block color="primary" text @click="show_coupons">{{ couponsCount }} {{ __("Coupons") }}</v-btn>
         </v-col>
         <v-col cols="5" class="mt-2">
-          <v-btn small block color="primary" text @click="show_offers"
-            >{{ offersCount }} {{ __("Offers") }} : {{ appliedOffersCount }}
-            {{ __("Applied") }}</v-btn
-          >
+          <v-btn small block color="primary" text @click="show_offers">{{ offersCount }} {{ __("Offers") }} : {{
+            appliedOffersCount }}
+            {{ __("Applied") }}</v-btn>
         </v-col>
       </v-row>
     </v-card>
-    
+
   </div>
 </template>
 
@@ -155,10 +106,12 @@
 import { evntBus } from "../../bus";
 import _ from "lodash";
 import ExtraFilters from "./ExtraFilters.vue";
+import LinkField from "./LinkField.vue";
 
 export default {
   components: {
-    ExtraFilters
+    ExtraFilters,
+    LinkField
   },
   data: () => ({
     pos_profile: "",
@@ -181,7 +134,8 @@ export default {
     float_precision: 2,
     currency_precision: 2,
     new_line: false,
-    qty: 1
+    qty: 1,
+    compatibilityItemSearch: null
   }),
 
   watch: {
@@ -291,20 +245,20 @@ export default {
         let gBtn = ref.$el;
         let gSpan = gBtn.children[0];
 
-        if(gSpan.innerText.toLowerCase() === groupName.toLowerCase()) {
-            // if already selected deselect
-            if(gBtn.classList.contains("warning")) {
-              gBtn.classList.remove("warning")
-              gBtn.classList.add("primary")
-              this.item_group = "ALL"
-            } else {
-              gBtn.classList.remove("primary")
-              gBtn.classList.add("warning")
-              this.item_group = groupName
-            }
-        } else {
+        if (gSpan.innerText.toLowerCase() === groupName.toLowerCase()) {
+          // if already selected deselect
+          if (gBtn.classList.contains("warning")) {
             gBtn.classList.remove("warning")
-            gBtn.classList.add("primary")  
+            gBtn.classList.add("primary")
+            this.item_group = "ALL"
+          } else {
+            gBtn.classList.remove("primary")
+            gBtn.classList.add("warning")
+            this.item_group = groupName
+          }
+        } else {
+          gBtn.classList.remove("warning")
+          gBtn.classList.add("primary")
         }
       })
     },
@@ -451,7 +405,7 @@ export default {
   },
 
   computed: {
-    itemSelectDisplayType(){
+    itemSelectDisplayType() {
       return this.pos_profile.posa_default_item_selection_view_type;
     },
     filtred_items() {
@@ -466,13 +420,23 @@ export default {
         filtred_group_list = this.items;
       }
 
-      if(this.pos_tags_filters && this.pos_tags_filters.length > 0) {
+      if (this.pos_tags_filters && this.pos_tags_filters.length > 0) {
         filtred_group_list = filtred_group_list.filter(fItem => {
           return fItem.pos_tags.some(itemPosTag => {
-            return this.pos_tags_filters.some( filterPosTag => filterPosTag.name === itemPosTag.tag_name)
+            return this.pos_tags_filters.some(filterPosTag => filterPosTag.name === itemPosTag.tag_name)
           })
         })
       }
+
+      if (this.compatibilityItemSearch) {
+        filtred_group_list = filtred_group_list.filter(fItem => {
+          return fItem.pos_item_compatibility.some(itemPosCompat => {
+            return (itemPosCompat.name1 === this.compatibilityItemSearch &&
+              fItem.posa_enable_pos_item_compatibility55)
+          })
+        })
+      }
+
       if (!this.search || this.search.length < 3) {
         if (
           this.pos_profile.posa_show_template_items &&
@@ -547,7 +511,7 @@ export default {
   },
 
   created: function () {
-    this.$nextTick(function () {});
+    this.$nextTick(function () { });
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
       this.items_view = data.pos_profile.posa_default_item_selection_view_type || "list";
@@ -573,7 +537,7 @@ export default {
       this.customer_price_list = data;
     });
     evntBus.$on("set_pos_tags_filters", (pos_tags) => {
-      this.pos_tags_filters = pos_tags; 
+      this.pos_tags_filters = pos_tags;
     });
     evntBus.$on("clear_pos_tags_filters", () => {
       this.pos_tags_filters.length = 0;
@@ -587,9 +551,9 @@ export default {
 </script>
 
 <style scoped>
-  .desc-item_controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+.desc-item_controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 </style>
