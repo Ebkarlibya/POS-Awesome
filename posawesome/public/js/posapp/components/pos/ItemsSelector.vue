@@ -9,7 +9,7 @@
             v-model="debounce_search" @keydown.esc="esc_event" @keydown.enter="enter_event"
             ref="debounce_search"></v-text-field>
         </v-col>
-        <v-col cols="3" v-if="pos_profile.posa_enable_item_compatibility">
+        <v-col cols="3" v-if="pos_profile.posa_pos_profile_enable_item_compatibility">
           <LinkField v-model="compatibilityItemSearch" @update="compatibilityItemSearch = $event"
             doctype="POS Item Compatibility" :filters="{}"></LinkField>
         </v-col>

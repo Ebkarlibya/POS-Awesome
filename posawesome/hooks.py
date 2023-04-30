@@ -256,7 +256,7 @@ fixtures = [
                     "Item-posa_pos_tags",  # table
 
                     # (POS Profile) & (Item)
-                    "POS Profile-posa_enable_item_compatibility"
+                    "POS Profile-posa_pos_profile_enable_item_compatibility",
                     "POS Profile-posa_enable_pos_additional_item_description",  # checkbox
                     "POS Profile-posa_disable_update_stock",  # checkbox
                     # Sales Invoice
