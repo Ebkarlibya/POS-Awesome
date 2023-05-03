@@ -1937,7 +1937,7 @@
   "insert_after": "posa_enable_pos_additional_item_description",
   "is_system_generated": 0,
   "is_virtual": 0,
-  "label": "posa pos profile Enable Item Compatibility",
+  "label": "Enable Item Compatibility",
   "length": 0,
   "mandatory_depends_on": null,
   "modified": "2023-04-30 13:59:00.067192",
