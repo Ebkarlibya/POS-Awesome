@@ -823,6 +823,8 @@ export default {
       if (!this.validate()) {
         return;
       }
+      evntBus.$emit('show_payment_dialog', true);
+
       evntBus.$emit('show_payment', 'true');
       const invoice_doc = this.proces_invoice();
       evntBus.$emit('send_invoice_doc_payment', invoice_doc);

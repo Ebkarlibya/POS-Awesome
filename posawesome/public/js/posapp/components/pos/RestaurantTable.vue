@@ -1,11 +1,7 @@
 <template>
   <div>
-    
-    <v-btn
-    primary
-    small
-    :disabled="invoice_doc.is_return === 1"
-    >
+
+    <v-btn primary small :disabled="disableSelectingTables || invoice_doc.is_return === 1">
       <div v-if="posa_pos_restaurant_table">
         <span style="font-size: 20px; font-weight: bolder;">
           {{ posa_pos_restaurant_table }}
@@ -22,14 +18,8 @@
         <v-card-title>
           <span class="headline primary--text">{{ __("Select Table") }}</span>
           <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            dark
-            @click="selectTable"
-            :disabled="!posa_pos_restaurant_table"
-            style="margin-left: 5px; margin-right: 5px"
-            >{{ __("UnSelect") }}</v-btn
-          >
+          <v-btn color="primary" dark @click="selectTable" :disabled="!posa_pos_restaurant_table"
+            style="margin-left: 5px; margin-right: 5px">{{ __("UnSelect") }}</v-btn>
           <v-btn color="error" dark @click="tablesDialog = false">{{
             __("Close")
           }}</v-btn>
@@ -40,37 +30,19 @@
           </p>
         </v-card-subtitle>
         <v-card-text class="pa-0">
-          <v-text-field
-              color="primary"
-              clearable
-              :label="frappe._('Search Tables')"
-              background-color="white"
-              hide-details
-              @input="search_table"
-              class="mx-4"
-            ></v-text-field>
+          <v-text-field color="primary" clearable :label="frappe._('Search Tables')" background-color="white" hide-details
+            @input="search_table" class="mx-4"></v-text-field>
           <v-container>
             <div>
               <v-row dense class="overflow-y-auto" style="max-height: 800px">
-                <v-col
-                  v-for="(table, idx) in restaurantTables"
-                  :key="idx"
-                  xl="3"
-                  lg="3"
-                  md="3"
-                  sm="3"
-                  cols="12"
-                  min-height="100"
-                >
+                <v-col v-for="(table, idx) in restaurantTables" :key="idx" xl="3" lg="3" md="3" sm="3" cols="12"
+                  min-height="100">
                   <v-card hover="hover" @click="selectTable(table)">
-                  <v-card-text
-                    class="text-center"
-                    style="font-size: larger; font-weight: bolder;"
-                  >
-                    <v-icon mx-3 style="margin: 0px 8px 0px 8px;">mdi-silverware</v-icon>
-                    {{ table.name }}
+                    <v-card-text class="text-center" style="font-size: larger; font-weight: bolder;">
+                      <v-icon mx-3 style="margin: 0px 8px 0px 8px;">mdi-silverware</v-icon>
+                      {{ table.name }}
 
-                </v-card-text>
+                    </v-card-text>
 
                   </v-card>
                 </v-col>
@@ -94,11 +66,13 @@ export default {
     customer: '',
     readonly: false,
     searchRestaurantTables: [],
-    restaurantTables: []
+    restaurantTables: [],
+    disableSelectingTables: false
   }),
   methods: {
     openRestaurantTablesDialog() {
-      if(this.invoice_doc.is_return === 1 ) return;
+      if (this.invoice_doc.is_return === 1) return;
+      if (this.disableSelectingTables) return;
 
       this.tablesDialog = true;
     },
@@ -107,9 +81,9 @@ export default {
       this.$emit('selectRestaurantTable', table);
     },
     search_table(value) {
-        this.restaurantTables = this.searchRestaurantTables.filter(rt => {
-          return rt.name.includes(value);
-        })
+      this.restaurantTables = this.searchRestaurantTables.filter(rt => {
+        return rt.name.includes(value);
+      })
     }
   },
 
@@ -135,6 +109,9 @@ export default {
       // });
       evntBus.$on('set_customer_readonly', (value) => {
         this.readonly = value;
+      });
+      evntBus.$on('show_payment_dialog', (value) => {
+        this.disableSelectingTables = value
       });
       frappe.call(
         {

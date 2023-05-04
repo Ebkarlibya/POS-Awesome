@@ -111,6 +111,9 @@ export default {
           setTimeout(() => posAlert.remove(), 3000)
         }
         else {
+          if (this.posAlert) {
+            this.posAlert.remove()
+          }
           this.posAlert = frappe.pos_show_alert({
             message: __("POS Plus: <string>Offline!</string>, Internet is Required for the POS to work properly !"),
             title: __("ETMS POS: Connectivity"),
