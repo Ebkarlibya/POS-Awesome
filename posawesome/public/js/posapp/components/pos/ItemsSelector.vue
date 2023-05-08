@@ -108,6 +108,16 @@ import _ from "lodash";
 import ExtraFilters from "./ExtraFilters.vue";
 import LinkField from "./LinkField.vue";
 
+function levenshteinDistance(itemName, searchQuery) {
+  let searchWords = searchQuery.split(" ");
+  for (let i = 0; i < searchWords.length; i++) {
+    if (!itemName.includes(searchWords[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export default {
   components: {
     ExtraFilters,
@@ -409,94 +419,107 @@ export default {
       return this.pos_profile.posa_default_item_selection_view_type;
     },
     filtred_items() {
-      this.search = this.get_search(this.first_search);
-      let filtred_list = [];
-      let filtred_group_list = [];
-      if (this.item_group != "ALL") {
-        filtred_group_list = this.items.filter((item) =>
-          item.item_group.toLowerCase() === this.item_group.toLowerCase()
-        );
-      } else {
-        filtred_group_list = this.items;
-      }
+  this.search = this.get_search(this.first_search);
+  let filtered_list = [];
+  let filtered_group_list = [];
+  if (this.item_group != "ALL") {
+    filtered_group_list = this.items.filter((item) =>
+      item.item_group.toLowerCase() === this.item_group.toLowerCase()
+    );
+  } else {
+    filtered_group_list = this.items;
+  }
 
-      if (this.pos_tags_filters && this.pos_tags_filters.length > 0) {
-        filtred_group_list = filtred_group_list.filter(fItem => {
-          return fItem.pos_tags.some(itemPosTag => {
-            return this.pos_tags_filters.some(filterPosTag => filterPosTag.name === itemPosTag.tag_name)
-          })
-        })
-      }
+  if (this.pos_tags_filters && this.pos_tags_filters.length > 0) {
+    filtered_group_list = filtered_group_list.filter(fItem => {
+      return fItem.pos_tags.some(itemPosTag => {
+        return this.pos_tags_filters.some(filterPosTag => filterPosTag.name === itemPosTag.tag_name)
+      })
+    })
+  }
 
-      if (this.compatibilityItemSearch) {
-        filtred_group_list = filtred_group_list.filter(fItem => {
-          return fItem.pos_item_compatibility.some(itemPosCompat => {
-            return (itemPosCompat.name1 === this.compatibilityItemSearch &&
-              fItem.posa_enable_pos_item_compatibility55)
-          })
-        })
-      }
+  if (this.compatibilityItemSearch) {
+    filtered_group_list = filtered_group_list.filter(fItem => {
+      return fItem.pos_item_compatibility.some(itemPosCompat => {
+        return (itemPosCompat.name1 === this.compatibilityItemSearch &&
+          fItem.posa_enable_pos_item_compatibility55)
+      })
+    })
+  }
 
-      if (!this.search || this.search.length < 3) {
-        if (
-          this.pos_profile.posa_show_template_items &&
-          this.pos_profile.posa_hide_variants_items
-        ) {
-          return (filtred_list = filtred_group_list
-            .filter((item) => !item.variant_of)
-            .slice(0, 50));
-        } else {
-          return (filtred_list = filtred_group_list.slice(0, 50));
+  if (!this.search || this.search.length < 3) {
+    if (
+      this.pos_profile.posa_show_template_items &&
+      this.pos_profile.posa_hide_variants_items
+    ) {
+      return (filtered_list = filtered_group_list
+        .filter((item) => !item.variant_of)
+        .slice(0, 50));
+    } else {
+      return (filtered_list = filtered_group_list.slice(0, 50));
+    }
+  } else if (this.search) {
+    filtered_list = filtered_group_list.filter((item) => {
+      let found = false;
+      for (let element of item.item_barcode) {
+        if (element.barcode == this.search) {
+          found = true;
+          break;
         }
-      } else if (this.search) {
-        filtred_list = filtred_group_list.filter((item) => {
+      }
+      return found;
+    });
+    if (filtered_list.length == 0) {
+      filtered_list = filtered_group_list.filter((item) =>
+        item.item_code.toLowerCase().includes(this.search.toLowerCase())
+      );
+      if (filtered_list.length == 0) {
+        filtered_list = filtered_group_list.filter((item) =>
+          item.item_name.toLowerCase().includes(this.search.toLowerCase())
+        );
+      }
+      if (
+        filtered_list.length == 0 &&
+        this.pos_profile.posa_search_serial_no
+      ) {
+        filtered_list = filtered_group_list.filter((item) => {
           let found = false;
-          for (let element of item.item_barcode) {
-            if (element.barcode == this.search) {
+          for (let element of item.serial_no_data) {
+            if (element.serial_no == this.search) {
               found = true;
+              this.flags.serial_no = null;
+              this.flags.serial_no = this.search;
               break;
             }
           }
           return found;
         });
-        if (filtred_list.length == 0) {
-          filtred_list = filtred_group_list.filter((item) =>
-            item.item_code.toLowerCase().includes(this.search.toLowerCase())
-          );
-          if (filtred_list.length == 0) {
-            filtred_list = filtred_group_list.filter((item) =>
-              item.item_name.toLowerCase().includes(this.search.toLowerCase())
-            );
-          }
-          if (
-            filtred_list.length == 0 &&
-            this.pos_profile.posa_search_serial_no
-          ) {
-            filtred_list = filtred_group_list.filter((item) => {
-              let found = false;
-              for (let element of item.serial_no_data) {
-                if (element.serial_no == this.search) {
-                  found = true;
-                  this.flags.serial_no = null;
-                  this.flags.serial_no = this.search;
-                  break;
-                }
-              }
-              return found;
-            });
-          }
-        }
       }
+    }
+  }
 
-      if (
-        this.pos_profile.posa_show_template_items &&
-        this.pos_profile.posa_hide_variants_items
-      ) {
-        return filtred_list.filter((item) => !item.variant_of).slice(0, 50);
-      } else {
-        return filtred_list.slice(0, 50);
-      }
-    },
+  if (
+    this.pos_profile.posa_show_template_items &&
+    this.pos_profile.posa_hide_variants_items
+  ) {
+    filtered_list = filtered_list.filter((item) => !item.variant_of).slice(0, 50);
+  } else {
+    filtered_list = filtered_list.slice(0, 50);
+  }
+
+  // Implement fuzzy search using Levenshtein distance algorithm
+  if (filtered_list.length == 0 && this.search) {
+  filtered_list = filtered_group_list.filter((items) => {
+    return levenshteinDistance(items.item_name.toLowerCase(), this.search.toLowerCase());
+  });
+}
+
+
+
+  return filtered_list;
+},
+
+
     debounce_search: {
       get() {
         return this.first_search;
