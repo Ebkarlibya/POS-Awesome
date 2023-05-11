@@ -492,9 +492,9 @@ export default {
     this.pos_profile.posa_show_template_items &&
     this.pos_profile.posa_hide_variants_items
   ) {
-    filtered_list = filtered_list.filter((item) => !item.variant_of).slice(0, 50);
+    filtred_list = filtred_list.filter((item) => !item.variant_of).slice(0, 50);
   } else {
-    filtered_list = filtered_list.slice(0, 50);
+    filtred_list = filtred_list.slice(0, 50);
   }
 
   // Implement fuzzy search using Levenshtein distance algorithm
