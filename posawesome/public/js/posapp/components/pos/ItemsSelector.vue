@@ -742,10 +742,29 @@ export default {
         this.pos_profile.posa_show_template_items &&
         this.pos_profile.posa_hide_variants_items
       ) {
-        return filtred_list.filter((item) => !item.variant_of).slice(0, 50);
+        filtred_list = filtred_list.filter((item) => !item.variant_of).slice(0, 50);
       } else {
-        return filtred_list.slice(0, 50);
+        filtred_list = filtred_list.slice(0, 50);
       }
+
+      // Implement fuzzy search using Levenshtein distance algorithm
+      if (filtred_list.length == 0 && this.search) {
+        filtred_list = filtred_group_list.filter((items) => {
+          return levenshteinDistance(items.item_name.toLowerCase(), this.search.toLowerCase());
+        });
+      }
+
+      return filtred_list;
+      function levenshteinDistance(itemName, searchQuery) {
+        let searchWords = searchQuery.split(" ");
+        for (let i = 0; i < searchWords.length; i++) {
+          if (!itemName.includes(searchWords[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+
     },
     debounce_search: {
       get() {
