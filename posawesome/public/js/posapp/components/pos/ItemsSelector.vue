@@ -8,6 +8,8 @@
             hint="Search by item code, serial number, batch no or barcode" background-color="white" hide-details
             v-model="debounce_search" @keydown.esc="esc_event" @keydown.enter="enter_event"
             ref="debounce_search"></v-text-field>
+          <video id="qrCodeVideo"></video>
+
         </v-col>
         <v-col cols="3" v-if="pos_profile.posa_pos_profile_enable_item_compatibility">
           <LinkField v-model="compatibilityItemSearch" @update="compatibilityItemSearch = $event"
@@ -107,6 +109,7 @@ import { evntBus } from "../../bus";
 import _ from "lodash";
 import ExtraFilters from "./ExtraFilters.vue";
 import LinkField from "./LinkField.vue";
+import QrScanner from "qr-scanner";
 
 export default {
   components: {
@@ -565,6 +568,7 @@ export default {
 
   mounted() {
     this.scan_barcoud();
+    console.log(QrScanner);
   },
 };
 </script>
