@@ -9,6 +9,9 @@
             v-model="debounce_search" @keydown.esc="esc_event" @keydown.enter="enter_event"
             ref="debounce_search"></v-text-field>
         </v-col>
+        <v-col>
+          <QRScanner @code-data="first_search = $event" />
+        </v-col>
         <v-col cols="3" v-if="pos_profile.posa_pos_profile_enable_item_compatibility">
           <LinkField v-model="compatibilityItemSearch" @update="compatibilityItemSearch = $event"
             doctype="POS Item Compatibility" :filters="{}"></LinkField>
@@ -107,11 +110,13 @@ import { evntBus } from "../../bus";
 import _ from "lodash";
 import ExtraFilters from "./ExtraFilters.vue";
 import LinkField from "./LinkField.vue";
+import QRScanner from "./QRScanner.vue";
 
 export default {
   components: {
     ExtraFilters,
-    LinkField
+    LinkField,
+    QRScanner
   },
   data: () => ({
     pos_profile: "",

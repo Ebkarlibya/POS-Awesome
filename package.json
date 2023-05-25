@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@zxing/library": "^0.20.0",
     "lodash": "^4.17.21",
     "vuetify": "^2.6.10"
   }

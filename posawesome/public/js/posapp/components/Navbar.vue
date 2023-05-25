@@ -2,44 +2,30 @@
   <nav>
     <ListInvoices></ListInvoices>
     <v-app-bar app height="40" class="elevation-2">
-      <v-app-bar-nav-icon
-        @click.stop="drawer = !drawer"
-        class="grey--text"
-      ></v-app-bar-nav-icon>
-      <v-img
-        :src="company_img"
-        alt="POS Awesome"
-        max-width="32"
-        class="mr-2"
-        color="primary"
-      ></v-img>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" class="grey--text"></v-app-bar-nav-icon>
+      <v-img :src="company_img" alt="POS Awesome" max-width="32" class="mr-2" color="primary"></v-img>
 
-      <v-toolbar-title
-        @click="go_desk"
-        style="cursor: pointer"
-        class="text-uppercase primary--text"
-      >
+      <v-toolbar-title @click="go_desk" style="cursor: pointer" class="text-uppercase primary--text">
         <!-- <span class="font-weight-light">{{company}}</span> -->
       </v-toolbar-title>
-
       <v-spacer></v-spacer>
+      <v-btn @click="openCodeScanner" icon>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="-2 -2 24 24">
+          <path fill="currentColor"
+            d="M13 18h3a2 2 0 0 0 2-2v-3a1 1 0 0 1 2 0v3a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4v-3a1 1 0 0 1 2 0v3a2 2 0 0 0 2 2h3a1 1 0 0 1 0 2h6a1 1 0 0 1 0-2zM2 7a1 1 0 1 1-2 0V4a4 4 0 0 1 4-4h3a1 1 0 1 1 0 2H4a2 2 0 0 0-2 2v3zm16 0V4a2 2 0 0 0-2-2h-3a1 1 0 0 1 0-2h3a4 4 0 0 1 4 4v3a1 1 0 0 1-2 0z" />
+        </svg> </v-btn>
       <v-btn style="cursor: unset" text color="primary">
         <span right>{{ pos_profile.name }}</span>
       </v-btn>
       <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn color="primary" dark text v-bind="attrs" v-on="on"
-              >Menu</v-btn
-            >
+            <v-btn color="primary" dark text v-bind="attrs" v-on="on">Menu</v-btn>
           </template>
           <v-card class="mx-auto" max-width="300" tile>
             <v-list dense>
               <v-list-item-group v-model="menu_item" color="primary">
-                <v-list-item
-                  @click="close_shift_dialog"
-                  v-if="!pos_profile.posa_hide_closing_shift"
-                >
+                <v-list-item @click="close_shift_dialog" v-if="!pos_profile.posa_hide_closing_shift">
                   <v-list-item-icon>
                     <v-icon>mdi-content-save-move-outline</v-icon>
                   </v-list-item-icon>
@@ -49,13 +35,9 @@
                     }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
-                <v-list-item
-                  @click="print_last_invoice"
-                  v-if="
-                    pos_profile.posa_allow_print_last_invoice &&
+                <v-list-item @click="print_last_invoice" v-if="pos_profile.posa_allow_print_last_invoice &&
                     this.last_invoice
-                  "
-                >
+                    ">
                   <v-list-item-icon>
                     <v-icon>mdi-printer</v-icon>
                   </v-list-item-icon>
@@ -93,7 +75,7 @@
                     <v-list-item-title>{{ __("Desk") }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
-                
+
                 <v-list-item @click="logOut">
                   <v-list-item-icon>
                     <v-icon>mdi-logout</v-icon>
@@ -116,12 +98,7 @@
         </v-menu>
       </div>
     </v-app-bar>
-    <v-navigation-drawer
-      v-model="drawer"
-      :mini-variant.sync="mini"
-      app
-      class="primary margen-top"
-    >
+    <v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" app class="primary margen-top">
       <v-list dark>
         <v-list-item class="px-2">
           <v-list-item-avatar>
@@ -136,11 +113,7 @@
         </v-list-item>
         <!-- <MyPopup/> -->
         <v-list-item-group v-model="item" color="white">
-          <v-list-item
-            v-for="item in items"
-            :key="item.text"
-            @click="changePage(item.text)"
-          >
+          <v-list-item v-for="item in items" :key="item.text" @click="changePage(item.text)">
             <v-list-item-icon>
               <v-icon v-text="item.icon"></v-icon>
             </v-list-item-icon>
@@ -170,7 +143,7 @@ import { evntBus } from "../bus";
 import ListInvoices from "./pos/ListInvoices.vue";
 
 export default {
-  components: {ListInvoices},
+  components: { ListInvoices },
   data() {
     return {
       drawer: false,
@@ -196,6 +169,9 @@ export default {
     };
   },
   methods: {
+    openCodeScanner() {
+      evntBus.$emit('open_code_scanner');
+    },
     changePage(key) {
       this.$emit("changePage", key);
     },
@@ -213,7 +189,7 @@ export default {
       );
       win.focus();
     },
-    openClosingShiftsList(){
+    openClosingShiftsList() {
       const win = window.open("/app/pos-closing-shift", "_blank");
       win.focus();
     },
