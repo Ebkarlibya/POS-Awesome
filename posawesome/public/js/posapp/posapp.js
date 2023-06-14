@@ -1,4 +1,5 @@
 import Home from './Home.vue';
+import VueToastify from "vue-toastify";
 
 frappe.provide('frappe.PosApp');
 
@@ -10,9 +11,11 @@ frappe.PosApp.posapp = class {
         this.make_body();
 
     }
-    make_body () {
+    make_body() {
         this.$el = this.$parent.find('.main-section');
+        Vue.use(VueToastify)
         this.vue = new Vue({
+            VueToastify: VueToastify,
             vuetify: new Vuetify(
                 {
                     rtl: frappe.utils.is_rtl(),
@@ -42,7 +45,7 @@ frappe.PosApp.posapp = class {
             render: h => h(Home),
         });
     }
-    setup_header () {
+    setup_header() {
 
     }
 

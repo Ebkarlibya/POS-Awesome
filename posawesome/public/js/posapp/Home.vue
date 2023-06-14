@@ -144,6 +144,40 @@ export default {
   created: function () {
     setTimeout(() => {
       this.remove_frappe_nav();
+      frappe.realtime.on("emp_cups_waiting_printers_jobs", async (data) => {
+        let jobsCount = 0
+        let printers = ""
+
+        for (let printer in data) {
+          printers += `${printer}\n`
+          for (job in data[printer]) {
+            jobsCount += 1
+          }
+        }
+
+        if (jobsCount < 1) return
+
+        const clearText = __('Clear')
+        const keepText = __('Keep')
+        let result = await this.$vToastify.prompt({
+          body: __(`
+            There are ({}) Pending Print Jobs, Clear All?<br>\n
+            
+            Printers:<br>\n
+            {}
+            `, [jobsCount, printers]),
+          answers: { Clear: true, Keep: false }
+        })
+        if (result) {
+          frappe.call({
+            method: "etms_multi_printers.api.clear_all_jobs",
+            args: {},
+            callback: function (r) {
+              console.log(r.message);
+            }
+          })
+        }
+      })
     }, 1000);
   },
 };

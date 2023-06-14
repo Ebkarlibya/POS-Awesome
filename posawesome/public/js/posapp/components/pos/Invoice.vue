@@ -20,17 +20,9 @@
     </v-dialog>
     <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5 mt-5">
       <v-row align="center" class="items px-2 py-1 mb-1">
-        <v-col v-if="pos_profile.posa_allow_sales_order" cols="9" class="px-6 pt-3" style="display: flex;">
-          <Customer></Customer>
-          <v-spacer></v-spacer>
-          <RestaurantTable v-if="pos_profile.posa_enable_pos_restaurant_table" ref="restaurantTable"
-            :invoice_doc="invoice_doc" @click.native="$refs.restaurantTable.openRestaurantTablesDialog()"
-            @selectRestaurantTable="selectRestaurantTable" :posa_pos_restaurant_table="posa_pos_restaurant_table"
-            class="">
-          </RestaurantTable>
-        </v-col>
 
-        <v-col v-if="!pos_profile.posa_allow_sales_order" cols="12" class="px-6 pt-6">
+
+        <v-col cols="12" class="px-6 pt-6">
           <v-row justify-space-between>
             <Customer></Customer>
             <v-spacer></v-spacer>
@@ -138,36 +130,36 @@
                     <v-text-field dense outlined color="primary" :label="frappe._('Rate')" background-color="white"
                       hide-details v-model.number="item.rate" type="number" :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)" id="rate" :disabled="!!item.posa_is_offer ||
-                          !!item.posa_is_replace ||
-                          !!item.posa_offer_applied ||
-                          !pos_profile.posa_allow_user_to_edit_rate ||
-                          !!invoice_doc.is_return
-                          ? true
-                          : false
+                        !!item.posa_is_replace ||
+                        !!item.posa_offer_applied ||
+                        !pos_profile.posa_allow_user_to_edit_rate ||
+                        !!invoice_doc.is_return
+                        ? true
+                        : false
                         "></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field dense outlined color="primary" :label="frappe._('Discount Percentage')"
                       background-color="white" hide-details v-model.number="item.discount_percentage" type="number"
                       @change="calc_prices(item, $event)" id="discount_percentage" :disabled="!!item.posa_is_offer ||
-                          !!item.posa_is_replace ||
-                          item.posa_offer_applied ||
-                          !pos_profile.posa_allow_user_to_edit_item_discount ||
-                          !!invoice_doc.is_return
-                          ? true
-                          : false
+                        !!item.posa_is_replace ||
+                        item.posa_offer_applied ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                        !!invoice_doc.is_return
+                        ? true
+                        : false
                         "></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field dense outlined color="primary" :label="frappe._('Discount Amount')"
                       background-color="white" hide-details v-model.number="item.discount_amount" type="number"
                       :prefix="invoice_doc.currency" @change="calc_prices(item, $event)" id="discount_amount" :disabled="!!item.posa_is_offer ||
-                          !!item.posa_is_replace ||
-                          !!item.posa_offer_applied ||
-                          !pos_profile.posa_allow_user_to_edit_item_discount ||
-                          !!invoice_doc.is_return
-                          ? true
-                          : false
+                        !!item.posa_is_replace ||
+                        !!item.posa_offer_applied ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                        !!invoice_doc.is_return
+                        ? true
+                        : false
                         "></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -245,11 +237,11 @@
                           Cancel
                         </v-btn>
                         <v-btn text color="primary" @click="[
-                            $refs.item_delivery_date.save(
-                              item.posa_delivery_date
-                            ),
-                            validate_due_date(item),
-                          ]
+                          $refs.item_delivery_date.save(
+                            item.posa_delivery_date
+                          ),
+                          validate_due_date(item),
+                        ]
                           ">
                           OK
                         </v-btn>
@@ -279,17 +271,17 @@
             <v-col v-if="!pos_profile.posa_use_percentage_discount" cols="6" class="pa-1">
               <v-text-field v-model="discount_amount" :label="frappe._('Additional Discount')" ref="discount" outlined
                 dense hide-details color="warning" type="number" :prefix="pos_profile.currency" :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount ||
-                    discount_percentage_offer_name
-                    ? true
-                    : false
+                  discount_percentage_offer_name
+                  ? true
+                  : false
                   "></v-text-field>
             </v-col>
             <v-col v-if="pos_profile.posa_use_percentage_discount" cols="6" class="pa-1">
               <v-text-field v-model="additional_discount_percentage" :label="frappe._('Additional Discount %')"
                 ref="percentage_discount" outlined dense color="warning" hide-details type="number" :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount ||
-                    discount_percentage_offer_name
-                    ? true
-                    : false
+                  discount_percentage_offer_name
+                  ? true
+                  : false
                   " @change="update_discount_umount"></v-text-field>
             </v-col>
             <v-col cols="6" class="pa-1 mt-2">
