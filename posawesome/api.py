@@ -127,6 +127,17 @@ def get_invoices_list():
             """,
             as_dict=True
         )
+
+        for invoice in invoices:
+            si_items = frappe.get_all(
+                "Sales Invoice Item",
+                fields=["posa_has_warranty"],
+                filters={"parent": invoice["name"]}
+            )
+            for si_item in si_items:
+                if(si_item["posa_has_warranty"]):
+                    invoice["posa_has_warranty"] = "Yes"
+                    
         return invoices
     except:
         tb = frappe.get_traceback()

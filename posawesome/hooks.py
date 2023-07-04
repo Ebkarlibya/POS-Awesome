@@ -244,6 +244,10 @@ fixtures = [
                     "POS Profile-posa_enable_pos_restaurant_table",  # checkbox
                     "POS Profile-posa_disable_payment_print_popup",  # checkbox
                     "POS Profile-posa_enable_pos_tags",  # checkbox
+                    "POS Profile-posa_enable_warranty_print_system", # checkbox
+                    "POS Profile-posa_warranty_print_format", # link
+
+                    
                     # Item
                     "Item-posa_pos_compatibility80",
                     "Item-posa_enable_pos_item_compatibility55",
@@ -254,13 +258,18 @@ fixtures = [
                     "Item-posa_pos_additional_item_description",  # table
                     "Item-posa_pos_tag",  # tab break
                     "Item-posa_pos_tags",  # table
+                    "Item-posa_has_warranty", # checkbox
+                    "Item-posa_warranty_no_of_years", # int
 
                     # (POS Profile) & (Item)
                     "POS Profile-posa_pos_profile_enable_item_compatibility",
                     "POS Profile-posa_enable_pos_additional_item_description",  # checkbox
                     "POS Profile-posa_disable_update_stock",  # checkbox
                     # Sales Invoice
-                    "Sales Invoice-posa_pos_restaurant_table"
+                    "Sales Invoice-posa_pos_restaurant_table", # table
+                    "POS Profile-posa_enable_warranty_print_system", # checkbox
+                    "Sales Invoice Item-posa_warranty_no_of_years", # int
+
                 ),
             ]
         ],
