@@ -268,7 +268,11 @@ fixtures = [
                     # Sales Invoice
                     "Sales Invoice-posa_pos_restaurant_table", # table
                     "POS Profile-posa_enable_warranty_print_system", # checkbox
+
+                    # Sales Invoice Item
+                    "Sales Invoice Item-posa_has_warranty", #checkbox
                     "Sales Invoice Item-posa_warranty_no_of_years", # int
+
 
                 ),
             ]
