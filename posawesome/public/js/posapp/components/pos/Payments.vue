@@ -836,6 +836,10 @@ export default {
             });
             frappe.utils.play_sound('submit');
             this.addresses = [];
+            setTimeout(() => {
+              evntBus.$emit('update_cur_items_details');
+              console.log("########## UP");
+            }, 5000)
           }
         },
       });
@@ -1279,6 +1283,8 @@ export default {
     this.$nextTick(function () {
       evntBus.$on('send_invoice_doc_payment', (invoice_doc) => {
         this.invoice_doc = invoice_doc;
+        this.invoice_doc.posa_delivery_date = new Date().toJSON().split("T")[0]
+        console.log(this.invoice_doc);
         const default_payment = this.invoice_doc.payments.find(
           (payment) => payment.default == 1
         );

@@ -205,9 +205,11 @@ def get_items(pos_profile, price_list=None):
                     fields=["name as serial_no"],
                 )
             if pos_profile.get("posa_display_items_in_stock"):
-                item_stock_qty = get_stock_availability(
+                bin_data = get_stock_availability(
                     item_code, pos_profile.get("warehouse")
                 )
+                item_stock_qty = bin_data["actual_qty"]
+
             attributes = ""
             if pos_profile.get("posa_show_template_items") and item.has_variants:
                 attributes = get_item_attributes(item.item_code)
@@ -777,7 +779,9 @@ def get_items_details(pos_profile, items_data):
     if len(items_data) > 0:
         for item in items_data:
             item_code = item.get("item_code")
-            item_stock_qty = get_stock_availability(item_code, warehouse)
+            
+            bin_data  = get_stock_availability(item_code, warehouse)
+
             try:
                 has_batch_no, has_serial_no = frappe.get_value(
                     "Item", item_code, ["has_batch_no", "has_serial_no"]
@@ -835,7 +839,8 @@ def get_items_details(pos_profile, items_data):
                     "item_uoms": uoms or [],
                     "serial_no_data": serial_no_data or [],
                     "batch_no_data": batch_no_data or [],
-                    "actual_qty": item_stock_qty or 0,
+                    "actual_qty": bin_data["actual_qty"] or 0,
+                    "reserved_qty": bin_data["reserved_qty"],
                     "has_batch_no": has_batch_no,
                     "has_serial_no": has_serial_no,
                 }
@@ -878,26 +883,40 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None):
         overwrite_warehouse=False,
     )
     if item.get("is_stock_item") and warehouse:
-        res["actual_qty"] = get_stock_availability(item_code, warehouse)
+        bin_data = get_stock_availability(item_code, warehouse)
+        res["actual_qty"] = bin_data["actual_qty"]
     res["max_discount"] = max_discount
     return res
 
 
 def get_stock_availability(item_code, warehouse):
-    actual_qty = (
-        frappe.db.get_value(
-            "Stock Ledger Entry",
-            filters={
-                "item_code": item_code,
-                "warehouse": warehouse,
-                "is_cancelled": 0,
-            },
-            fieldname="qty_after_transaction",
-            order_by="posting_date desc, posting_time desc, creation desc",
-        )
-        or 0.0
+    # actual_qty = (
+    #     frappe.db.get_value(
+    #         "Stock Ledger Entry",
+    #         filters={
+    #             "item_code": item_code,
+    #             "warehouse": warehouse,
+    #             "is_cancelled": 0,
+    #         },
+    #         fieldname="qty_after_transaction",
+    #         order_by="posting_date desc, posting_time desc, creation desc",
+    #     )
+    #     or 0.0
+    # )
+    actual_qty = None
+    reserved_qty = None
+
+    data = frappe.get_all(
+        "Bin", 
+        fields=["actual_qty", "reserved_qty"],
+        filters={"item_code": item_code, "warehouse": warehouse}
     )
-    return actual_qty
+
+    if len(data) > 0:
+        return data[0]
+    else:
+        return {"actual_qty": 0, "reserved_qty": 0}
+
 
 
 @frappe.whitelist()

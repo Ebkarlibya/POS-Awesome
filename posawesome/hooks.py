@@ -246,6 +246,7 @@ fixtures = [
                     "POS Profile-posa_enable_pos_tags",  # checkbox
                     "POS Profile-posa_enable_warranty_print_system", # checkbox
                     "POS Profile-posa_warranty_print_format", # link
+                    "POS Profile-posa_show_sellable_qty_instead_of_actual_qty", # checkbox
 
                     
                     # Item

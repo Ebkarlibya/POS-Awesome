@@ -236,13 +236,14 @@ export default {
           value: "item_code",
         },
         { text: __("Rate"), value: "rate", align: "start" },
-        { text: __("Available QTY"), value: "actual_qty", align: "start" },
+        { text: __("Available QTY"), value: "actual_qty", align: (this.pos_profile.posa_show_sellable_qty_instead_of_actual_qty ? " d-none": "start") },
+        { text: __("Sellable QTY"), value: "sellable_qty", align: (this.pos_profile.posa_show_sellable_qty_instead_of_actual_qty ? "start": " d-none") },
         { text: __("UOM"), value: "stock_uom", align: "start" },
       ];
       if (!this.pos_profile.posa_display_item_code) {
         items_headers.splice(1, 1);
       }
-
+      console.log("posa_show_sellable_qty_instead_of_actual_qty", this.pos_profile.posa_show_sellable_qty_instead_of_actual_qty);
       return items_headers;
     },
     setFastItemGroupFilter(event, groupName) {
@@ -356,6 +357,7 @@ export default {
                 (element) => element.item_code == item.item_code
               );
               item.actual_qty = updated_item.actual_qty;
+              item.sellable_qty = updated_item.actual_qty - updated_item.reserved_qty;
               item.serial_no_data = updated_item.serial_no_data;
               item.batch_no_data = updated_item.batch_no_data;
               item.item_uoms = updated_item.item_uoms;
