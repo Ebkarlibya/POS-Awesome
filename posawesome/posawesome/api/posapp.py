@@ -523,11 +523,19 @@ def submit_invoice(invoice, data):
     invoice_doc.posa_is_printed = 1
     invoice_doc.save()
 
-    if frappe.get_value(
+    allow_submissions_in_background_job = frappe.get_value(
         "POS Profile",
         invoice_doc.pos_profile,
         "posa_allow_submissions_in_background_job",
-    ):
+    )
+    
+    disable_invoice_submission = frappe.get_value(
+        "POS Profile",
+        invoice_doc.pos_profile,
+        "posa_disable_invoice_submission",
+    )
+    
+    if allow_submissions_in_background_job and (not disable_invoice_submission and not invoice_doc.return_against):
         invoices_list = frappe.get_all(
             "Sales Invoice",
             filters={
@@ -550,7 +558,7 @@ def submit_invoice(invoice, data):
                     "cash_account": cash_account,
                 },
             )
-    else:
+    elif (not disable_invoice_submission and not invoice_doc.return_against):
         invoice_doc.submit()
         redeeming_customer_credit(
             invoice_doc, data, is_payment_entry, total_cash, cash_account

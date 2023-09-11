@@ -94,6 +94,7 @@ doctype_js = {
 doc_events = {
     "Sales Invoice": {
         "validate": "posawesome.posawesome.api.invoice.validate",
+        "after_insert": "posawesome.posawesome.api.invoice.after_insert",
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
     },
@@ -239,6 +240,7 @@ fixtures = [
                     # # # # # # #
 
                     # POS Profile
+                    "POS Profile-posa_disable_invoice_submission", # checkbox
                     "POS Profile-posa_default_pos_sell_type",  # select
                     "POS Profile-posa_show_fast_item_group_search_filters",  # checkbox
                     "POS Profile-posa_enable_pos_restaurant_table",  # checkbox
