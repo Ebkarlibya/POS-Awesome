@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import nowdate, flt, cstr
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
@@ -421,7 +422,93 @@ def update_invoice(data):
 
     invoice_doc.update_modified()
     invoice_doc.save()
+
+    if not data.get("name"):
+        posa_insert_sales_order(invoice_doc)
+
     return invoice_doc
+
+
+def posa_insert_sales_order(sales_invoice_doc):
+    pos_profile = frappe.get_doc(
+        "POS Profile", {"name": sales_invoice_doc.get("pos_profile")})
+
+    if (
+        sales_invoice_doc.posa_pos_opening_shift
+        and sales_invoice_doc.pos_profile
+        and sales_invoice_doc.is_pos
+        and pos_profile.posa_allow_sales_order
+        and pos_profile.posa_create_sales_invoice_as_draft
+        and not sales_invoice_doc.return_against
+    ):
+        sales_order_doc = make_sales_order(sales_invoice_doc.name)
+        if sales_order_doc:
+            sales_order_doc.posa_notes = sales_invoice_doc.posa_notes
+            sales_order_doc.posa_created_from_invoice = sales_invoice_doc.name
+            sales_order_doc.flags.ignore_permissions = True
+            sales_order_doc.flags.ignore_account_permission = True
+            sales_order_doc.save()
+            # sales_order_doc.submit()
+            url = frappe.utils.get_url_to_form(
+                sales_order_doc.doctype, sales_order_doc.name
+            )
+            msgprint = "Sales Order Created at <a href='{0}'>{1}</a>".format(
+                url, sales_order_doc.name
+            )
+            frappe.msgprint(
+                _(msgprint), title="Sales Order Created", indicator="green", alert=True
+            )
+            i = 0
+            for item in sales_order_doc.items:
+                sales_invoice_doc.items[i].sales_order = sales_order_doc.name
+                sales_invoice_doc.items[i].so_detail = item.name
+                i += 1
+
+
+def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
+
+    def set_missing_values(source, target):
+        target.ignore_pricing_rule = 1
+        target.flags.ignore_permissions = ignore_permissions
+        target.run_method("set_missing_values")
+        target.run_method("calculate_taxes_and_totals")
+
+    def update_item(obj, target, source_parent):
+        target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+        target.delivery_date = (
+            obj.posa_delivery_date or source_parent.posa_delivery_date
+        )
+
+    doclist = get_mapped_doc(
+        "Sales Invoice",
+        source_name,
+        {
+            "Sales Invoice": {
+                "doctype": "Sales Order",
+            },
+            "Sales Invoice Item": {
+                "doctype": "Sales Order Item",
+                "field_map": {
+                    "cost_center": "cost_center",
+                    "Warehouse": "warehouse",
+                    "delivery_date": "posa_delivery_date",
+                    "posa_notes": "posa_notes",
+                },
+                "postprocess": update_item,
+            },
+            "Sales Taxes and Charges": {
+                "doctype": "Sales Taxes and Charges",
+                "add_if_empty": True,
+            },
+            "Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+            "Payment Schedule": {"doctype": "Payment Schedule", "add_if_empty": True},
+        },
+        target_doc,
+        set_missing_values,
+        ignore_permissions=ignore_permissions,
+    )
+
+    return doclist
 
 
 @frappe.whitelist()
@@ -430,11 +517,8 @@ def submit_invoice(invoice, data):
     invoice = json.loads(invoice)
     invoice_doc = frappe.get_doc("Sales Invoice", invoice.get("name"))
     invoice_doc.update(invoice)
-    if invoice.get("posa_delivery_date"):
-        invoice_doc.update_stock = 0
-
-    if frappe.db.get_value("POS Profile", {"name": invoice_doc.get("pos_profile")}, fieldname="posa_disable_update_stock"):
-        invoice_doc.update_stock = 0
+    pos_profile = frappe.get_doc(
+        "POS Profile", {"name": invoice_doc.get("pos_profile")})
 
     mop_cash_list = [
         i.mode_of_payment
@@ -514,55 +598,53 @@ def submit_invoice(invoice, data):
         invoice_doc.is_pos = 0
 
     invoice_doc.payments = payments
-    if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
+    if pos_profile.posa_auto_set_batch:
         set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
+
+    # update stock, this is the Original POS behavior
+    if invoice.get("posa_delivery_date"):
+        invoice_doc.update_stock = 0
+
+    invoice_doc.update_stock = pos_profile.posa_update_stock_of_new_inovices
     invoice_doc.save()
 
-    allow_submissions_in_background_job = frappe.get_value(
-        "POS Profile",
-        invoice_doc.pos_profile,
-        "posa_allow_submissions_in_background_job",
-    )
-    
-    disable_invoice_submission = frappe.get_value(
-        "POS Profile",
-        invoice_doc.pos_profile,
-        "posa_disable_invoice_submission",
-    )
-    
-    if allow_submissions_in_background_job and (not disable_invoice_submission and not invoice_doc.return_against):
-        invoices_list = frappe.get_all(
-            "Sales Invoice",
-            filters={
-                "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
-                "docstatus": 0,
-                "posa_is_printed": 1,
-            },
-        )
-        for invoice in invoices_list:
-            enqueue(
-                method=submit_in_background_job,
-                queue="short",
-                timeout=1000,
-                is_async=True,
-                kwargs={
-                    "invoice": invoice.name,
-                    "data": data,
-                    "is_payment_entry": is_payment_entry,
-                    "total_cash": total_cash,
-                    "cash_account": cash_account,
+    # submititon
+    if not pos_profile.posa_create_sales_invoice_as_draft and not invoice_doc.return_against:
+
+        # submit!
+        if pos_profile.posa_allow_submissions_in_background_job:
+            invoices_list = frappe.get_all(
+                "Sales Invoice",
+                filters={
+                    "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
+                    "docstatus": 0,
+                    "posa_is_printed": 1,
                 },
             )
-    elif (not disable_invoice_submission and not invoice_doc.return_against):
-        invoice_doc.submit()
-        redeeming_customer_credit(
-            invoice_doc, data, is_payment_entry, total_cash, cash_account
-        )
+            for invoice in invoices_list:
+                enqueue(
+                    method=submit_in_background_job,
+                    queue="short",
+                    timeout=1000,
+                    is_async=True,
+                    kwargs={
+                        "invoice": invoice.name,
+                        "data": data,
+                        "is_payment_entry": is_payment_entry,
+                        "total_cash": total_cash,
+                        "cash_account": cash_account,
+                    },
+                )
+        else:
+            invoice_doc.submit()
+            redeeming_customer_credit(
+                invoice_doc, data, is_payment_entry, total_cash, cash_account
+            )
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
 
@@ -765,6 +847,8 @@ def get_draft_invoices(pos_opening_shift):
     )
     data = []
     for invoice in invoices_list:
+        if frappe.db.exists("Sales Order", {"posa_created_from_invoice": invoice["name"]}):
+            continue
         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
     return data
 
@@ -787,8 +871,8 @@ def get_items_details(pos_profile, items_data):
     if len(items_data) > 0:
         for item in items_data:
             item_code = item.get("item_code")
-            
-            bin_data  = get_stock_availability(item_code, warehouse)
+
+            bin_data = get_stock_availability(item_code, warehouse)
 
             try:
                 has_batch_no, has_serial_no = frappe.get_value(
@@ -915,7 +999,7 @@ def get_stock_availability(item_code, warehouse):
     reserved_qty = None
 
     data = frappe.get_all(
-        "Bin", 
+        "Bin",
         fields=["actual_qty", "reserved_qty"],
         filters={"item_code": item_code, "warehouse": warehouse}
     )
@@ -924,7 +1008,6 @@ def get_stock_availability(item_code, warehouse):
         return data[0]
     else:
         return {"actual_qty": 0, "reserved_qty": 0}
-
 
 
 @frappe.whitelist()

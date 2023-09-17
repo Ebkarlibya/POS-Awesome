@@ -240,17 +240,18 @@ fixtures = [
                     # # # # # # #
 
                     # POS Profile
-                    "POS Profile-posa_disable_invoice_submission", # checkbox
+                    "POS Profile-posa_create_sales_invoice_as_draft",  # checkbox
+                    "POS Profile-posa_update_stock_of_new_sales_orders_so_mode",  # checkbox
                     "POS Profile-posa_default_pos_sell_type",  # select
                     "POS Profile-posa_show_fast_item_group_search_filters",  # checkbox
                     "POS Profile-posa_enable_pos_restaurant_table",  # checkbox
                     "POS Profile-posa_disable_payment_print_popup",  # checkbox
                     "POS Profile-posa_enable_pos_tags",  # checkbox
-                    "POS Profile-posa_enable_warranty_print_system", # checkbox
-                    "POS Profile-posa_warranty_print_format", # link
-                    "POS Profile-posa_show_sellable_qty_instead_of_actual_qty", # checkbox
+                    "POS Profile-posa_enable_warranty_print_system",  # checkbox
+                    "POS Profile-posa_warranty_print_format",  # link
+                    "POS Profile-posa_show_sellable_qty_instead_of_actual_qty",  # checkbox
 
-                    
+
                     # Item
                     "Item-posa_pos_compatibility80",
                     "Item-posa_enable_pos_item_compatibility55",
@@ -261,20 +262,23 @@ fixtures = [
                     "Item-posa_pos_additional_item_description",  # table
                     "Item-posa_pos_tag",  # tab break
                     "Item-posa_pos_tags",  # table
-                    "Item-posa_has_warranty", # checkbox
-                    "Item-posa_warranty_no_of_years", # int
+                    "Item-posa_has_warranty",  # checkbox
+                    "Item-posa_warranty_no_of_years",  # int
 
                     # (POS Profile) & (Item)
                     "POS Profile-posa_pos_profile_enable_item_compatibility",
                     "POS Profile-posa_enable_pos_additional_item_description",  # checkbox
                     "POS Profile-posa_disable_update_stock",  # checkbox
                     # Sales Invoice
-                    "Sales Invoice-posa_pos_restaurant_table", # table
-                    "POS Profile-posa_enable_warranty_print_system", # checkbox
+                    "Sales Invoice-posa_pos_restaurant_table",  # table
+                    "POS Profile-posa_enable_warranty_print_system",  # checkbox
 
                     # Sales Invoice Item
-                    "Sales Invoice Item-posa_has_warranty", #checkbox
-                    "Sales Invoice Item-posa_warranty_no_of_years", # int
+                    "Sales Invoice Item-posa_has_warranty",  # checkbox
+                    "Sales Invoice Item-posa_warranty_no_of_years",  # int
+
+                    # Sales Order
+                    "Sales Order-posa_created_from_invoice",
 
 
                 ),

@@ -1,4 +1,6 @@
+import json
 import frappe
+
 
 @frappe.whitelist()
 def get_additional_item_descriptions(item_code: str):
@@ -6,7 +8,7 @@ def get_additional_item_descriptions(item_code: str):
         additional_item_descriptions = frappe.get_all(
             "POS Additional Item Description Table",
             fields=["description"],
-            filters={"parent": item_code}    
+            filters={"parent": item_code}
         )
 
         return additional_item_descriptions
@@ -14,10 +16,11 @@ def get_additional_item_descriptions(item_code: str):
         tb = frappe.get_traceback()
         print(frappe.get_traceback())
 
+
 @frappe.whitelist()
 def get_restaurant_tables():
     try:
-        tables =  frappe.get_all(
+        tables = frappe.get_all(
             "POS Restaurant Table"
         )
         sorted(tables, key=lambda x: x["name"], reverse=True)
@@ -26,6 +29,7 @@ def get_restaurant_tables():
         tb = frappe.get_traceback()
         print(frappe.get_traceback())
 
+
 @frappe.whitelist()
 def get_companies_pos_offers_names(offer_name: str, exclude_company: str):
     try:
@@ -33,12 +37,12 @@ def get_companies_pos_offers_names(offer_name: str, exclude_company: str):
 
         companies = frappe.get_all(
             "Company",
-            fields = ["name", "abbr"],
+            fields=["name", "abbr"],
             filters={
                 "name": ["!=", exclude_company]
             }
         )
-        
+
         for company in companies:
             new_pos_offer_names.append(
                 {
@@ -51,6 +55,7 @@ def get_companies_pos_offers_names(offer_name: str, exclude_company: str):
     except:
         tb = frappe.get_traceback()
         print(frappe.get_traceback())
+
 
 @frappe.whitelist()
 def make_multi_company_pos_offers(current_pos_offer_name: str, for_companies):
@@ -65,30 +70,29 @@ def make_multi_company_pos_offers(current_pos_offer_name: str, for_companies):
                 current_pos_offer_name
             )
 
-
             # if pos_offer.name == current_pos_offer_name:
             #     frappe.throw(frappe._(f"POS Offer: ({pos_offer_new_name}) already exist for Company: ({pos_offer.company})"), "POS Offers Multi Company Creator")
             pos_offer.is_created_from_pos_offer = 1
             pos_offer.company = companyies_table["company"]
             if frappe.db.exists("POS Offer", companyies_table["suggested_offer_name"]):
                 frappe.db.rollback()
-                return { "status": "fail", "data": f"POS Offer ({companyies_table['suggested_offer_name']}) Already exist"}
+                return {"status": "fail", "data": f"POS Offer ({companyies_table['suggested_offer_name']}) Already exist"}
 
             pos_offer.insert(set_name=companyies_table["suggested_offer_name"])
             # pos_offer.save()
             created_offers.append(companyies_table["suggested_offer_name"])
 
         frappe.db.commit()
-        return { "status": "success", "data": f"Successfully Created {len(created_offers)} POS Offers"}
+        return {"status": "success", "data": f"Successfully Created {len(created_offers)} POS Offers"}
 
     except:
         print(frappe.get_traceback())
-        
+
 
 @frappe.whitelist()
 def get_pos_tags():
     try:
-        tags =  frappe.get_all(
+        tags = frappe.get_all(
             "POS Tag",
             fields=["name", "order_weight"],
             order_by="order_weight asc"
@@ -98,10 +102,19 @@ def get_pos_tags():
         tb = frappe.get_traceback()
         print(frappe.get_traceback())
 
+
 @frappe.whitelist()
 def get_invoices_list():
     try:
         term_sql_cond = ""
+        include_drafts = json.loads(frappe.form_dict["include_drafts"])
+
+        docstatuses = ""
+
+        if include_drafts:
+            docstatuses = "(0,1)"
+        else:
+            docstatuses = "(1)"
 
         if "term" in frappe.form_dict and len(frappe.form_dict["term"]) > 0:
             escaped_input = frappe.db.escape(f"%{frappe.form_dict['term']}%")
@@ -119,7 +132,7 @@ def get_invoices_list():
                 docstatus
                 from `tabSales Invoice`
                     
-                where docstatus in (1)
+                where docstatus in {docstatuses}
                 and is_return = 0
                 {term_sql_cond}
                 order by creation desc
@@ -135,13 +148,66 @@ def get_invoices_list():
                 filters={"parent": invoice["name"]}
             )
             for si_item in si_items:
-                if(si_item["posa_has_warranty"]):
+                if (si_item["posa_has_warranty"]):
                     invoice["posa_has_warranty"] = "Yes"
-                    
+
         return invoices
     except:
         tb = frappe.get_traceback()
         print(frappe.get_traceback())
+
+
+@frappe.whitelist()
+def get_orders_list():
+    try:
+        term_sql_cond = ""
+        include_drafts = json.loads(frappe.form_dict["include_drafts"])
+
+        docstatuses = ""
+
+        if include_drafts:
+            docstatuses = "(0,1)"
+        else:
+            docstatuses = "(1)"
+
+        if "term" in frappe.form_dict and len(frappe.form_dict["term"]) > 0:
+            escaped_input = frappe.db.escape(f"%{frappe.form_dict['term']}%")
+            term_sql_cond = f"""
+                and name like {escaped_input}
+                or grand_total like {escaped_input}
+            """
+            # cond_filters["name"] = ["like", f"%{frappe.form_dict['term']}%"]
+            # cond_filters["posa_pos_restaurant_table"] = ["like", f"%{frappe.form_dict['term']}%"]
+
+        orders = frappe.db.sql(
+            f"""
+                select name, customer, delivery_date, grand_total,
+                docstatus
+                from `tabSales Order`
+                    
+                where docstatus in {docstatuses}
+                {term_sql_cond}
+                order by creation desc
+                limit 20
+            """,
+            as_dict=True
+        )
+
+        # for order in orders:
+        #     si_items = frappe.get_all(
+        #         "Sales Invoice Item",
+        #         fields=["posa_has_warranty"],
+        #         filters={"parent": invoice["name"]}
+        #     )
+        #     for si_item in si_items:
+        #         if (si_item["posa_has_warranty"]):
+        #             invoice["posa_has_warranty"] = "Yes"
+
+        return orders
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())
+
 
 @frappe.whitelist()
 def check_connection():
@@ -151,7 +217,7 @@ def check_connection():
         res = requests.get("https://google.com")
 
         return True
-    
+
     except:
         print(frappe.get_traceback())
         return False

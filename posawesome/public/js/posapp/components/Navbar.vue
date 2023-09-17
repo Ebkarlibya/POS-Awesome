@@ -1,6 +1,7 @@
 <template>
   <nav>
     <ListInvoices></ListInvoices>
+    <ListOrders></ListOrders>
     <v-app-bar app height="40" class="elevation-2">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" class="grey--text"></v-app-bar-nav-icon>
       <v-img :src="company_img" alt="POS Awesome" max-width="32" class="mr-2" color="primary"></v-img>
@@ -9,6 +10,9 @@
         <!-- <span class="font-weight-light">{{company}}</span> -->
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      <div class="custom_badge" v-if="pos_profile.posa_create_sales_invoice_as_draft">
+        {{ __("Payment Disabled") }}
+      </div>
       <v-btn @click="openCodeScanner" icon>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="-2 -2 24 24">
           <path fill="currentColor"
@@ -64,6 +68,15 @@
                   </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title>{{ __("Invoices List") }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item @click="openOrdersList">
+                  <v-list-item-icon>
+                    <v-icon>mdi-menu</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ __("Orders List") }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
 
@@ -141,9 +154,10 @@
 <script>
 import { evntBus } from "../bus";
 import ListInvoices from "./pos/ListInvoices.vue";
+import ListOrders from "./pos/ListOrders.vue";
 
 export default {
-  components: { ListInvoices },
+  components: { ListInvoices, ListOrders },
   data() {
     return {
       drawer: false,
@@ -181,6 +195,9 @@ export default {
     },
     openInvoicesList() {
       evntBus.$emit('open_invoices_list')
+    },
+    openOrdersList() {
+      evntBus.$emit('open_orders_list')
     },
     go_about() {
       const win = window.open(
@@ -301,5 +318,14 @@ export default {
 <style scoped>
 .margen-top {
   margin-top: 0px;
+}
+
+.custom_badge {
+  font-size: 12px;
+  padding: 2px;
+  background-color: green;
+  width: fit-content;
+  padding: 3px 8px 3px 8px;
+  border-radius: 5px;
 }
 </style>

@@ -312,7 +312,8 @@
                 :disabled="invoice_doc.is_return === 1">{{ __('Save/New') }}</v-btn>
             </v-col>
             <v-col class="pa-1">
-              <v-btn block class="pa-0" color="success" @click="show_payment" dark>{{ __('PAY') }}</v-btn>
+              <v-btn block class="pa-0" color="success" @click="show_payment" dark
+                :disabled="pos_profile.posa_create_sales_invoice_as_draft == 1">{{ __('PAY') }}</v-btn>
             </v-col>
             <v-col v-if="pos_profile.posa_allow_print_draft_invoices" cols="6" class="pa-1">
               <v-btn block class="pa-0" color="primary" @click="print_draft_invoice" dark>{{ __('Print Draft') }}</v-btn>

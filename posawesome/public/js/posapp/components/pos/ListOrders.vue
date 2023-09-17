@@ -1,13 +1,13 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="invoicesListDialog" max-width="800px">
+    <v-dialog v-model="ordersListDialog" max-width="800px">
       <!-- <template v-slot:activator="{ on, attrs }">
         <v-btn color="primary" dark v-bind="attrs" v-on="on">Open Dialog</v-btn>
       </template>-->
       <v-card>
         <v-card-title>
           <span class="headline primary--text">{{
-            __('Invoices List')
+            __('Orders List')
           }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
@@ -16,14 +16,14 @@
               <v-col cols="12" class="pa-1">
                 <div class="mx-2 my-5">
                   <v-text-field v-model="search" append-icon="mdi-magnify"
-                    :label="__('Search by Part of Invoice Name, Amount or Table Name')" single-line
+                    :label="__('Search by Part of Order Name, Amount or Table Name')" single-line
                     hide-details></v-text-field>
                 </div>
                 <template>
-                  <v-container>
+                  <!-- <v-container>
                     <v-checkbox v-model="includeDrafts" :label="__('Include Drafts')"></v-checkbox>
-                  </v-container>
-                  <v-data-table :headers="headers" :items="invoices_data" item-key="name" class="elevation-1"
+                  </v-container> -->
+                  <v-data-table :headers="headers" :items="orders_data" item-key="name" class="elevation-1"
                     :single-select="singleSelect" :footer-props="{ 'items-per-page-options': [5, -1] }" show-select
                     v-model="selected">
                   </v-data-table>
@@ -50,11 +50,11 @@ import { evntBus } from '../../bus';
 export default {
   // props: ["draftsDialog"],
   data: () => ({
-    invoicesListDialog: false,
+    ordersListDialog: false,
     singleSelect: true,
     includeDrafts: false,
     selected: [],
-    invoices_data: [],
+    orders_data: [],
     search: '',
     headers: [
       {
@@ -68,16 +68,16 @@ export default {
         text: __('Date'),
         align: 'start',
         sortable: true,
-        value: 'posting_date',
+        value: 'delivery_date',
       },
+      // {
+      //   text: __('Status'),
+      //   align: 'start',
+      //   sortable: true,
+      //   value: 'status',
+      // },
       {
-        text: __('Status'),
-        align: 'start',
-        sortable: true,
-        value: 'status',
-      },
-      {
-        text: __('Invoice'),
+        text: __('Order'),
         value: 'name',
         align: 'start',
         sortable: true,
@@ -92,15 +92,15 @@ export default {
   }),
   watch: {
     search(value) {
-      this.search_invoice(value);
+      this.search_order(value);
     },
     includeDrafts(value) {
-      this.search_invoice(value);
+      this.search_order(value);
     },
   },
   methods: {
     close_dialog() {
-      this.invoicesListDialog = false;
+      this.ordersListDialog = false;
     },
 
     print_invoice() {
@@ -118,15 +118,15 @@ export default {
         // this.invoicesListDialog = false;
       }
     },
-    load_print_page(invoice_name) {
+    load_print_page(order_name) {
       const print_format =
         this.pos_profile.print_format_for_online ||
         this.pos_profile.print_format;
       const letter_head = this.pos_profile.letter_head || 0;
       const url =
         frappe.urllib.get_base_url() +
-        '/printview?doctype=Sales%20Invoice&name=' +
-        invoice_name +
+        '/printview?doctype=Sales%20Order&name=' +
+        order_name +
         '&trigger_print=1' +
         '&format=' +
         print_format +
@@ -143,12 +143,12 @@ export default {
         true
       );
     },
-    load_warranty_print_page(invoice_name) {
+    load_warranty_print_page(order_name) {
       const letter_head = this.pos_profile.letter_head || 0;
       const url =
         frappe.urllib.get_base_url() +
-        '/printview?doctype=Sales%20Invoice&name=' +
-        invoice_name +
+        '/printview?doctype=Sales%20Order&name=' +
+        order_name +
         '&trigger_print=1' +
         '&format=' +
         this.pos_profile.posa_warranty_print_format +
@@ -164,17 +164,17 @@ export default {
         true
       );
     },
-    search_invoice() {
+    search_order() {
       frappe.call(
         {
-          method: "posawesome.api.get_invoices_list",
+          method: "posawesome.api.get_orders_list",
           args: { term: this.search.trim(), include_drafts: this.includeDrafts },
           callback: (r) => {
-            this.invoices_data = r.message.map(el => {
-              el.status = `(${el.docstatus === 0 ? 'Draft' : 'Submitted'})`
-              return el
-            });
-            console.log(this.invoices_data);
+            // this.invoices_data = r.message.map(el => {
+            //   el.status = `(${el.docstatus === 0 ? 'Draft' : 'Submitted'})`
+            //   return el
+            // });
+            this.orders_data = r.message
           }
         })
     }
@@ -200,12 +200,12 @@ export default {
         })
       }
     });
-    evntBus.$on('open_invoices_list', (data) => {
-      this.invoicesListDialog = true;
+    evntBus.$on('open_orders_list', (data) => {
+      this.ordersListDialog = true;
       this.selected = [];
-      this.search_invoice();
+      this.search_order();
     });
-    this.search_invoice();
+    this.search_order();
   }
 };
 </script>

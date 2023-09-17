@@ -20,8 +20,11 @@ def validate(doc, method):
     auto_set_delivery_charges(doc)
     calc_delivery_charges(doc)
 
+
 def after_insert(doc, method):
-    insert_sales_order(doc)
+    pass
+    # insert_sales_order(doc)
+
 
 def before_submit(doc, method):
     add_loyalty_point(doc)
@@ -59,20 +62,19 @@ def add_loyalty_point(invoice_doc):
                 )
                 doc.insert(ignore_permissions=True)
 
-def insert_sales_order(doc):
-    disable_invoice_submission = frappe.get_value(
-        "POS Profile",
-        doc.pos_profile,
-        "posa_disable_invoice_submission",
-    )
-    allow_sales_order = frappe.get_value("POS Profile", doc.pos_profile, "posa_allow_sales_order")
-    # return
+# draft SO handler
+
+
+def posa_insert_sales_order(doc):
+    pos_profile = frappe.get_doc(
+        "POS Profile", {"name": doc.get("pos_profile")})
+
     if (
         doc.posa_pos_opening_shift
         and doc.pos_profile
         and doc.is_pos
-        and allow_sales_order
-        and disable_invoice_submission
+        and pos_profile.posa_allow_sales_order
+        and pos_profile.posa_create_sales_invoice_as_draft
         and not doc.return_against
     ):
         sales_order_doc = make_sales_order(doc.name)
@@ -81,7 +83,7 @@ def insert_sales_order(doc):
             sales_order_doc.flags.ignore_permissions = True
             sales_order_doc.flags.ignore_account_permission = True
             sales_order_doc.save()
-            sales_order_doc.submit()
+            # sales_order_doc.submit()
             url = frappe.utils.get_url_to_form(
                 sales_order_doc.doctype, sales_order_doc.name
             )
@@ -97,13 +99,12 @@ def insert_sales_order(doc):
                 doc.items[i].so_detail = item.name
                 i += 1
 
+
 def create_sales_order(doc):
     if (
         doc.posa_pos_opening_shift
         and doc.pos_profile
         and doc.is_pos
-        and doc.posa_delivery_date
-        and not doc.update_stock
         and frappe.get_value("POS Profile", doc.pos_profile, "posa_allow_sales_order")
     ):
         sales_order_doc = make_sales_order(doc.name)
@@ -113,7 +114,7 @@ def create_sales_order(doc):
                 doc.pos_profile,
                 "posa_disable_invoice_submission",
             )
-                
+
             sales_order_doc.posa_notes = doc.posa_notes
             sales_order_doc.flags.ignore_permissions = True
             sales_order_doc.flags.ignore_account_permission = True
@@ -138,7 +139,7 @@ def create_sales_order(doc):
 
 
 def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
-    
+
     def set_missing_values(source, target):
         target.ignore_pricing_rule = 1
         target.flags.ignore_permissions = ignore_permissions
