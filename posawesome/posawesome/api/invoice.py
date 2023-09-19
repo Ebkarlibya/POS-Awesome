@@ -22,8 +22,7 @@ def validate(doc, method):
 
 
 def after_insert(doc, method):
-    pass
-    # insert_sales_order(doc)
+    posa_insert_sales_order(doc)
 
 
 def before_submit(doc, method):
@@ -73,8 +72,8 @@ def posa_insert_sales_order(doc):
         doc.posa_pos_opening_shift
         and doc.pos_profile
         and doc.is_pos
-        and pos_profile.posa_allow_sales_order
-        and pos_profile.posa_create_sales_invoice_as_draft
+        # and pos_profile.posa_allow_sales_order
+        and pos_profile.posa_create_sales_invoice_as_draft  # payment disabled mode
         and not doc.return_against
     ):
         sales_order_doc = make_sales_order(doc.name)
@@ -83,7 +82,7 @@ def posa_insert_sales_order(doc):
             sales_order_doc.flags.ignore_permissions = True
             sales_order_doc.flags.ignore_account_permission = True
             sales_order_doc.save()
-            # sales_order_doc.submit()
+            sales_order_doc.submit()
             url = frappe.utils.get_url_to_form(
                 sales_order_doc.doctype, sales_order_doc.name
             )
