@@ -269,6 +269,8 @@ fixtures = [
                     "POS Profile-posa_pos_profile_enable_item_compatibility",
                     "POS Profile-posa_enable_pos_additional_item_description",  # checkbox
                     "POS Profile-posa_disable_update_stock",  # checkbox
+                    "POS Profile-posa_update_stock_of_new_inovices",
+
                     # Sales Invoice
                     "Sales Invoice-posa_pos_restaurant_table",  # table
                     "POS Profile-posa_enable_warranty_print_system",  # checkbox
