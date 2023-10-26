@@ -270,10 +270,10 @@ fixtures = [
                     "POS Profile-posa_enable_pos_additional_item_description",  # checkbox
                     "POS Profile-posa_disable_update_stock",  # checkbox
                     "POS Profile-posa_update_stock_of_new_inovices",
+                    "POS Profile-posa_disable_invoice_submission",  # checkbox
 
                     # Sales Invoice
                     "Sales Invoice-posa_pos_restaurant_table",  # table
-                    "POS Profile-posa_enable_warranty_print_system",  # checkbox
 
                     # Sales Invoice Item
                     "Sales Invoice Item-posa_has_warranty",  # checkbox
