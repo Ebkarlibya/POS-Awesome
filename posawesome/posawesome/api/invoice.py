@@ -65,6 +65,8 @@ def add_loyalty_point(invoice_doc):
 
 
 def posa_insert_sales_order(doc):
+    if not doc.pos_profile:
+        return
     pos_profile = frappe.get_doc(
         "POS Profile", {"name": doc.get("pos_profile")})
 
