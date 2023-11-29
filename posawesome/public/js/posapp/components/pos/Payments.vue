@@ -24,6 +24,7 @@
               readonly
               :prefix="invoice_doc.currency"
               dense
+              required="true"
             ></v-text-field>
           </v-col>
           <v-col cols="5">
@@ -140,7 +141,7 @@
                 :disabled="payment.amount == 0"
                 @click="phone_dialog = true"
               >
-                {{ __('Request') }}
+                {{ __("Request") }}
               </v-btn>
             </v-col>
           </v-row>
@@ -584,6 +585,7 @@
               hide-details
               :filter="salesPersonFilter"
               :disabled="readonly"
+              :required="!!pos_profile.posa_require_sales_team"
             >
               <template v-slot:item="data">
                 <template>
@@ -615,7 +617,7 @@
             color="error"
             dark
             @click="back_to_invoice"
-            >{{ __('Back') }}</v-btn
+            >{{ __("Back") }}</v-btn
           >
         </v-col>
         <v-col cols="12">
@@ -627,7 +629,7 @@
             dark
             @click="submit"
             :disabled="vaildatPayment"
-            >{{ __('Submit Payments') }}</v-btn
+            >{{ __("Submit Payments") }}</v-btn
           >
         </v-col>
       </v-row>
@@ -637,7 +639,7 @@
         <v-card>
           <v-card-title>
             <span class="headline primary--text">{{
-              __('Confirm Mobile Number')
+              __("Confirm Mobile Number")
             }}</span>
           </v-card-title>
           <v-card-text class="pa-0">
@@ -657,10 +659,10 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="error" dark @click="phone_dialog = false">{{
-              __('Close')
+              __("Close")
             }}</v-btn>
             <v-btn color="primary" dark @click="request_payment">{{
-              __('Request')
+              __("Request")
             }}</v-btn>
           </v-card-actions>
         </v-card>
@@ -670,12 +672,12 @@
 </template>
 
 <script>
-import { evntBus } from '../../bus';
+import { evntBus } from "../../bus";
 export default {
   data: () => ({
     loading: false,
-    pos_profile: '',
-    invoice_doc: '',
+    pos_profile: "",
+    invoice_doc: "",
     loyalty_amount: 0,
     is_credit_sale: 0,
     is_write_off_change: 0,
@@ -683,7 +685,7 @@ export default {
     po_date_menu: false,
     addresses: [],
     sales_persons: [],
-    sales_person: '',
+    sales_person: "",
     paid_change: 0,
     order_delivery_date: false,
     paid_change_rules: [],
@@ -692,9 +694,9 @@ export default {
     redeem_customer_credit: false,
     customer_credit_dict: [],
     phone_dialog: false,
-    invoiceType: 'Invoice',
-    pos_settings: '',
-    customer_info: '',
+    invoiceType: "Invoice",
+    pos_settings: "",
+    customer_info: "",
     mpesa_modes: [],
     float_precision: 2,
     currency_precision: 2,
@@ -702,17 +704,26 @@ export default {
 
   methods: {
     back_to_invoice() {
-      evntBus.$emit('show_payment_dialog', false);
-      evntBus.$emit('show_payment', 'false');
-      evntBus.$emit('set_customer_readonly', false);
+      evntBus.$emit("show_payment_dialog", false);
+      evntBus.$emit("show_payment", "false");
+      evntBus.$emit("set_customer_readonly", false);
     },
     submit() {
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `Payments not correct`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
+        return;
+      }
+
+      if (!!this.pos_profile.posa_require_sales_team) {
+        evntBus.$emit("show_mesage", {
+          text: `Sales Person is required`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
         return;
       }
 
@@ -720,11 +731,11 @@ export default {
         !this.pos_profile.posa_allow_partial_payment &&
         this.total_payments < this.invoice_doc.grand_total
       ) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `The amount paid is not complete`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
         return;
       }
 
@@ -733,33 +744,33 @@ export default {
         !this.pos_profile.posa_allow_credit_sale &&
         this.total_payments == 0
       ) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `Please enter the amount paid`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
         return;
       }
 
       if (!this.paid_change) this.paid_change = 0;
 
       if (this.paid_change > -this.diff_payment) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `Paid change can not be greater than total change!`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
         return;
       }
 
       let total_change = flt(flt(this.paid_change) + flt(-this.credit_change));
 
       if (this.is_cashback && total_change != -this.diff_payment) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `Error in change calculations!`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
         return;
       }
 
@@ -770,11 +781,11 @@ export default {
       });
 
       if (credit_calc_check.length > 0) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `redeamed credit can not greater than its total.`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
         return;
       }
 
@@ -782,11 +793,11 @@ export default {
         !this.invoice_doc.is_return &&
         this.redeemed_customer_credit > this.invoice_doc.grand_total
       ) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `can not redeam customer credit more than invoice total`,
-          color: 'error',
+          color: "error",
         });
-        frappe.utils.play_sound('error');
+        frappe.utils.play_sound("error");
         return;
       }
 
@@ -794,23 +805,23 @@ export default {
       this.customer_credit_dict = [];
       this.redeem_customer_credit = false;
       this.is_cashback = true;
-      this.sales_person = '';
+      this.sales_person = "";
 
-      evntBus.$emit('new_invoice', 'false');
+      evntBus.$emit("new_invoice", "false");
       this.back_to_invoice();
     },
     submit_invoice() {
       let data = {};
-      data['total_change'] = -this.diff_payment;
-      data['paid_change'] = this.paid_change;
-      data['credit_change'] = -this.credit_change;
-      data['redeemed_customer_credit'] = this.redeemed_customer_credit;
-      data['customer_credit_dict'] = this.customer_credit_dict;
-      data['is_cashback'] = this.is_cashback;
+      data["total_change"] = -this.diff_payment;
+      data["paid_change"] = this.paid_change;
+      data["credit_change"] = -this.credit_change;
+      data["redeemed_customer_credit"] = this.redeemed_customer_credit;
+      data["customer_credit_dict"] = this.customer_credit_dict;
+      data["is_cashback"] = this.is_cashback;
 
       const vm = this;
       frappe.call({
-        method: 'posawesome.posawesome.api.posapp.submit_invoice',
+        method: "posawesome.posawesome.api.posapp.submit_invoice",
         args: {
           data: data,
           invoice: this.invoice_doc,
@@ -818,28 +829,33 @@ export default {
         async: true,
         callback: function (r) {
           if (r.message) {
-            has_warranty = vm.invoice_doc.items.filter(item => item.posa_has_warranty === 1).length
-            if(vm.pos_profile.posa_enable_warranty_print_system && has_warranty > 0) {
-              vm.load_warranty_print_page()
+            has_warranty = vm.invoice_doc.items.filter(
+              (item) => item.posa_has_warranty === 1
+            ).length;
+            if (
+              vm.pos_profile.posa_enable_warranty_print_system &&
+              has_warranty > 0
+            ) {
+              vm.load_warranty_print_page();
             }
             setTimeout(() => {
-              if(!vm.pos_profile.posa_disable_payment_print_popup) {
+              if (!vm.pos_profile.posa_disable_payment_print_popup) {
                 vm.load_print_page();
               }
-            }, 1000)
+            }, 1000);
 
-            evntBus.$emit('etms_pos__submitted_invoice', r.message);
-            evntBus.$emit('set_last_invoice', vm.invoice_doc.name);
-            evntBus.$emit('show_mesage', {
+            evntBus.$emit("etms_pos__submitted_invoice", r.message);
+            evntBus.$emit("set_last_invoice", vm.invoice_doc.name);
+            evntBus.$emit("show_mesage", {
               text: `Invoice ${r.message.name} is Submited`,
-              color: 'success',
+              color: "success",
             });
-            frappe.utils.play_sound('submit');
+            frappe.utils.play_sound("submit");
             this.addresses = [];
             setTimeout(() => {
-              evntBus.$emit('update_cur_items_details');
+              evntBus.$emit("update_cur_items_details");
               console.log("########## UP");
-            }, 5000)
+            }, 5000);
           }
         },
       });
@@ -872,16 +888,16 @@ export default {
       const letter_head = this.pos_profile.letter_head || 0;
       const url =
         frappe.urllib.get_base_url() +
-        '/printview?doctype=Sales%20Invoice&name=' +
+        "/printview?doctype=Sales%20Invoice&name=" +
         this.invoice_doc.name +
-        '&trigger_print=1' +
-        '&format=' +
+        "&trigger_print=1" +
+        "&format=" +
         print_format +
-        '&no_letterhead=' +
+        "&no_letterhead=" +
         letter_head;
-      const printWindow = window.open(url, 'Print');
+      const printWindow = window.open(url, "Print");
       printWindow.addEventListener(
-        'load',
+        "load",
         function () {
           printWindow.print();
           // printWindow.close();
@@ -893,16 +909,16 @@ export default {
       const letter_head = this.pos_profile.letter_head || 0;
       const url =
         frappe.urllib.get_base_url() +
-        '/printview?doctype=Sales%20Invoice&name=' +
+        "/printview?doctype=Sales%20Invoice&name=" +
         this.invoice_doc.name +
-        '&trigger_print=1' +
-        '&format=' +
+        "&trigger_print=1" +
+        "&format=" +
         this.pos_profile.posa_warranty_print_format +
-        '&no_letterhead=' +
+        "&no_letterhead=" +
         letter_head;
-      const printWindow = window.open(url, 'PrintWarranty');
+      const printWindow = window.open(url, "PrintWarranty");
       printWindow.addEventListener(
-        'load',
+        "load",
         function () {
           printWindow.print();
           // printWindow.close();
@@ -924,16 +940,16 @@ export default {
       value = parseFloat(value);
       return value
         .toFixed(this.currency_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,");
     },
     formtFloat(value) {
       value = parseFloat(value);
       return value
         .toFixed(this.float_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,");
     },
     shortPay(e) {
-      if (e.key === 'x' && (e.ctrlKey || e.metaKey)) {
+      if (e.key === "x" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.submit();
       }
@@ -945,7 +961,7 @@ export default {
       let change = -this.diff_payment;
       if (this.paid_change > change) {
         this.paid_change_rules = [
-          'Paid change can not be greater than total change!',
+          "Paid change can not be greater than total change!",
         ];
         this.credit_change = 0;
       }
@@ -954,7 +970,7 @@ export default {
       this.clear_all_amounts();
       if (e) {
         frappe
-          .call('posawesome.posawesome.api.posapp.get_available_credit', {
+          .call("posawesome.posawesome.api.posapp.get_available_credit", {
             customer: this.invoice_doc.customer,
             company: this.pos_profile.company,
           })
@@ -976,7 +992,7 @@ export default {
         return;
       }
       frappe.call({
-        method: 'posawesome.posawesome.api.posapp.get_customer_addresses',
+        method: "posawesome.posawesome.api.posapp.get_customer_addresses",
         args: { customer: vm.invoice_doc.customer },
         async: true,
         callback: function (r) {
@@ -991,14 +1007,14 @@ export default {
     addressFilter(item, queryText, itemText) {
       const textOne = item.address_title
         ? item.address_title.toLowerCase()
-        : '';
+        : "";
       const textTwo = item.address_line1
         ? item.address_line1.toLowerCase()
-        : '';
+        : "";
       const textThree = item.address_line2
         ? item.address_line2.toLowerCase()
-        : '';
-      const textFour = item.city ? item.city.toLowerCase() : '';
+        : "";
+      const textFour = item.city ? item.city.toLowerCase() : "";
       const textFifth = item.name.toLowerCase();
       const searchText = queryText.toLowerCase();
       return (
@@ -1010,7 +1026,7 @@ export default {
       );
     },
     new_address() {
-      evntBus.$emit('open_new_address', this.invoice_doc.customer);
+      evntBus.$emit("open_new_address", this.invoice_doc.customer);
     },
     get_sales_person_names() {
       const vm = this;
@@ -1019,18 +1035,18 @@ export default {
         localStorage.sales_persons_storage
       ) {
         vm.sales_persons = JSON.parse(
-          localStorage.getItem('sales_persons_storage')
+          localStorage.getItem("sales_persons_storage")
         );
       }
       frappe.call({
-        method: 'posawesome.posawesome.api.posapp.get_sales_person_names',
+        method: "posawesome.posawesome.api.posapp.get_sales_person_names",
         callback: function (r) {
           if (r.message) {
             vm.sales_persons = r.message;
             if (vm.pos_profile.posa_local_storage) {
-              localStorage.setItem('sales_persons_storage', '');
+              localStorage.setItem("sales_persons_storage", "");
               localStorage.setItem(
-                'sales_persons_storage',
+                "sales_persons_storage",
                 JSON.stringify(r.message)
               );
             }
@@ -1041,7 +1057,7 @@ export default {
     salesPersonFilter(item, queryText, itemText) {
       const textOne = item.sales_person_name
         ? item.sales_person_name.toLowerCase()
-        : '';
+        : "";
       const textTwo = item.name.toLowerCase();
       const searchText = queryText.toLowerCase();
 
@@ -1053,29 +1069,29 @@ export default {
       this.phone_dialog = false;
       const vm = this;
       if (!this.invoice_doc.contact_mobile) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: __(`Pleas Set Customer Mobile Number`),
-          color: 'error',
+          color: "error",
         });
-        evntBus.$emit('open_edit_customer');
+        evntBus.$emit("open_edit_customer");
         this.back_to_invoice();
         return;
       }
-      evntBus.$emit('freeze', {
+      evntBus.$emit("freeze", {
         title: __(`Waiting for payment... `),
       });
 
       let formData = this.invoice_doc;
-      formData['total_change'] = -this.diff_payment;
-      formData['paid_change'] = this.paid_change;
-      formData['credit_change'] = -this.credit_change;
-      formData['redeemed_customer_credit'] = this.redeemed_customer_credit;
-      formData['customer_credit_dict'] = this.customer_credit_dict;
-      formData['is_cashback'] = this.is_cashback;
+      formData["total_change"] = -this.diff_payment;
+      formData["paid_change"] = this.paid_change;
+      formData["credit_change"] = -this.credit_change;
+      formData["redeemed_customer_credit"] = this.redeemed_customer_credit;
+      formData["customer_credit_dict"] = this.customer_credit_dict;
+      formData["is_cashback"] = this.is_cashback;
 
       frappe
         .call({
-          method: 'posawesome.posawesome.api.posapp.update_invoice',
+          method: "posawesome.posawesome.api.posapp.update_invoice",
           args: {
             data: formData,
           },
@@ -1089,49 +1105,49 @@ export default {
         .then(() => {
           frappe
             .call({
-              method: 'posawesome.posawesome.api.posapp.create_payment_request',
+              method: "posawesome.posawesome.api.posapp.create_payment_request",
               args: {
                 doc: vm.invoice_doc,
               },
             })
             .fail(() => {
-              evntBus.$emit('unfreeze');
-              evntBus.$emit('show_mesage', {
+              evntBus.$emit("unfreeze");
+              evntBus.$emit("show_mesage", {
                 text: __(`Payment request failed`),
-                color: 'error',
+                color: "error",
               });
             })
             .then(({ message }) => {
               const payment_request_name = message.name;
               setTimeout(() => {
                 frappe.db
-                  .get_value('Payment Request', payment_request_name, [
-                    'status',
-                    'grand_total',
+                  .get_value("Payment Request", payment_request_name, [
+                    "status",
+                    "grand_total",
                   ])
                   .then(({ message }) => {
-                    if (message.status != 'Paid') {
-                      evntBus.$emit('unfreeze');
-                      evntBus.$emit('show_mesage', {
+                    if (message.status != "Paid") {
+                      evntBus.$emit("unfreeze");
+                      evntBus.$emit("show_mesage", {
                         text: __(
                           `Payment Request took too long to respond. Please try requesting for payment again`
                         ),
-                        color: 'error',
+                        color: "error",
                       });
                     } else {
-                      evntBus.$emit('unfreeze');
-                      evntBus.$emit('show_mesage', {
-                        text: __('Payment of {0} received successfully.', [
+                      evntBus.$emit("unfreeze");
+                      evntBus.$emit("show_mesage", {
+                        text: __("Payment of {0} received successfully.", [
                           formtCurrency(
                             message.grand_total,
                             vm.invoice_doc.currency,
                             0
                           ),
                         ]),
-                        color: 'success',
+                        color: "success",
                       });
                       frappe.db
-                        .get_doc('Sales Invoice', vm.invoice_doc.name)
+                        .get_doc("Sales Invoice", vm.invoice_doc.name)
                         .then((doc) => {
                           vm.invoice_doc = doc;
                           vm.submit();
@@ -1145,7 +1161,7 @@ export default {
     get_mpesa_modes() {
       const vm = this;
       frappe.call({
-        method: 'posawesome.posawesome.api.m_pesa.get_mpesa_mode_of_payment',
+        method: "posawesome.posawesome.api.m_pesa.get_mpesa_mode_of_payment",
         args: { company: vm.pos_profile.company },
         async: true,
         callback: function (r) {
@@ -1160,7 +1176,7 @@ export default {
     is_mpesa_c2b_payment(payment) {
       if (
         this.mpesa_modes.includes(payment.mode_of_payment) &&
-        payment.type == 'Bank'
+        payment.type == "Bank"
       ) {
         payment.amount = 0;
         return true;
@@ -1174,13 +1190,13 @@ export default {
         mode_of_payment: payment.mode_of_payment,
         customer: this.invoice_doc.customer,
       };
-      evntBus.$emit('open_mpesa_payments', data);
+      evntBus.$emit("open_mpesa_payments", data);
     },
     set_mpesa_payment(payment) {
       this.pos_profile.use_customer_credit = 1;
       this.redeem_customer_credit = true;
       const advance = {
-        type: 'Advance',
+        type: "Advance",
         credit_origin: payment.name,
         total_credit: payment.unallocated_amount,
         credit_to_redeem: payment.unallocated_amount,
@@ -1218,7 +1234,7 @@ export default {
       return (this.paid_change - change).toFixed(this.currency_precision);
     },
     diff_lable() {
-      let lable = this.diff_payment < 0 ? 'Change' : 'To Be Paid';
+      let lable = this.diff_payment < 0 ? "Change" : "To Be Paid";
       return lable;
     },
     available_pioints_amount() {
@@ -1250,7 +1266,7 @@ export default {
     vaildatPayment() {
       if (this.pos_profile.posa_allow_sales_order) {
         if (
-          this.invoiceType == 'Order' &&
+          this.invoiceType == "Order" &&
           !this.invoice_doc.posa_delivery_date
         ) {
           return true;
@@ -1268,8 +1284,8 @@ export default {
       } else {
         this.pos_settings.invoice_fields.forEach((el) => {
           if (
-            el.fieldtype == 'Button' &&
-            el.fieldname == 'request_for_payment'
+            el.fieldtype == "Button" &&
+            el.fieldname == "request_for_payment"
           ) {
             res = true;
           }
@@ -1281,7 +1297,7 @@ export default {
 
   created: function () {
     this.$nextTick(function () {
-      evntBus.$on('send_invoice_doc_payment', (invoice_doc) => {
+      evntBus.$on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
         // this.invoice_doc.posa_delivery_date = new Date().toJSON().split("T")[0]
         const default_payment = this.invoice_doc.payments.find(
@@ -1298,48 +1314,48 @@ export default {
         this.get_addresses();
         this.get_sales_person_names();
       });
-      evntBus.$on('register_pos_profile', (data) => {
+      evntBus.$on("register_pos_profile", (data) => {
         this.pos_profile = data.pos_profile;
         this.get_mpesa_modes();
         this.float_precision =
-          frappe.defaults.get_default('float_precision') || 2;
+          frappe.defaults.get_default("float_precision") || 2;
         this.currency_precision =
-          frappe.defaults.get_default('currency_precision') || 2;
+          frappe.defaults.get_default("currency_precision") || 2;
       });
-      evntBus.$on('add_the_new_address', (data) => {
+      evntBus.$on("add_the_new_address", (data) => {
         this.addresses.push(data);
         this.$forceUpdate();
       });
-      evntBus.$on('update_invoice_type', (data) => {
+      evntBus.$on("update_invoice_type", (data) => {
         this.invoiceType = data;
-        if (this.invoice_doc && data != 'Order') {
+        if (this.invoice_doc && data != "Order") {
           this.invoice_doc.posa_delivery_date = null;
           this.invoice_doc.posa_notes = null;
           this.invoice_doc.shipping_address_name = null;
         }
       });
     });
-    evntBus.$on('update_customer', (customer) => {
+    evntBus.$on("update_customer", (customer) => {
       if (this.customer != customer) {
         this.customer_credit_dict = [];
         this.redeem_customer_credit = false;
         this.is_cashback = true;
       }
     });
-    evntBus.$on('set_pos_settings', (data) => {
+    evntBus.$on("set_pos_settings", (data) => {
       this.pos_settings = data;
     });
-    evntBus.$on('set_customer_info_to_edit', (data) => {
+    evntBus.$on("set_customer_info_to_edit", (data) => {
       this.customer_info = data;
     });
-    evntBus.$on('set_mpesa_payment', (data) => {
+    evntBus.$on("set_mpesa_payment", (data) => {
       this.set_mpesa_payment(data);
     });
-    document.addEventListener('keydown', this.shortPay.bind(this));
+    document.addEventListener("keydown", this.shortPay.bind(this));
   },
 
   destroyed() {
-    document.removeEventListener('keydown', this.shortPay);
+    document.removeEventListener("keydown", this.shortPay);
   },
 
   watch: {
@@ -1348,9 +1364,9 @@ export default {
         this.invoice_doc.loyalty_amount = 0;
         this.invoice_doc.redeem_loyalty_points = 0;
         this.invoice_doc.loyalty_points = 0;
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `Loyalty Amount can not be more then ${this.available_pioints_amount}`,
-          color: 'error',
+          color: "error",
         });
       } else {
         this.invoice_doc.loyalty_amount = flt(this.loyalty_amount);
@@ -1378,9 +1394,9 @@ export default {
     },
     redeemed_customer_credit(value) {
       if (value > this.available_customer_credit) {
-        evntBus.$emit('show_mesage', {
+        evntBus.$emit("show_mesage", {
           text: `You can redeem customer credit upto ${this.available_customer_credit}`,
-          color: 'error',
+          color: "error",
         });
       }
     },
