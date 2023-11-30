@@ -718,13 +718,15 @@ export default {
         return;
       }
 
-      if (!!this.pos_profile.posa_require_sales_team && !this.sales_person) {
-        evntBus.$emit("show_mesage", {
-          text: `Sales Person is required`,
-          color: "error",
-        });
-        frappe.utils.play_sound("error");
-        return;
+      if (!!this.pos_profile.posa_require_sales_team) {
+        if (!this.sales_person) {
+          evntBus.$emit("show_mesage", {
+            text: `Sales Person is required`,
+            color: "error",
+          });
+          frappe.utils.play_sound("error");
+          return;
+        }
       }
 
       if (
