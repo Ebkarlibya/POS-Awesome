@@ -254,6 +254,18 @@ fixtures = [
                     "POS Profile-posa_allow_reconcile_payments",
                     "POS Profile-column_break_uolvm",
                     "POS Profile-posa_allow_mpesa_reconcile_payments",
+
+
+                    # # # # # # #
+                    # ETMS POS  #
+                    # # # # # # #
+
+                    # Item
+
+                    "Item-custom_posa_pos_tag",  # tab break
+                    "Item-custom_posa_pos_tags",  # table
+
+
                 ),
             ]
         ],

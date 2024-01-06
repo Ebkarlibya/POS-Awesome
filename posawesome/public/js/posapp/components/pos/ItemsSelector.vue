@@ -12,7 +12,7 @@
         color="info"
       ></v-progress-linear>
       <v-row class="items px-2 py-1">
-        <v-col class="pb-0 mb-2">
+        <v-col cols="8" class="pb-0 mb-2">
           <v-text-field
             dense
             clearable
@@ -28,6 +28,9 @@
             @keydown.enter="search_onchange"
             ref="debounce_search"
           ></v-text-field>
+        </v-col>
+        <v-col cols="4">
+          <TagFilters />
         </v-col>
         <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
           <v-text-field
@@ -151,7 +154,7 @@
       <!-- Item Group Filter End -->
 
       <v-row no-gutters align="center" justify="center">
-        <v-col cols="12">
+        <!-- <v-col cols="12">
           <v-select
             :items="items_group"
             :label="frappe._('Items Group')"
@@ -161,7 +164,7 @@
             v-model="item_group"
             v-on:change="search_onchange"
           ></v-select>
-        </v-col>
+        </v-col> -->
         <v-col cols="3" class="mt-1">
           <v-btn-toggle
             v-model="items_view"
@@ -195,10 +198,12 @@ import { evntBus } from "../../bus";
 import format from "../../format";
 import _ from "lodash";
 import ItemGroupMultiSelect from "./ItemGroupMultiSelect.vue";
+import TagFilters from "./TagFilters.vue";
 
 export default {
   components: {
     ItemGroupMultiSelect,
+    TagFilters,
   },
 
   mixins: [format],
@@ -220,6 +225,7 @@ export default {
     customer_price_list: null,
     new_line: false,
     qty: 1,
+    pos_tags_filters: [],
   }),
 
   watch: {
@@ -566,6 +572,15 @@ export default {
         } else {
           filtred_group_list = this.items;
         }
+        if (this.pos_tags_filters && this.pos_tags_filters.length > 0) {
+          filtred_group_list = filtred_group_list.filter((fItem) => {
+            return fItem.pos_tags.some((itemPosTag) => {
+              return this.pos_tags_filters.some(
+                (filterPosTag) => filterPosTag.tag_name === itemPosTag.tag_name
+              );
+            });
+          });
+        }
         if (!this.search || this.search.length < 3) {
           if (
             this.pos_profile.posa_show_template_items &&
@@ -678,6 +693,12 @@ export default {
     });
     evntBus.$on("update_customer_price_list", (data) => {
       this.customer_price_list = data;
+    });
+    evntBus.$on("set_pos_tags_filters", (pos_tags) => {
+      this.pos_tags_filters = pos_tags;
+    });
+    evntBus.$on("clear_pos_tags_filters", () => {
+      this.pos_tags_filters.length = 0;
     });
   },
 

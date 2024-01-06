@@ -21,8 +21,6 @@ export default {
   props: ["itemGroups", "label"],
   methods: {
     triggerSelect(event, groupName) {
-      console.log(event, groupName);
-      console.log(this.$refs);
       this.$emit("click", event, groupName);
     },
   },
