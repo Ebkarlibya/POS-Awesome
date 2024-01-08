@@ -505,6 +505,7 @@ def add_taxes_from_tax_template(item, parent_doc):
 @frappe.whitelist()
 def update_invoice(data):
     data = json.loads(data)
+
     if data.get("name"):
         invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
         invoice_doc.update(data)
@@ -512,22 +513,24 @@ def update_invoice(data):
         invoice_doc = frappe.get_doc(data)
 
     invoice_doc.set_missing_values()
+
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
 
     if invoice_doc.is_return and invoice_doc.return_against:
+        invoice_doc.is_pos = 0
+
         ref_doc = frappe.get_cached_doc(
             invoice_doc.doctype, invoice_doc.return_against)
         if not ref_doc.update_stock:
             invoice_doc.update_stock = 0
         if len(invoice_doc.payments) == 0:
             invoice_doc.payments = ref_doc.payments
-        invoice_doc.paid_amount = (
-            invoice_doc.rounded_total or invoice_doc.grand_total or invoice_doc.total
-        )
+        invoice_doc.paid_amount = invoice_doc.rounded_total or invoice_doc.grand_total or invoice_doc.total
         for payment in invoice_doc.payments:
             if payment.default:
                 payment.amount = invoice_doc.paid_amount
+
     allow_zero_rated_items = frappe.get_cached_value(
         "POS Profile", invoice_doc.pos_profile, "posa_allow_zero_rated_items"
     )
@@ -551,7 +554,6 @@ def update_invoice(data):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
-
     invoice_doc.save()
     return invoice_doc
 
@@ -560,6 +562,7 @@ def update_invoice(data):
 def submit_invoice(invoice, data):
     data = json.loads(data)
     invoice = json.loads(invoice)
+    invoice["write_off_amount"] = invoice['rounding_adjustment']
     invoice_doc = frappe.get_doc("Sales Invoice", invoice.get("name"))
     invoice_doc.update(invoice)
     if invoice.get("posa_delivery_date"):
