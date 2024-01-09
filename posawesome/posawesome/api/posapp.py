@@ -518,7 +518,7 @@ def update_invoice(data):
     frappe.flags.ignore_account_permission = True
 
     if invoice_doc.is_return and invoice_doc.return_against:
-        invoice_doc.is_pos = 0
+        # invoice_doc.is_pos = 0
 
         ref_doc = frappe.get_cached_doc(
             invoice_doc.doctype, invoice_doc.return_against)
@@ -527,9 +527,16 @@ def update_invoice(data):
         if len(invoice_doc.payments) == 0:
             invoice_doc.payments = ref_doc.payments
         invoice_doc.paid_amount = invoice_doc.rounded_total or invoice_doc.grand_total or invoice_doc.total
+
+        # if ref_doc.rounding_adjustment > 0:
         for payment in invoice_doc.payments:
             if payment.default:
-                payment.amount = invoice_doc.paid_amount
+                payment.amount = invoice_doc.paid_amount - ref_doc.rounding_adjustment * \
+                    2 if ref_doc.rounding_adjustment < 0 else invoice_doc.paid_amount
+        if ref_doc.write_off_amount:
+            invoice_doc.write_off_amount = ref_doc.rounding_adjustment if ref_doc.rounding_adjustment < 0 else ref_doc.rounding_adjustment * -1
+            invoice_doc.write_off_account = ref_doc.write_off_account
+            invoice_doc.write_off_cost_center = ref_doc.write_off_cost_center
 
     allow_zero_rated_items = frappe.get_cached_value(
         "POS Profile", invoice_doc.pos_profile, "posa_allow_zero_rated_items"
@@ -555,15 +562,20 @@ def update_invoice(data):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
     invoice_doc.save()
+    # invoice_doc.is_pos = 0
+    # invoice_doc.save()
     return invoice_doc
 
 
 @frappe.whitelist()
 def submit_invoice(invoice, data):
+    count = 0
     data = json.loads(data)
     invoice = json.loads(invoice)
-    invoice["write_off_amount"] = invoice['rounding_adjustment']
+    invoice["write_off_amount"] = invoice['rounding_adjustment'] if invoice['rounding_adjustment'] < 0 else invoice['rounding_adjustment'] * -1
+
     invoice_doc = frappe.get_doc("Sales Invoice", invoice.get("name"))
+    invoice_payments = invoice_doc.payments
     invoice_doc.update(invoice)
     if invoice.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
@@ -626,7 +638,12 @@ def submit_invoice(invoice, data):
                 invoice_doc.append("advances", advance_payment)
                 invoice_doc.is_pos = 0
                 is_payment_entry = 1
-
+    if invoice_doc.is_return:
+        for pay in invoice_doc.payments:
+            meth = [dictionary.name for dictionary in invoice_payments]
+            if pay.name in meth:
+                i = meth.index(pay.name)
+                pay.amount = invoice_payments[i].amount
     payments = invoice_doc.payments
 
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
@@ -672,7 +689,7 @@ def submit_invoice(invoice, data):
             invoice_doc, data, is_payment_entry, total_cash, cash_account, payments
         )
 
-    return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
+    return {"name": invoice_doc.name, "status": invoice_doc.docstatus, "invoice": invoice_doc}
 
 
 def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
