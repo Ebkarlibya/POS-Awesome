@@ -344,6 +344,7 @@ export default {
           align: "start",
           sortable: true,
           value: "item_name",
+          width: "40%",
         },
         {
           text: __("Code"),
@@ -352,7 +353,7 @@ export default {
           value: "item_code",
         },
         { text: __("Rate"), value: "rate", align: "start" },
-        { text: __("Available QTY"), value: "actual_qty", align: "start" },
+        { text: __("Ava. QTY"), value: "actual_qty", align: "start" },
         { text: __("UOM"), value: "stock_uom", align: "start" },
       ];
       if (!this.pos_profile.posa_display_item_code) {

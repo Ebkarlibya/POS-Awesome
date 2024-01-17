@@ -860,12 +860,11 @@ export default {
           align: "start",
           sortable: true,
           value: "item_name",
+          width: "40%",
         },
         { text: __("QTY"), value: "qty", align: "center" },
-        { text: __("UOM"), value: "uom", align: "center" },
         { text: __("Rate"), value: "rate", align: "center" },
         { text: __("Amount"), value: "amount", align: "center" },
-        { text: __("is Offer"), value: "posa_is_offer", align: "center" },
       ],
     };
   },
