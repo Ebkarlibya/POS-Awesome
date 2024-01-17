@@ -6,8 +6,8 @@
         class="grey--text"
       ></v-app-bar-nav-icon>
       <v-img
-        src="/assets/posawesome/js/posapp/components/pos/pos.png"
-        alt="POS Awesome"
+        :src="company_img"
+        :alt="company"
         max-width="32"
         class="mr-2"
         color="primary"
@@ -17,8 +17,8 @@
         style="cursor: pointer"
         class="text-uppercase primary--text"
       >
-        <span class="font-weight-light">pos</span>
-        <span>awesome</span>
+        <span class="font-weight-light">{{ company }}</span>
+        <span>POS</span>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -181,7 +181,7 @@ export default {
       snack: false,
       snackColor: "",
       snackText: "",
-      company: "POS Awesome",
+      company: "",
       company_img: "/assets/erpnext/images/erpnext-logo.svg",
       pos_profile: "",
       freeze: false,
@@ -266,12 +266,26 @@ export default {
         this.show_mesage(data);
       });
       evntBus.$on("set_company", (data) => {
-        this.company = data.name;
+        this.company = data.name || "POS PLUS";
         this.company_img = data.company_logo
           ? data.company_logo
           : this.company_img;
+        // this.company = data.name;
+        // this.company_img = data.company_logo
+        //   ? data.company_logo
+        //   : this.company_img;
       });
-      evntBus.$on("register_pos_profile", (data) => {
+      evntBus.$on("register_pos_profile", async (data) => {
+        company_logo = await frappe.db.get_value(
+          "Company",
+          data.pos_profile.company,
+          ["company_logo"]
+        );
+        company = data.pos_profile.company || "POS PLUS";
+        company_img =
+          company_logo.message.company_logo ||
+          "/assets/erpnext/images/erpnext-logo.svg";
+
         this.pos_profile = data.pos_profile;
         const payments = { text: "Payments", icon: "mdi-cash-register" };
         if (
