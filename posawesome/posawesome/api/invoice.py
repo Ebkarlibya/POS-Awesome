@@ -242,3 +242,58 @@ def calc_delivery_charges(doc):
 
     if calculate_taxes_and_totals:
         doc.calculate_taxes_and_totals()
+
+
+@frappe.whitelist()
+def get_invoices_list():
+    import json
+    try:
+        term_sql_cond = ""
+        include_drafts = json.loads(frappe.form_dict["include_drafts"])
+
+        docstatuses = ""
+
+        if include_drafts:
+            docstatuses = "(0,1)"
+        else:
+            docstatuses = "(1)"
+
+        if "term" in frappe.form_dict and len(frappe.form_dict["term"]) > 0:
+            escaped_input = frappe.db.escape(f"%{frappe.form_dict['term']}%")
+            term_sql_cond = f"""
+                and name like {escaped_input}
+                or posa_pos_restaurant_table like {escaped_input}
+                or grand_total like {escaped_input}
+            """
+            # cond_filters["name"] = ["like", f"%{frappe.form_dict['term']}%"]
+            # cond_filters["posa_pos_restaurant_table"] = ["like", f"%{frappe.form_dict['term']}%"]
+
+        invoices = frappe.db.sql(
+            f"""
+                select name, customer, posting_date, grand_total,
+                docstatus
+                from `tabSales Invoice`
+                    
+                where docstatus in {docstatuses}
+                and is_return = 0
+                {term_sql_cond}
+                order by creation desc
+                limit 20
+            """,
+            as_dict=True
+        )
+
+        # for invoice in invoices:
+        #     si_items = frappe.get_all(
+        #         "Sales Invoice Item",
+        #         fields=["posa_has_warranty"],
+        #         filters={"parent": invoice["name"]}
+        #     )
+        #     for si_item in si_items:
+        #         if (si_item["posa_has_warranty"]):
+        #             invoice["posa_has_warranty"] = "Yes"
+        print(invoices)
+        return invoices
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())

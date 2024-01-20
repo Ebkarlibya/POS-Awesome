@@ -1,5 +1,8 @@
 <template>
   <nav>
+    <ListInvoices></ListInvoices>
+    <ListOrders></ListOrders>
+
     <v-app-bar app height="40" class="elevation-2">
       <v-app-bar-nav-icon
         @click.stop="drawer = !drawer"
@@ -89,6 +92,32 @@
                 </v-list-item>
 
                 <v-divider class="my-0"></v-divider>
+
+                <!-- List Invoices to print -->
+                <v-list-item @click="openInvoicesList">
+                  <v-list-item-icon>
+                    <v-icon>mdi-menu</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{
+                      __("Invoices List")
+                    }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+
+                <!-- List orders to print -->
+                <v-list-item @click="openOrdersList">
+                  <v-list-item-icon>
+                    <v-icon>mdi-menu</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{
+                      __("Orders List")
+                    }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+
+                <v-divider class="my-0"></v-divider>
                 <v-list-item @click="logOut">
                   <v-list-item-icon>
                     <v-icon>mdi-logout</v-icon>
@@ -163,9 +192,13 @@
 
 <script>
 import { evntBus } from "../bus";
+import ListInvoices from "./pos/ListInvoices.vue";
+import ListOrders from "./pos/ListOrders.vue";
 
 export default {
   // components: {MyPopup},
+  components: { ListInvoices, ListOrders },
+
   data() {
     return {
       drawer: false,
@@ -208,6 +241,12 @@ export default {
     openClosingShiftsList() {
       const win = window.open("/app/pos-closing-shift", "_blank");
       win.focus();
+    },
+    openInvoicesList() {
+      evntBus.$emit("open_invoices_list");
+    },
+    openOrdersList() {
+      evntBus.$emit("open_orders_list");
     },
     openDesk() {
       const win = window.open("/app", "_blank");

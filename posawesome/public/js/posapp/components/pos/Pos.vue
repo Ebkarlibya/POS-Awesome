@@ -21,10 +21,10 @@
       </v-col>
       <v-col
         v-show="offers"
-        xl="5"
-        lg="5"
-        md="5"
-        sm="5"
+        xl="6"
+        lg="6"
+        md="6"
+        sm="6"
         cols="12"
         class="pos pr-0"
       >
@@ -32,10 +32,10 @@
       </v-col>
       <v-col
         v-show="coupons"
-        xl="5"
-        lg="5"
-        md="5"
-        sm="5"
+        xl="6"
+        lg="6"
+        md="6"
+        sm="6"
         cols="12"
         class="pos pr-0"
       >
@@ -43,10 +43,10 @@
       </v-col>
       <v-col
         v-show="payment"
-        xl="5"
-        lg="5"
-        md="5"
-        sm="5"
+        xl="6"
+        lg="6"
+        md="6"
+        sm="6"
         cols="12"
         class="pos pr-0"
       >
