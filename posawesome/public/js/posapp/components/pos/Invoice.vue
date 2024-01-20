@@ -165,6 +165,7 @@
             class="elevation-1"
             :items-per-page="itemsPerPage"
             hide-default-footer
+            :item-class="posa_data_table_rows"
           >
             <template v-slot:item.qty="{ item }">{{
               formtFloat(item.qty)
@@ -854,6 +855,7 @@ export default {
       selcted_delivery_charges: {},
       invoice_posting_date: false,
       posting_date: frappe.datetime.nowdate(),
+      posa_last_active_item_row_id: null,
       items_headers: [
         {
           text: __("Name"),
@@ -909,6 +911,13 @@ export default {
   },
 
   methods: {
+    posa_data_table_rows(item) {
+      if (this.posa_last_active_item_row_id === item.item_code) {
+        return "theme--light warning";
+      } else {
+        return "";
+      }
+    },
     remove_item(item) {
       const index = this.items.findIndex(
         (el) => el.posa_row_id == item.posa_row_id
@@ -942,6 +951,8 @@ export default {
     },
 
     add_item(item) {
+      this.posa_last_active_item_row_id = item.item_code;
+
       if (!item.uom) {
         item.uom = item.stock_uom;
       }
