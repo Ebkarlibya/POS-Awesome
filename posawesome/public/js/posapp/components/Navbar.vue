@@ -233,10 +233,7 @@ export default {
       location.reload();
     },
     go_about() {
-      const win = window.open(
-        "https://github.com/yrestom/POS-Awesome",
-        "_blank"
-      );
+      const win = window.open("https://ebkar.ly/", "_blank");
       win.focus();
     },
     openClosingShiftsList() {
