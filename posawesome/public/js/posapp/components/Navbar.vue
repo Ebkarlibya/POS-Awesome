@@ -159,6 +159,7 @@
             <v-icon>mdi-chevron-left</v-icon>
           </v-btn>
         </v-list-item>
+
         <!-- <MyPopup/> -->
         <v-list-item-group v-model="item" color="white">
           <v-list-item
@@ -333,6 +334,11 @@ export default {
         ) {
           this.items.push(payments);
         }
+        this.items.push({ text: "Orders", icon: "mdi-salesforce" });
+        this.items.push({
+          text: "Invoices",
+          icon: "mdi-cash",
+        });
       });
       evntBus.$on("set_last_invoice", (data) => {
         this.last_invoice = data;

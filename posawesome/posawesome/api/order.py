@@ -26,8 +26,8 @@ def get_orders_list():
 
         orders = frappe.db.sql(
             f"""
-                select name, customer, delivery_date, grand_total,
-                docstatus
+                select name, customer, delivery_date, grand_total, transaction_date,
+                currency, docstatus
                 from `tabSales Order`
                     
                 where docstatus in {docstatuses}
@@ -47,8 +47,28 @@ def get_orders_list():
         #     for si_item in si_items:
         #         if (si_item["posa_has_warranty"]):
         #             invoice["posa_has_warranty"] = "Yes"
-
         return orders
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())
+
+
+@frappe.whitelist()
+def get_order_items():
+    try:
+        order = json.loads(frappe.form_dict["order"])
+        items = frappe.db.sql(
+            f"""
+                SELECT item_code, qty, rate, amount
+                FROM `tabSales Order Item`
+                    
+                WHERE parent = {frappe.db.escape(f"{order['name']}")}
+                order by creation desc
+                limit 20
+            """,
+            as_dict=True
+        )
+        return items
     except:
         tb = frappe.get_traceback()
         print(frappe.get_traceback())

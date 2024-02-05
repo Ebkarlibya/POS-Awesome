@@ -74,7 +74,6 @@ import NewAddress from "./NewAddress.vue";
 import Variants from "./Variants.vue";
 import Returns from "./Returns.vue";
 import MpesaPayments from "./Mpesa-Payments.vue";
-
 export default {
   data: function () {
     return {

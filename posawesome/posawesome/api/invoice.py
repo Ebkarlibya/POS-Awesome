@@ -292,8 +292,29 @@ def get_invoices_list():
         #     for si_item in si_items:
         #         if (si_item["posa_has_warranty"]):
         #             invoice["posa_has_warranty"] = "Yes"
-        print(invoices)
         return invoices
+    except:
+        tb = frappe.get_traceback()
+        print(frappe.get_traceback())
+
+
+@frappe.whitelist()
+def get_invoice_items():
+    import json
+    try:
+        invoice = json.loads(frappe.form_dict["invoice"])
+        items = frappe.db.sql(
+            f"""
+                SELECT item_code, qty, rate, amount
+                FROM `tabSales Invoice Item`
+                    
+                WHERE parent = {frappe.db.escape(f"{invoice['name']}")}
+                order by creation desc
+                limit 20
+            """,
+            as_dict=True
+        )
+        return items
     except:
         tb = frappe.get_traceback()
         print(frappe.get_traceback())

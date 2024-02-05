@@ -215,14 +215,14 @@ export default {
           sortable: true,
         });
       }
-      if (this.pos_profile.posa_enable_warranty_print_system) {
-        this.headers.push({
-          text: __("Has Warranty"),
-          value: "posa_has_warranty",
-          align: "start",
-          sortable: true,
-        });
-      }
+      // if (this.pos_profile.posa_enable_warranty_print_system) {
+      //   this.headers.push({
+      //     text: __("Has Warranty"),
+      //     value: "posa_has_warranty",
+      //     align: "start",
+      //     sortable: true,
+      //   });
+      // }
     });
     evntBus.$on("open_orders_list", (data) => {
       this.ordersListDialog = true;

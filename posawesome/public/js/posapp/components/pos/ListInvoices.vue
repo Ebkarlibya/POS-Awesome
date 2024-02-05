@@ -54,7 +54,7 @@
           <v-btn color="success" dark @click="print_invoice">{{
             __("Print")
           }}</v-btn>
-          <v-btn
+          <!-- <v-btn
             color="secondary"
             v-if="
               pos_profile.posa_enable_warranty_print_system &&
@@ -64,7 +64,7 @@
             dark
             @click="print_warranty_invoice"
             >{{ __("Print Warranty") }}</v-btn
-          >
+          > -->
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -218,14 +218,14 @@ export default {
           sortable: true,
         });
       }
-      if (this.pos_profile.posa_enable_warranty_print_system) {
-        this.headers.push({
-          text: __("Has Warranty"),
-          value: "posa_has_warranty",
-          align: "start",
-          sortable: true,
-        });
-      }
+      // if (this.pos_profile.posa_enable_warranty_print_system) {
+      //   this.headers.push({
+      //     text: __("Has Warranty"),
+      //     value: "posa_has_warranty",
+      //     align: "start",
+      //     sortable: true,
+      //   });
+      // }
     });
     evntBus.$on("open_invoices_list", (data) => {
       this.invoicesListDialog = true;
