@@ -262,9 +262,9 @@ def get_invoices_list():
             escaped_input = frappe.db.escape(f"%{frappe.form_dict['term']}%")
             term_sql_cond = f"""
                 and name like {escaped_input}
-                or posa_pos_restaurant_table like {escaped_input}
                 or grand_total like {escaped_input}
             """
+            # or posa_pos_restaurant_table like {escaped_input}
             # cond_filters["name"] = ["like", f"%{frappe.form_dict['term']}%"]
             # cond_filters["posa_pos_restaurant_table"] = ["like", f"%{frappe.form_dict['term']}%"]
 
