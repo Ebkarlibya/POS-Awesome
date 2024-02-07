@@ -270,8 +270,8 @@ def get_invoices_list():
 
         invoices = frappe.db.sql(
             f"""
-                select name, customer, posting_date, grand_total,
-                docstatus
+                select name, customer, posting_date,due_date, grand_total,
+                status, outstanding_amount
                 from `tabSales Invoice`
                     
                 where docstatus in {docstatuses}

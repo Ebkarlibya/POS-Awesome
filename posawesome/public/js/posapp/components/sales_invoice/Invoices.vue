@@ -60,8 +60,13 @@
               checkbox-color="primary"
               :single-select="true"
             >
+              <template #item.status="{ item }">
+                <v-chip variant="elevated" :color="item.color">
+                  {{ item.status }}
+                </v-chip>
+              </template>
               <!-- @item-selected="onOrderSelected" -->
-              <template v-slot:item.grand_total="{ item }">
+              <!-- <template v-slot:item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
                 {{ formtCurrency(item.grand_total) }}
               </template>
@@ -70,7 +75,7 @@
                   >{{ currencySymbol(item.currency) }}
                   {{ formtCurrency(item.outstanding_amount) }}</span
                 >
-              </template>
+              </template> -->
             </v-data-table>
             <v-divider></v-divider>
           </div>
@@ -97,6 +102,23 @@
                   background-color="white"
                   hide-details
                   :value="selected_invoices[0].grand_total"
+                  readonly
+                  flat
+                  :prefix="currencySymbol(pos_profile_details.currency)"
+                ></v-text-field>
+                {{
+              }}</v-col>
+            </v-row>
+            <v-row class="mx-2 my-5">
+              <v-col md="8" cols="12">Outstanding Amount</v-col>
+              <v-col md="4" cols="12">
+                <v-text-field
+                  class="p-0 m-0"
+                  dense
+                  color="primary"
+                  background-color="white"
+                  hide-details
+                  :value="selected_invoices[0].outstanding_amount"
                   readonly
                   flat
                   :prefix="currencySymbol(pos_profile_details.currency)"
@@ -168,13 +190,13 @@ export default {
           text: __("Date"),
           align: "start",
           sortable: true,
-          value: "transaction_date",
+          value: "posting_date",
         },
         {
           text: __("Due Date"),
           align: "start",
           sortable: true,
-          value: "delivery_date",
+          value: "due_date",
         },
         {
           text: __("Total"),
@@ -187,6 +209,12 @@ export default {
           align: "end",
           sortable: true,
           value: "status",
+        },
+        {
+          text: __("Outstanding"),
+          align: "end",
+          sortable: true,
+          value: "outstanding_amount",
         },
       ],
 
@@ -229,9 +257,15 @@ export default {
         callback: (r) => {
           if (r.message) {
             this.invoice_data = r.message.map((el) => {
-              el.status = `(${el.docstatus === 0 ? "Draft" : "Submitted"})`;
+              el.color =
+                el.status == "Unpaid" || el.status === "Overdue"
+                  ? "red"
+                  : el.status === "Paid"
+                  ? "green"
+                  : "yellow";
               return el;
             });
+            console.log(this.invoice_data);
           } else {
           }
 
