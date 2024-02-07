@@ -27,7 +27,7 @@ def get_orders_list():
         orders = frappe.db.sql(
             f"""
                 select name, customer, delivery_date, grand_total, transaction_date,
-                currency, docstatus
+                currency, status
                 from `tabSales Order`
                     
                 where docstatus in {docstatuses}

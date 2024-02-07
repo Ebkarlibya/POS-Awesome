@@ -61,11 +61,10 @@
                 {{ currencySymbol(item.currency) }}
                 {{ formtCurrency(item.grand_total) }}
               </template>
-              <template v-slot:item.outstanding_amount="{ item }">
-                <span class="primary--text"
-                  >{{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.outstanding_amount) }}</span
-                >
+              <template v-slot:item.status="{ item }">
+                <v-chip variant="elevated" :color="item.color">
+                  {{ item.status }}
+                </v-chip>
               </template>
             </v-data-table>
             <v-divider></v-divider>
@@ -74,7 +73,12 @@
       </v-col>
 
       <!-- Side Panel for info -->
-      <v-col md="4" cols="12" class="pb-2 pr-0">
+      <v-col
+        md="4"
+        cols="12"
+        class="pb-2 pr-0"
+        v-if="selected_orders.length != 0"
+      >
         <v-card
           class="invoices mx-auto grey lighten-5 mt-3 p-3"
           style="max-height: 94vh; height: 94vh"
@@ -225,7 +229,12 @@ export default {
         callback: (r) => {
           if (r.message) {
             this.orders_data = r.message.map((el) => {
-              el.status = `(${el.docstatus === 0 ? "Draft" : "Submitted"})`;
+              el.color = ["Cancelled", "Closed"].includes(el.status)
+                ? "red"
+                : el.status === "Completed"
+                ? "green"
+                : "yellow";
+
               return el;
             });
           } else {

@@ -66,7 +66,7 @@
                 </v-chip>
               </template>
               <!-- @item-selected="onOrderSelected" -->
-              <!-- <template v-slot:item.grand_total="{ item }">
+              <template v-slot:item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
                 {{ formtCurrency(item.grand_total) }}
               </template>
@@ -75,7 +75,7 @@
                   >{{ currencySymbol(item.currency) }}
                   {{ formtCurrency(item.outstanding_amount) }}</span
                 >
-              </template> -->
+              </template>
             </v-data-table>
             <v-divider></v-divider>
           </div>
@@ -83,7 +83,12 @@
       </v-col>
 
       <!-- Side Panel for info -->
-      <v-col md="4" cols="12" class="pb-2 pr-0">
+      <v-col
+        md="4"
+        cols="12"
+        class="pb-2 pr-0"
+        v-if="selected_invoices.length != 0"
+      >
         <v-card
           class="invoices mx-auto grey lighten-5 mt-3 p-3"
           style="max-height: 94vh; height: 94vh"

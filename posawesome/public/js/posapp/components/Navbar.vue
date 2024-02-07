@@ -91,10 +91,10 @@
                   </v-list-item-content>
                 </v-list-item>
 
-                <v-divider class="my-0"></v-divider>
+                <!-- <v-divider class="my-0"></v-divider> -->
 
                 <!-- List Invoices to print -->
-                <v-list-item @click="openInvoicesList">
+                <!-- <v-list-item @click="openInvoicesList">
                   <v-list-item-icon>
                     <v-icon>mdi-menu</v-icon>
                   </v-list-item-icon>
@@ -103,10 +103,10 @@
                       __("Invoices List")
                     }}</v-list-item-title>
                   </v-list-item-content>
-                </v-list-item>
+                </v-list-item> -->
 
                 <!-- List orders to print -->
-                <v-list-item @click="openOrdersList">
+                <!-- <v-list-item @click="openOrdersList">
                   <v-list-item-icon>
                     <v-icon>mdi-menu</v-icon>
                   </v-list-item-icon>
@@ -115,7 +115,7 @@
                       __("Orders List")
                     }}</v-list-item-title>
                   </v-list-item-content>
-                </v-list-item>
+                </v-list-item> -->
 
                 <v-divider class="my-0"></v-divider>
                 <v-list-item @click="logOut">
