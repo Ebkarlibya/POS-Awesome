@@ -1057,19 +1057,24 @@ def create_customer(
         is_exist = frappe.db.exists(
             "Customer", {"customer_name": customer_name})
         if pos_profile.get("posa_allow_duplicate_customer_names") or not is_exist:
+            customer_data = {
+                "doctype": "Customer",
+                "customer_name": customer_name,
+                "posa_referral_company": company,
+                "tax_id": tax_id,
+                "mobile_no": mobile_no,
+                "email_id": email_id,
+                "posa_referral_code": referral_code,
+                "posa_birthday": birthday,
+                "customer_type": customer_type,
+                "gender": gender,
+            }
+            if pos_profile.get('custom_posa_different_mobile_no_field'):
+                field_name = pos_profile.get(
+                    'custom_posa_mobile_number_field_name')
+                customer_data[field_name] = mobile_no
             customer = frappe.get_doc(
-                {
-                    "doctype": "Customer",
-                    "customer_name": customer_name,
-                    "posa_referral_company": company,
-                    "tax_id": tax_id,
-                    "mobile_no": mobile_no,
-                    "email_id": email_id,
-                    "posa_referral_code": referral_code,
-                    "posa_birthday": birthday,
-                    "customer_type": customer_type,
-                    "gender": gender,
-                }
+                customer_data
             )
             if customer_group:
                 customer.customer_group = customer_group
