@@ -586,6 +586,46 @@
           </v-row>
         </div>
         <v-divider></v-divider>
+        <!-- {{ sales_partners }} -->
+        {{ sales_partner }}
+        <v-row class="pb-0 mb-2" align="start">
+          <v-col cols="12">
+            <v-autocomplete
+              dense
+              clearable
+              auto-select-first
+              outlined
+              color="primary"
+              :label="frappe._('Sales Partner')"
+              v-model="sales_partner"
+              :items="sales_partners"
+              item-text="name"
+              item-value="name"
+              background-color="white"
+              :no-data-text="__('Sales Partner not found')"
+              hide-details
+              :filter="salesPartnerFilter"
+              :disabled="readonly"
+            >
+              <!-- !change the item text -->
+              <template v-slot:item="data">
+                <template>
+                  <v-list-item-content>
+                    <v-list-item-title
+                      class="primary--text subtitle-1"
+                      v-html="data.item.name"
+                    ></v-list-item-title>
+                    <!-- v-if="data.item.sales_person_name != data.item.name" -->
+                    <v-list-item-subtitle
+                      v-html="` ${data.item.partner_type}`"
+                    ></v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </template>
+            </v-autocomplete>
+          </v-col>
+        </v-row>
+
         <v-row class="pb-0 mb-2" align="start">
           <v-col cols="12">
             <v-autocomplete
@@ -728,6 +768,9 @@ export default {
     pos_settings: "",
     customer_info: "",
     mpesa_modes: [],
+
+    sales_partners: [],
+    sales_partner: "",
   }),
 
   methods: {
@@ -851,6 +894,7 @@ export default {
       this.redeem_customer_credit = false;
       this.is_cashback = true;
       this.sales_person = "";
+      this.sales_partner = "";
 
       evntBus.$emit("new_invoice", "false");
       this.back_to_invoice();
@@ -1060,6 +1104,7 @@ export default {
     new_address() {
       evntBus.$emit("open_new_address", this.invoice_doc.customer);
     },
+
     get_sales_person_names() {
       const vm = this;
       if (
@@ -1097,6 +1142,62 @@ export default {
         textOne.indexOf(searchText) > -1 || textTwo.indexOf(searchText) > -1
       );
     },
+
+    get_sales_partner_names() {
+      const vm = this;
+      if (
+        vm.pos_profile.posa_local_storage &&
+        localStorage.sales_partners_storage
+      ) {
+        vm.sales_partners = JSON.parse(
+          localStorage.getItem("sales_partners_storage")
+        );
+      }
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.get_sales_partner_names",
+        callback: function (r) {
+          if (r.message) {
+            vm.sales_partners = r.message;
+            if (vm.pos_profile.posa_local_storage) {
+              localStorage.setItem("sales_partners_storage", "");
+              localStorage.setItem(
+                "sales_partners_storage",
+                JSON.stringify(r.message)
+              );
+            }
+          }
+        },
+      });
+    },
+
+    get_default_sales_partner_name() {
+      var default_sales_partner = "";
+      frappe.call({
+        method:
+          "posawesome.posawesome.api.posapp.get_default_sales_partner_name",
+        args: {
+          customer_name: this.customer_info.customer_name,
+        },
+        async: false,
+        callback: function (r) {
+          if (r.message) {
+            default_sales_partner = r.message.default_sales_partner;
+          }
+        },
+      });
+      this.sales_partner = default_sales_partner;
+    },
+
+    salesPartnerFilter(item, queryText, itemText) {
+      const textOne = item.name ? item.name.toLowerCase() : "";
+      const textTwo = item.name.toLowerCase();
+      const searchText = queryText.toLowerCase();
+
+      return (
+        textOne.indexOf(searchText) > -1 || textTwo.indexOf(searchText) > -1
+      );
+    },
+
     request_payment() {
       this.phone_dialog = false;
       const vm = this;
@@ -1363,6 +1464,8 @@ export default {
         this.loyalty_amount = 0;
         this.get_addresses();
         this.get_sales_person_names();
+        this.get_sales_partner_names();
+        this.get_default_sales_partner_name();
       });
       evntBus.$on("register_pos_profile", (data) => {
         this.pos_profile = data.pos_profile;
@@ -1467,6 +1570,13 @@ export default {
             allocated_percentage: 100,
           },
         ];
+      } else {
+        this.invoice_doc.sales_team = [];
+      }
+    },
+    sales_partner() {
+      if (this.sales_partner) {
+        this.invoice_doc.sales_partner = this.sales_partner;
       } else {
         this.invoice_doc.sales_team = [];
       }

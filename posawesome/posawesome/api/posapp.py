@@ -467,6 +467,60 @@ def get_sales_person_names():
     )
     return sales_persons
 
+# # # # # # # # # # # # # # #
+#                           #
+#           ETMS            #
+#                           #
+# # # # # # # # # # # # # # #
+
+
+@frappe.whitelist()
+def get_sales_partner_names():
+    sales_partners = frappe.db.sql(
+        """
+        SELECT name, partner_type
+        FROM `tabSales Partner`
+        ORDER by name
+        LIMIT 0, 10000
+        """,
+        as_dict=1,
+    )
+    return sales_partners
+
+
+@frappe.whitelist()
+def get_sales_partner_names():
+    sales_partners = frappe.db.sql(
+        """
+        SELECT name, partner_type
+        FROM `tabSales Partner`
+        ORDER by name
+        LIMIT 0, 10000
+        """,
+        as_dict=1,
+    )
+    return sales_partners
+
+
+@frappe.whitelist()
+def get_default_sales_partner_name():
+    customer_name = frappe.form_dict['customer_name']
+    sales_partners = frappe.db.sql(
+        f"""
+        SELECT default_sales_partner
+        FROM `tabCustomer`
+        WHERE name = '{customer_name}'
+        """,
+        as_dict=1,
+    )
+    return sales_partners[0]
+
+# # # # # # # # # # # # # # #
+#                           #
+#           ETMS            #
+#                           #
+# # # # # # # # # # # # # # #
+
 
 def add_taxes_from_tax_template(item, parent_doc):
     accounts_settings = frappe.get_cached_doc("Accounts Settings")
