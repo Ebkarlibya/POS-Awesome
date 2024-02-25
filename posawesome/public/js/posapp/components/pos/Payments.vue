@@ -810,6 +810,21 @@ export default {
           return;
         }
       }
+      console.log(
+        this.pos_profile.custom_posa_require_sales_partner,
+        this.sales_partner
+      );
+      if (
+        this.pos_profile.custom_posa_require_sales_partner &&
+        !this.sales_partner
+      ) {
+        evntBus.$emit("show_mesage", {
+          text: `The Sales Partner is Required, If you don\'t want this message to show please disable the option in the POS Profile`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+        return;
+      }
 
       if (
         !this.pos_profile.posa_allow_partial_payment &&
@@ -1575,10 +1590,11 @@ export default {
       }
     },
     sales_partner() {
+      console.log("hehehehe", this.sales_partner);
       if (this.sales_partner) {
         this.invoice_doc.sales_partner = this.sales_partner;
       } else {
-        this.invoice_doc.sales_team = [];
+        this.invoice_doc.sales_partner = "";
       }
     },
   },
