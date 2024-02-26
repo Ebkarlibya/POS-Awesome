@@ -657,7 +657,6 @@ export default {
       } else {
         filtered_list = filtred_list.slice(0, 50);
       }
-
       // Implement fuzzy search using Levenshtein distance algorithm
       if (filtred_list.length == 0 && this.search) {
         filtred_list = filtred_group_list.filter((items) => {
