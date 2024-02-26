@@ -561,105 +561,147 @@ export default {
   computed: {
     filtred_items() {
       this.search = this.get_search(this.first_search);
-      if (!this.pos_profile.pose_use_limit_search) {
-        let filtred_list = [];
-        let filtred_group_list = [];
-        if (this.item_group != "ALL") {
-          filtred_group_list = this.items.filter((item) =>
-            item.item_group
-              .toLowerCase()
-              .includes(this.item_group.toLowerCase())
-          );
-        } else {
-          filtred_group_list = this.items;
-        }
-        if (this.pos_tags_filters && this.pos_tags_filters.length > 0) {
-          filtred_group_list = filtred_group_list.filter((fItem) => {
-            return fItem.pos_tags.some((itemPosTag) => {
-              return this.pos_tags_filters.some(
-                (filterPosTag) => filterPosTag.tag_name === itemPosTag.tag_name
-              );
-            });
-          });
-        }
-        if (!this.search || this.search.length < 3) {
-          if (
-            this.pos_profile.posa_show_template_items &&
-            this.pos_profile.posa_hide_variants_items
-          ) {
-            return (filtred_list = filtred_group_list
-              .filter((item) => !item.variant_of)
-              .slice(0, 50));
-          } else {
-            return (filtred_list = filtred_group_list.slice(0, 50));
-          }
-        } else if (this.search) {
-          filtred_list = filtred_group_list.filter((item) => {
-            let found = false;
-            for (let element of item.item_barcode) {
-              if (element.barcode == this.search) {
-                found = true;
-                break;
-              }
-            }
-            return found;
-          });
-          if (filtred_list.length == 0) {
-            filtred_list = filtred_group_list.filter((item) =>
-              item.item_code.toLowerCase().includes(this.search.toLowerCase())
+      // if (!this.pos_profile.pose_use_limit_search) {
+      let filtred_list = [];
+      let filtred_group_list = [];
+      if (this.item_group != "ALL") {
+        filtred_group_list = this.items.filter((item) =>
+          item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
+        );
+      } else {
+        filtred_group_list = this.items;
+      }
+      if (this.pos_tags_filters && this.pos_tags_filters.length > 0) {
+        filtred_group_list = filtred_group_list.filter((fItem) => {
+          return fItem.pos_tags.some((itemPosTag) => {
+            return this.pos_tags_filters.some(
+              (filterPosTag) => filterPosTag.tag_name === itemPosTag.tag_name
             );
-            if (filtred_list.length == 0) {
-              filtred_list = filtred_group_list.filter((item) =>
-                item.item_name.toLowerCase().includes(this.search.toLowerCase())
-              );
-            }
-            if (
-              filtred_list.length == 0 &&
-              this.pos_profile.posa_search_serial_no
-            ) {
-              filtred_list = filtred_group_list.filter((item) => {
-                let found = false;
-                for (let element of item.serial_no_data) {
-                  if (element.serial_no == this.search) {
-                    found = true;
-                    this.flags.serial_no = null;
-                    this.flags.serial_no = this.search;
-                    break;
-                  }
-                }
-                return found;
-              });
-            }
-            if (
-              filtred_list.length == 0 &&
-              this.pos_profile.posa_search_batch_no
-            ) {
-              filtred_list = filtred_group_list.filter((item) => {
-                let found = false;
-                for (let element of item.batch_no_data) {
-                  if (element.batch_no == this.search) {
-                    found = true;
-                    this.flags.batch_no = null;
-                    this.flags.batch_no = this.search;
-                    break;
-                  }
-                }
-                return found;
-              });
-            }
-          }
-        }
+          });
+        });
+      }
+      if (!this.search || this.search.length < 3) {
         if (
           this.pos_profile.posa_show_template_items &&
           this.pos_profile.posa_hide_variants_items
         ) {
-          return filtred_list.filter((item) => !item.variant_of).slice(0, 50);
+          return (filtred_list = filtred_group_list
+            .filter((item) => !item.variant_of)
+            .slice(0, 50));
         } else {
-          return filtred_list.slice(0, 50);
+          return (filtred_list = filtred_group_list.slice(0, 50));
         }
-      } else {
-        return this.items.slice(0, 50);
+      } else if (this.search) {
+        filtred_list = filtred_group_list.filter((item) => {
+          let found = false;
+          for (let element of item.item_barcode) {
+            if (element.barcode == this.search) {
+              found = true;
+              break;
+            }
+          }
+          return found;
+        });
+        if (filtred_list.length == 0) {
+          filtred_list = filtred_group_list.filter((item) =>
+            item.item_code.toLowerCase().includes(this.search.toLowerCase())
+          );
+          if (filtred_list.length == 0) {
+            filtred_list = filtred_group_list.filter((item) =>
+              item.item_name.toLowerCase().includes(this.search.toLowerCase())
+            );
+          }
+          if (
+            filtred_list.length == 0 &&
+            this.pos_profile.posa_search_serial_no
+          ) {
+            filtred_list = filtred_group_list.filter((item) => {
+              let found = false;
+              for (let element of item.serial_no_data) {
+                if (element.serial_no == this.search) {
+                  found = true;
+                  this.flags.serial_no = null;
+                  this.flags.serial_no = this.search;
+                  break;
+                }
+              }
+              return found;
+            });
+          }
+          if (
+            filtred_list.length == 0 &&
+            this.pos_profile.posa_search_batch_no
+          ) {
+            filtred_list = filtred_group_list.filter((item) => {
+              let found = false;
+              for (let element of item.batch_no_data) {
+                if (element.batch_no == this.search) {
+                  found = true;
+                  this.flags.batch_no = null;
+                  this.flags.batch_no = this.search;
+                  break;
+                }
+              }
+              return found;
+            });
+          }
+        }
       }
+      if (
+        this.pos_profile.posa_show_template_items &&
+        this.pos_profile.posa_hide_variants_items
+      ) {
+        filtered_list = filtred_list
+          .filter((item) => !item.variant_of)
+          .slice(0, 50);
+      } else {
+        filtered_list = filtred_list.slice(0, 50);
+      }
+
+      // Implement fuzzy search using Levenshtein distance algorithm
+      if (filtred_list.length == 0 && this.search) {
+        filtred_list = filtred_group_list.filter((items) => {
+          return levenshteinDistance(
+            items.item_name.toLowerCase(),
+            this.search.toLowerCase()
+          );
+        });
+      }
+      return filtred_list;
+      function levenshteinDistance(itemName, searchQuery) {
+        let searchWords = searchQuery.split(" ");
+        for (let i = 0; i < searchWords.length; i++) {
+          if (!itemName.includes(searchWords[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+      // }
+      // else {
+      //   filtred_list = [];
+
+      //   if (filtred_list.length == 0 && this.search) {
+      //     filtred_list = filtred_group_list.filter((items) => {
+      //       return levenshteinDistance(
+      //         items.item_name.toLowerCase(),
+      //         this.search.toLowerCase()
+      //       );
+      //     });
+      //     return filtred_list;
+      //   } else {
+      //     return this.items.slice(0, 50);
+      //   }
+      // }
+      // function levenshteinDistance(itemName, searchQuery) {
+      //   let searchWords = searchQuery.split(" ");
+      //   for (let i = 0; i < searchWords.length; i++) {
+      //     if (!itemName.includes(searchWords[i])) {
+      //       return false;
+      //     }
+      //   }
+      //   return true;
+      // }
     },
     debounce_search: {
       get() {
