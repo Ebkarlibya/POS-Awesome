@@ -267,7 +267,9 @@ fixtures = [
 
                     # POS Profile
                     'POS Profile-custom_posa_different_mobile_no_field',
-                    'POS Profile-custom_posa_mobile_number_field_name'
+                    'POS Profile-custom_posa_mobile_number_field_name',
+                    'POS Profile-custom_require_related_bausiness',
+                    'POS Profile-custom_posa_require_sales_partner'
 
 
                 ),

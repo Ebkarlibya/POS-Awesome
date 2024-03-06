@@ -1194,6 +1194,9 @@ export default {
       doc.posa_delivery_charges = this.selcted_delivery_charges.name;
       doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
       doc.posting_date = this.posting_date;
+      if (this.pos_profile.custom_require_related_bausiness) {
+        doc.custom_related_business = this.pos_profile.name;
+      }
       return doc;
     },
 

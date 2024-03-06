@@ -586,8 +586,7 @@
           </v-row>
         </div>
         <v-divider></v-divider>
-        <!-- {{ sales_partners }} -->
-        {{ sales_partner }}
+
         <v-row class="pb-0 mb-2" align="start">
           <v-col cols="12">
             <v-autocomplete
@@ -771,6 +770,9 @@ export default {
 
     sales_partners: [],
     sales_partner: "",
+
+    related_bussines: "",
+    related_bussineses: [],
   }),
 
   methods: {
@@ -810,10 +812,7 @@ export default {
           return;
         }
       }
-      console.log(
-        this.pos_profile.custom_posa_require_sales_partner,
-        this.sales_partner
-      );
+
       if (
         this.pos_profile.custom_posa_require_sales_partner &&
         !this.sales_partner
@@ -1191,7 +1190,7 @@ export default {
         method:
           "posawesome.posawesome.api.posapp.get_default_sales_partner_name",
         args: {
-          customer_name: this.customer_info.customer_name,
+          customer_name: this.customer_info.name,
         },
         async: false,
         callback: function (r) {
@@ -1200,7 +1199,9 @@ export default {
           }
         },
       });
-      this.sales_partner = default_sales_partner;
+      if (default_sales_partner) {
+        this.sales_partner = default_sales_partner;
+      }
     },
 
     salesPartnerFilter(item, queryText, itemText) {
@@ -1590,7 +1591,6 @@ export default {
       }
     },
     sales_partner() {
-      console.log("hehehehe", this.sales_partner);
       if (this.sales_partner) {
         this.invoice_doc.sales_partner = this.sales_partner;
       } else {

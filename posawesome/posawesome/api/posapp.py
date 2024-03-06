@@ -489,20 +489,6 @@ def get_sales_partner_names():
 
 
 @frappe.whitelist()
-def get_sales_partner_names():
-    sales_partners = frappe.db.sql(
-        """
-        SELECT name, partner_type
-        FROM `tabSales Partner`
-        ORDER by name
-        LIMIT 0, 10000
-        """,
-        as_dict=1,
-    )
-    return sales_partners
-
-
-@frappe.whitelist()
 def get_default_sales_partner_name():
     customer_name = frappe.form_dict['customer_name']
     sales_partners = frappe.db.sql(
@@ -513,7 +499,8 @@ def get_default_sales_partner_name():
         """,
         as_dict=1,
     )
-    return sales_partners[0]
+    return sales_partners[0] if len(sales_partners) > 0 else None
+
 
 # # # # # # # # # # # # # # #
 #                           #
