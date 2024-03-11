@@ -1275,6 +1275,7 @@ def search_invoices_for_return(invoice_name, company):
         fields=["name"],
         limit_page_length=0,
         order_by="customer",
+        ignore_permissions=True,
     )
     data = []
     is_returned = frappe.get_all(
@@ -1282,6 +1283,8 @@ def search_invoices_for_return(invoice_name, company):
         filters={"return_against": invoice_name, "docstatus": 1},
         fields=["name"],
         order_by="customer",
+        ignore_permissions=True,
+
     )
     if len(is_returned):
         return data

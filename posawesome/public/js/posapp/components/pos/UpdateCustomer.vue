@@ -8,10 +8,10 @@
       <v-card>
         <v-card-title>
           <span v-if="customer_id" class="headline primary--text">{{
-            __('Update Customer')
+            __("Update Customer")
           }}</span>
           <span v-else class="headline primary--text">{{
-            __('Create Customer')
+            __("Create Customer")
           }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
@@ -163,10 +163,10 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" dark @click="close_dialog">{{
-            __('Close')
+            __("Close")
           }}</v-btn>
           <v-btn color="success" dark @click="submit_dialog">{{
-            __('Submit')
+            __("Submit")
           }}</v-btn>
         </v-card-actions>
       </v-card>
@@ -175,26 +175,26 @@
 </template>
 
 <script>
-import { evntBus } from '../../bus';
+import { evntBus } from "../../bus";
 export default {
   data: () => ({
     customerDialog: false,
-    pos_profile: '',
-    customer_id: '',
-    customer_name: '',
-    tax_id: '',
-    mobile_no: '',
-    email_id: '',
-    referral_code: '',
+    pos_profile: "",
+    customer_id: "",
+    customer_name: "",
+    tax_id: "",
+    mobile_no: "",
+    email_id: "",
+    referral_code: "",
     birthday: null,
     birthday_menu: false,
-    group: '',
+    group: "",
     groups: [],
-    territory: '',
+    territory: "",
     territorys: [],
     genders: [],
-    customer_type: 'Individual',
-    gender: '',
+    customer_type: "Individual",
+    gender: "",
     loyalty_points: null,
     loyalty_program: null,
   }),
@@ -205,17 +205,17 @@ export default {
       this.clear_customer();
     },
     clear_customer() {
-      this.customer_name = '';
-      this.tax_id = '';
-      this.mobile_no = '';
-      this.email_id = '';
-      this.referral_code = '';
-      this.birthday = '';
-      this.group = frappe.defaults.get_user_default('Customer Group');
-      this.territory = frappe.defaults.get_user_default('Territory');
-      this.customer_id = '';
-      this.customer_type = 'Individual';
-      this.gender = '';
+      this.customer_name = "";
+      this.tax_id = "";
+      this.mobile_no = "";
+      this.email_id = "";
+      this.referral_code = "";
+      this.birthday = "";
+      this.group = frappe.defaults.get_user_default("Customer Group");
+      this.territory = frappe.defaults.get_user_default("Territory");
+      this.customer_id = "";
+      this.customer_type = "Individual";
+      this.gender = "";
       this.loyalty_points = null;
       this.loyalty_program = null;
     },
@@ -223,11 +223,11 @@ export default {
       if (this.groups.length > 0) return;
       const vm = this;
       frappe.db
-        .get_list('Customer Group', {
-          fields: ['name'],
+        .get_list("Customer Group", {
+          fields: ["name"],
           filters: { is_group: 0 },
           limit: 1000,
-          order_by: 'name',
+          order_by: "name",
         })
         .then((data) => {
           if (data.length > 0) {
@@ -241,11 +241,11 @@ export default {
       if (this.territorys.length > 0) return;
       const vm = this;
       frappe.db
-        .get_list('Territory', {
-          fields: ['name'],
+        .get_list("Territory", {
+          fields: ["name"],
           filters: { is_group: 0 },
           limit: 5000,
-          order_by: 'name',
+          order_by: "name",
         })
         .then((data) => {
           if (data.length > 0) {
@@ -258,8 +258,8 @@ export default {
     getGenders() {
       const vm = this;
       frappe.db
-        .get_list('Gender', {
-          fields: ['name'],
+        .get_list("Gender", {
+          fields: ["name"],
           page_length: 10,
         })
         .then((data) => {
@@ -273,23 +273,23 @@ export default {
     submit_dialog() {
       // validate if all required fields are filled
       if (!this.customer_name) {
-        evntBus.$emit('show_mesage', {
-          text: __('Customer name is required.'),
-          color: 'error',
+        evntBus.$emit("show_mesage", {
+          text: __("Customer name is required."),
+          color: "error",
         });
         return;
       }
       if (!this.group) {
-        evntBus.$emit('show_mesage', {
-          text: __('Customer group is required.'),
-          color: 'error',
+        evntBus.$emit("show_mesage", {
+          text: __("Customer group is required."),
+          color: "error",
         });
         return;
       }
       if (!this.territory) {
-        evntBus.$emit('show_mesage', {
-          text: __('Customer territory is required.'),
-          color: 'error',
+        evntBus.$emit("show_mesage", {
+          text: __("Customer territory is required."),
+          color: "error",
         });
         return;
       }
@@ -308,33 +308,33 @@ export default {
           territory: this.territory,
           customer_type: this.customer_type,
           gender: this.gender,
-          method: this.customer_id ? 'update' : 'create',
+          method: this.customer_id ? "update" : "create",
           pos_profile_doc: this.pos_profile,
         };
         frappe.call({
-          method: 'posawesome.posawesome.api.posapp.create_customer',
+          method: "posawesome.posawesome.api.posapp.create_customer",
           args: args,
           callback: (r) => {
             if (!r.exc && r.message.name) {
-              let text = __('Customer created successfully.');
+              let text = __("Customer created successfully.");
               if (vm.customer_id) {
-                text = __('Customer updated successfully.');
+                text = __("Customer updated successfully.");
               }
-              evntBus.$emit('show_mesage', {
+              evntBus.$emit("show_mesage", {
                 text: text,
-                color: 'success',
+                color: "success",
               });
               args.name = r.message.name;
-              frappe.utils.play_sound('submit');
-              evntBus.$emit('add_customer_to_list', args);
-              evntBus.$emit('set_customer', r.message.name);
-              evntBus.$emit('fetch_customer_details');
+              frappe.utils.play_sound("submit");
+              evntBus.$emit("add_customer_to_list", args);
+              evntBus.$emit("set_customer", r.message.name);
+              evntBus.$emit("fetch_customer_details");
               this.close_dialog();
             } else {
-              frappe.utils.play_sound('error');
-              evntBus.$emit('show_mesage', {
-                text: __('Customer creation failed.'),
-                color: 'error',
+              frappe.utils.play_sound("error");
+              evntBus.$emit("show_mesage", {
+                text: __("Customer creation failed."),
+                color: "error",
               });
             }
           },
@@ -344,7 +344,7 @@ export default {
     },
   },
   created: function () {
-    evntBus.$on('open_update_customer', (data) => {
+    evntBus.$on("open_update_customer", (data) => {
       this.customerDialog = true;
       if (data) {
         this.customer_name = data.customer_name;
@@ -361,18 +361,18 @@ export default {
         this.gender = data.gender;
       }
     });
-    evntBus.$on('register_pos_profile', (data) => {
+    evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
     });
-    evntBus.$on('payments_register_pos_profile', (data) => {
+    evntBus.$on("payments_register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
     });
     this.getCustomerGroups();
     this.getCustomerTerritorys();
     this.getGenders();
     // set default values for customer group and territory from user defaults
-    this.group = frappe.defaults.get_user_default('Customer Group');
-    this.territory = frappe.defaults.get_user_default('Territory');
+    this.group = frappe.defaults.get_user_default("Customer Group");
+    this.territory = frappe.defaults.get_user_default("Territory");
   },
 };
 </script>

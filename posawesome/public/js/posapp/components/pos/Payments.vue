@@ -94,6 +94,7 @@
                 :prefix="currencySymbol(invoice_doc.currency)"
                 @focus="set_rest_amount(payment.idx)"
                 :readonly="invoice_doc.is_return ? true : false"
+                :ref="payment.mode_of_payment"
               ></v-text-field>
             </v-col>
             <v-col
@@ -152,7 +153,6 @@
             </v-col>
           </v-row>
         </div>
-
         <v-row
           class="pyments px-1 py-0"
           v-if="
@@ -186,6 +186,9 @@
               :prefix="currencySymbol(invoice_doc.currency)"
               disabled
             ></v-text-field>
+          </v-col>
+          <v-col cols="5">
+            <v-btn @click="calculate_loyalty_price">Calculate</v-btn>
           </v-col>
         </v-row>
 
@@ -776,6 +779,20 @@ export default {
   }),
 
   methods: {
+    calculate_loyalty_price() {
+      for (var i = 0; i < this.invoice_doc.payments.length; i++) {
+        if (parseFloat(this.invoice_doc.payments[i].amount) > 0) {
+          this.invoice_doc.payments[i].amount -= this.loyalty_amount;
+          const textField =
+            this.$refs[this.invoice_doc.payments[i].mode_of_payment];
+          if (textField) {
+            textField.value = this.formtCurrency(
+              this.invoice_doc.payments[i].amount
+            );
+          }
+        }
+      }
+    },
     back_to_invoice() {
       evntBus.$emit("show_payment", "false");
       evntBus.$emit("set_customer_readonly", false);

@@ -269,7 +269,9 @@ fixtures = [
                     'POS Profile-custom_posa_different_mobile_no_field',
                     'POS Profile-custom_posa_mobile_number_field_name',
                     'POS Profile-custom_require_related_bausiness',
-                    'POS Profile-custom_posa_require_sales_partner'
+                    'POS Profile-custom_posa_require_sales_partner',
+                    'POS Profile-custom_posa_use_amount_discount',
+                    'POS Profile-custom_posa_max_discount_amount_allowed',
 
 
                 ),

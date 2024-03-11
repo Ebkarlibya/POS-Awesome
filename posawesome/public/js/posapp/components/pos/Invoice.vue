@@ -312,6 +312,7 @@
                       "
                     ></v-text-field>
                   </v-col>
+
                   <v-col cols="4">
                     <v-text-field
                       dense
@@ -1302,12 +1303,31 @@ export default {
               (this.flt(item.discount_amount) * 100) /
               this.flt(item.price_list_rate);
             if (
-              discount_percentage > this.pos_profile.posa_max_discount_allowed
+              discount_percentage >
+                this.pos_profile.posa_max_discount_allowed &&
+              this.pos_profile.posa_use_percentage_discount
             ) {
               evntBus.$emit("show_mesage", {
                 text: __(
                   `Discount percentage for item '{0}' cannot be greater than {1}%`,
                   [item.item_name, this.pos_profile.posa_max_discount_allowed]
+                ),
+                color: "error",
+              });
+              value = false;
+            } else if (
+              flt(item.discount_amount) >
+                this.pos_profile.custom_posa_max_discount_amount_allowed &&
+              this.pos_profile.custom_posa_use_amount_discount
+            ) {
+              evntBus.$emit("show_mesage", {
+                text: __(
+                  `Discount Amount for item '{0}' cannot be greater than {1}{2}`,
+                  [
+                    item.item_name,
+                    this.pos_profile.custom_posa_max_discount_amount_allowed,
+                    this.pos_profile.currency,
+                  ]
                 ),
                 color: "error",
               });
@@ -1382,10 +1402,26 @@ export default {
         }
         if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
           const clac_percentage = (this.discount_amount / this.Total) * 100;
-          if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
+          if (
+            (clac_percentage > this.pos_profile.posa_max_discount_allowed,
+            this.pos_profile.posa_use_percentage_discount)
+          ) {
             evntBus.$emit("show_mesage", {
               text: __(`The discount should not be higher than {0}%`, [
                 this.pos_profile.posa_max_discount_allowed,
+              ]),
+              color: "error",
+            });
+            value = false;
+          } else if (
+            flt(this.discount_amount) >
+              this.pos_profile.custom_posa_max_discount_amount_allowed &&
+            this.pos_profile.custom_posa_use_amount_discount
+          ) {
+            evntBus.$emit("show_mesage", {
+              text: __(`The discount should not be higher than {0} {1}`, [
+                this.pos_profile.custom_posa_max_discount_amount_allowed,
+                this.pos_profile.currency,
               ]),
               color: "error",
             });
