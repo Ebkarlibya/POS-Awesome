@@ -188,7 +188,9 @@
             ></v-text-field>
           </v-col>
           <v-col cols="5">
-            <v-btn @click="calculate_loyalty_price">Calculate</v-btn>
+            <v-btn color="primary" @click="calculate_loyalty_price"
+              >Calculate Loyalty Price</v-btn
+            >
           </v-col>
         </v-row>
 
@@ -776,13 +778,34 @@ export default {
 
     related_bussines: "",
     related_bussineses: [],
+    // is_loyalty_calculated: false,
   }),
 
   methods: {
     calculate_loyalty_price() {
+      if (this.loyalty_amount > this.available_pioints_amount) {
+        evntBus.$emit("show_mesage", {
+          text: __(`Cannot use more credit points than you have `),
+          color: "error",
+        });
+        return;
+      }
+      const acc = 0;
+      const payment_total = this.invoice_doc.payments.reduce(
+        (accumulator, currentValue) =>
+          flt(accumulator) + flt(currentValue["amount"]),
+        acc
+      );
       for (var i = 0; i < this.invoice_doc.payments.length; i++) {
-        if (parseFloat(this.invoice_doc.payments[i].amount) > 0) {
-          this.invoice_doc.payments[i].amount -= this.loyalty_amount;
+        if (
+          flt(this.invoice_doc.net_total - flt(payment_total)) >=
+          flt(this.loyalty_amount)
+        ) {
+          break;
+        }
+        if (flt(this.invoice_doc.payments[i].amount) > 0) {
+          this.invoice_doc.payments[i].amount =
+            flt(this.invoice_doc.payments[i].amount) - flt(this.loyalty_amount);
           const textField =
             this.$refs[this.invoice_doc.payments[i].mode_of_payment];
           if (textField) {
@@ -790,6 +813,8 @@ export default {
               this.invoice_doc.payments[i].amount
             );
           }
+          this.is_loyalty_calculated = true;
+          break;
         }
       }
     },
