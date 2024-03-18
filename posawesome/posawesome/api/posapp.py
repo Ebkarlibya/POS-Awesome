@@ -1264,6 +1264,14 @@ def set_customer_info(customer, fieldname, value=""):
 
 @frappe.whitelist()
 def search_invoices_for_return(invoice_name, company):
+    '''
+    This function is used to get all the invoices for return function
+    ETMS EDIT: We edited this function so if the checkbox in the settings Panel, is checked,
+    It will get all the invoices
+    '''
+    allow_cross_branch_return = frappe.get_single(
+        'POS Settings Panel').allow_cross_branch_return
+    print(allow_cross_branch_return)
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
@@ -1275,7 +1283,7 @@ def search_invoices_for_return(invoice_name, company):
         fields=["name"],
         limit_page_length=0,
         order_by="customer",
-        ignore_permissions=True,
+        ignore_permissions=allow_cross_branch_return,
     )
     data = []
     is_returned = frappe.get_all(
@@ -1283,7 +1291,7 @@ def search_invoices_for_return(invoice_name, company):
         filters={"return_against": invoice_name, "docstatus": 1},
         fields=["name"],
         order_by="customer",
-        ignore_permissions=True,
+        ignore_permissions=allow_cross_branch_return,
 
     )
     if len(is_returned):

@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-03-18 09:57:25.828680",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "allow_cross_branch_return"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "allow_cross_branch_return",
+   "fieldtype": "Check",
+   "label": "Allow Cross Branch Return"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-18 10:11:42.183053",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POS Settings Panel",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
