@@ -152,7 +152,6 @@
           </v-menu>
         </v-col>
       </v-row>
-
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 60vh">
         <template @mouseover="style = 'cursor: pointer'">
           <v-data-table
@@ -1296,6 +1295,24 @@ export default {
     validate() {
       let value = true;
       this.items.forEach((item) => {
+        if (
+          this.pos_profile.custom_posa_use_amount_discount &&
+          flt(item.discount_amount) >
+            this.pos_profile.custom_posa_max_discount_amount_allowed
+        ) {
+          evntBus.$emit("show_mesage", {
+            text: __(
+              `Discount Amount for item '{0}' cannot be greater than {1} {2}`,
+              [
+                item.item_name,
+                this.pos_profile.custom_posa_max_discount_amount_allowed,
+                this.pos_profile.currency,
+              ]
+            ),
+            color: "error",
+          });
+          value = false;
+        }
         if (this.pos_profile.posa_max_discount_allowed) {
           if (item.discount_amount && this.flt(item.discount_amount) > 0) {
             // calc discount percentage
@@ -1311,23 +1328,6 @@ export default {
                 text: __(
                   `Discount percentage for item '{0}' cannot be greater than {1}%`,
                   [item.item_name, this.pos_profile.posa_max_discount_allowed]
-                ),
-                color: "error",
-              });
-              value = false;
-            } else if (
-              flt(item.discount_amount) >
-                this.pos_profile.custom_posa_max_discount_amount_allowed &&
-              this.pos_profile.custom_posa_use_amount_discount
-            ) {
-              evntBus.$emit("show_mesage", {
-                text: __(
-                  `Discount Amount for item '{0}' cannot be greater than {1}{2}`,
-                  [
-                    item.item_name,
-                    this.pos_profile.custom_posa_max_discount_amount_allowed,
-                    this.pos_profile.currency,
-                  ]
                 ),
                 color: "error",
               });
