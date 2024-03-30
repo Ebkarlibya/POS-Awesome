@@ -1400,11 +1400,13 @@ export default {
             value = false;
           }
         }
+
         if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
           const clac_percentage = (this.discount_amount / this.Total) * 100;
+
           if (
-            (clac_percentage > this.pos_profile.posa_max_discount_allowed,
-            this.pos_profile.posa_use_percentage_discount)
+            clac_percentage > this.pos_profile.posa_max_discount_allowed &&
+            this.pos_profile.posa_use_percentage_discount
           ) {
             evntBus.$emit("show_mesage", {
               text: __(`The discount should not be higher than {0}%`, [
@@ -2796,6 +2798,7 @@ export default {
       evntBus.$emit("update_invoice_type", this.invoiceType);
     },
     discount_amount() {
+      console.log(this.additional_discount_percentage);
       if (!this.discount_amount || this.discount_amount == 0) {
         this.additional_discount_percentage = 0;
       } else if (this.pos_profile.posa_use_percentage_discount) {
