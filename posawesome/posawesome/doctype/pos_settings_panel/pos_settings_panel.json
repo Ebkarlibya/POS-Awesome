@@ -18,6 +18,7 @@
    "label": "Allow Cross Branch Return"
   },
   {
+   "default": "+218",
    "fieldname": "country_code",
    "fieldtype": "Data",
    "label": "Country Code"
@@ -26,7 +27,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-05-08 15:04:02.616203",
+ "modified": "2024-05-08 16:08:04.215354",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Settings Panel",
