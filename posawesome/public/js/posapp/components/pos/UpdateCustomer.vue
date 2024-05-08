@@ -37,7 +37,17 @@
                   v-model="tax_id"
                 ></v-text-field>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="2" style="padding-right: 0px">
+                <v-text-field
+                  dense
+                  v-model="countryCode"
+                  placeholder="+218"
+                  background-color="white"
+                  hide-details
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="4" style="padding-left: 0px">
                 <v-text-field
                   dense
                   color="primary"
@@ -45,7 +55,11 @@
                   background-color="white"
                   hide-details
                   v-model="mobile_no"
-                ></v-text-field>
+                >
+                  <!-- <template v-slot:prepend-inner>
+                    
+                  </template> -->
+                </v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -148,6 +162,22 @@
                   hide-details
                 ></v-text-field>
               </v-col>
+
+              <v-col cols="6">
+                <v-autocomplete
+                  clearable
+                  dense
+                  color="primary"
+                  :label="frappe._('Sales Partner')"
+                  v-model="sales_partner"
+                  :items="sales_partners"
+                  background-color="white"
+                  :no-data-text="__('No Sales Partners Were Found!')"
+                  hide-details
+                >
+                </v-autocomplete>
+              </v-col>
+
               <v-col cols="6" v-if="loyalty_points">
                 <v-text-field
                   v-model="loyalty_points"
@@ -180,6 +210,8 @@ export default {
   data: () => ({
     customerDialog: false,
     pos_profile: "",
+    pos_settings_panel: "",
+    countryCode: "",
     customer_id: "",
     customer_name: "",
     tax_id: "",
@@ -192,6 +224,8 @@ export default {
     groups: [],
     territory: "",
     territorys: [],
+    sales_partner: "",
+    sales_partners: [],
     genders: [],
     customer_type: "Individual",
     gender: "",
@@ -270,6 +304,23 @@ export default {
           }
         });
     },
+    getSalesPartners() {
+      if (this.sales_partners.length > 0) return;
+      const vm = this;
+      frappe.db
+        .get_list("Sales Partner", {
+          fields: ["name"],
+          limit: 5000,
+          order_by: "name",
+        })
+        .then((data) => {
+          if (data.length > 0) {
+            data.forEach((el) => {
+              vm.sales_partners.push(el.name);
+            });
+          }
+        });
+    },
     submit_dialog() {
       // validate if all required fields are filled
       if (!this.customer_name) {
@@ -293,6 +344,7 @@ export default {
         });
         return;
       }
+      // ? Mobile no is a pos plus field
       if (this.customer_name) {
         const vm = this;
         const args = {
@@ -300,7 +352,10 @@ export default {
           customer_name: this.customer_name,
           company: this.pos_profile.company,
           tax_id: this.tax_id,
-          mobile_no: this.mobile_no,
+
+          mobile_no: `${this.countryCode}${this.mobile_no}`,
+          default_sales_partner: this.sales_partner,
+
           email_id: this.email_id,
           referral_code: this.referral_code,
           birthday: this.birthday,
@@ -363,6 +418,8 @@ export default {
     });
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
+      this.pos_settings_panel = data.pos_settings_panel;
+      this.countryCode = this.pos_settings_panel.country_code;
     });
     evntBus.$on("payments_register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
@@ -370,6 +427,7 @@ export default {
     this.getCustomerGroups();
     this.getCustomerTerritorys();
     this.getGenders();
+    this.getSalesPartners();
     // set default values for customer group and territory from user defaults
     this.group = frappe.defaults.get_user_default("Customer Group");
     this.territory = frappe.defaults.get_user_default("Territory");

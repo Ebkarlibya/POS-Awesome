@@ -7,7 +7,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "allow_cross_branch_return"
+  "allow_cross_branch_return",
+  "country_code"
  ],
  "fields": [
   {
@@ -15,12 +16,17 @@
    "fieldname": "allow_cross_branch_return",
    "fieldtype": "Check",
    "label": "Allow Cross Branch Return"
+  },
+  {
+   "fieldname": "country_code",
+   "fieldtype": "Data",
+   "label": "Country Code"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-18 10:11:42.183053",
+ "modified": "2024-05-08 15:04:02.616203",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Settings Panel",

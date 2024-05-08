@@ -218,6 +218,7 @@ export default {
       company: "",
       company_img: "/assets/erpnext/images/erpnext-logo.svg",
       pos_profile: "",
+      pos_settings_panel:"",
       freeze: false,
       freezeTitle: "",
       freezeMsg: "",
@@ -324,6 +325,7 @@ export default {
           "/assets/erpnext/images/erpnext-logo.svg";
 
         this.pos_profile = data.pos_profile;
+        this.pos_settings_panel = data.pos_settings_panel
         const payments = { text: "Payments", icon: "mdi-cash-register" };
         if (
           this.pos_profile.posa_use_pos_awesome_payments &&

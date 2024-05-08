@@ -112,6 +112,7 @@ def check_opening_shift(user):
         data["pos_opening_shift"] = frappe.get_doc(
             "POS Opening Shift", open_vouchers[0]["name"]
         )
+        data['pos_settings_panel'] = frappe.get_single('POS Settings Panel')
         update_opening_shift_data(data, open_vouchers[0]["pos_profile"])
     return data
 
@@ -1091,6 +1092,7 @@ def create_customer(
     territory=None,
     customer_type=None,
     gender=None,
+    default_sales_partner=None,
     method="create",
 ):
     pos_profile = json.loads(pos_profile_doc)
@@ -1103,12 +1105,14 @@ def create_customer(
                 "customer_name": customer_name,
                 "posa_referral_company": company,
                 "tax_id": tax_id,
+                # ? Pos Plus Field
                 "mobile_no": mobile_no,
                 "email_id": email_id,
                 "posa_referral_code": referral_code,
                 "posa_birthday": birthday,
                 "customer_type": customer_type,
                 "gender": gender,
+                "default_sales_partner": default_sales_partner
             }
             if pos_profile.get('custom_posa_different_mobile_no_field'):
                 field_name = pos_profile.get(
@@ -1125,7 +1129,7 @@ def create_customer(
                 customer.territory = territory
             else:
                 customer.territory = "All Territories"
-            customer.save()
+            customer.insert(ignore_mandatory=True)
             return customer
         else:
             frappe.throw(_("Customer already exists"))
@@ -1271,7 +1275,6 @@ def search_invoices_for_return(invoice_name, company):
     '''
     allow_cross_branch_return = frappe.get_single(
         'POS Settings Panel').allow_cross_branch_return
-    print(allow_cross_branch_return)
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
