@@ -419,7 +419,7 @@ export default {
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
       this.pos_settings_panel = data.pos_settings_panel;
-      this.countryCode = this.pos_settings_panel.country_code;
+      this.countryCode = this.pos_settings_panel.country_code || '+218';
     });
     evntBus.$on("payments_register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
