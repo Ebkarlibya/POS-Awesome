@@ -854,7 +854,7 @@ export default {
           return;
         }
       }
-
+      // ETMS
       if (
         this.pos_profile.custom_posa_require_sales_partner &&
         !this.sales_partner
@@ -978,6 +978,10 @@ export default {
       data["redeemed_customer_credit"] = this.redeemed_customer_credit;
       data["customer_credit_dict"] = this.customer_credit_dict;
       data["is_cashback"] = this.is_cashback;
+      // ETMS //
+      if (this.pos_profile.custom_posa_is_credit_sale) {
+        this.invoice_doc.is_pos = 0;
+      }
 
       const vm = this;
       frappe.call({

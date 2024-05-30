@@ -35,8 +35,7 @@ from frappe.utils.caching import redis_cache
 @frappe.whitelist()
 def get_opening_dialog_data():
     data = {}
-    data["companies"] = frappe.get_list(
-        "Company", limit_page_length=0, order_by="name")
+    data["companies"] = frappe.get_list("Company", limit_page_length=0, order_by="name")
     data["pos_profiles_data"] = frappe.get_list(
         "POS Profile",
         filters={"disabled": 0},
@@ -112,7 +111,7 @@ def check_opening_shift(user):
         data["pos_opening_shift"] = frappe.get_doc(
             "POS Opening Shift", open_vouchers[0]["name"]
         )
-        data['pos_settings_panel'] = frappe.get_single('POS Settings Panel')
+        data["pos_settings_panel"] = frappe.get_single("POS Settings Panel")
         update_opening_shift_data(data, open_vouchers[0]["pos_profile"])
     return data
 
@@ -124,8 +123,7 @@ def update_opening_shift_data(data, pos_profile):
         "Stock Settings", None, "allow_negative_stock"
     )
     data["stock_settings"] = {}
-    data["stock_settings"].update(
-        {"allow_negative_stock": allow_negative_stock})
+    data["stock_settings"].update({"allow_negative_stock": allow_negative_stock})
 
 
 @frappe.whitelist()
@@ -143,8 +141,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
         pos_profile = json.loads(pos_profile)
         today = nowdate()
         data = dict()
-        posa_display_items_in_stock = pos_profile.get(
-            "posa_display_items_in_stock")
+        posa_display_items_in_stock = pos_profile.get("posa_display_items_in_stock")
         search_serial_no = pos_profile.get("posa_search_serial_no")
         search_batch_no = pos_profile.get("posa_search_batch_no")
         posa_show_template_items = pos_profile.get("posa_show_template_items")
@@ -167,8 +164,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     search_value, search_serial_no
                 )
 
-            item_code = data.get("item_code") if data.get(
-                "item_code") else search_value
+            item_code = data.get("item_code") if data.get("item_code") else search_value
             serial_no = data.get("serial_no") if data.get("serial_no") else ""
             batch_no = data.get("batch_no") if data.get("batch_no") else ""
             barcode = data.get("barcode") if data.get("barcode") else ""
@@ -260,8 +256,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                 )
                 batch_no_data = []
                 if search_batch_no:
-                    batch_list = get_batch_qty(
-                        warehouse=warehouse, item_code=item_code)
+                    batch_list = get_batch_qty(warehouse=warehouse, item_code=item_code)
                     if batch_list:
                         for batch in batch_list:
                             if batch.qty > 0 and batch.batch_no:
@@ -305,8 +300,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     item_attributes = frappe.get_all(
                         "Item Variant Attribute",
                         fields=["attribute", "attribute_value"],
-                        filters={"parent": item.item_code,
-                                 "parentfield": "attributes"},
+                        filters={"parent": item.item_code, "parentfield": "attributes"},
                     )
                 if posa_display_items_in_stock and (
                     not item_stock_qty or item_stock_qty < 0
@@ -319,11 +313,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                         fields=["tag_name"],
                         filters={"parent": item_code},
                     )
-                    item.update(
-                        {
-                            "pos_tags": pos_tags
-                        }
-                    )
+                    item.update({"pos_tags": pos_tags})
                     row.update(item)
                     row.update(
                         {
@@ -351,8 +341,7 @@ def get_item_group_condition(pos_profile):
     cond = " and 1=1"
     item_groups = get_item_groups(pos_profile)
     if item_groups:
-        cond = " and item_group in (%s)" % (
-            ", ".join(["%s"] * len(item_groups)))
+        cond = " and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
 
     return cond % tuple(item_groups)
 
@@ -415,8 +404,7 @@ def get_customer_group_condition(pos_profile):
     cond = "disabled = 0"
     customer_groups = get_customer_groups(pos_profile)
     if customer_groups:
-        cond = " customer_group in (%s)" % (
-            ", ".join(["%s"] * len(customer_groups)))
+        cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
 
     return cond % tuple(customer_groups)
 
@@ -468,6 +456,7 @@ def get_sales_person_names():
     )
     return sales_persons
 
+
 # # # # # # # # # # # # # # #
 #                           #
 #           ETMS            #
@@ -491,7 +480,7 @@ def get_sales_partner_names():
 
 @frappe.whitelist()
 def get_default_sales_partner_name():
-    customer_name = frappe.form_dict['customer_name']
+    customer_name = frappe.form_dict["customer_name"]
     sales_partners = frappe.db.sql(
         f"""
         SELECT default_sales_partner
@@ -526,8 +515,7 @@ def add_taxes_from_tax_template(item, parent_doc):
         for tax_detail in taxes_template_details:
             tax_type = tax_detail.get("tax_type")
 
-            found = any(tax.account_head ==
-                        tax_type for tax in parent_doc.taxes)
+            found = any(tax.account_head == tax_type for tax in parent_doc.taxes)
             if not found:
                 tax_row = parent_doc.append("taxes", {})
                 tax_row.update(
@@ -539,14 +527,14 @@ def add_taxes_from_tax_template(item, parent_doc):
                 )
 
                 if parent_doc.doctype == "Purchase Order":
-                    tax_row.update(
-                        {"category": "Total", "add_deduct_tax": "Add"})
+                    tax_row.update({"category": "Total", "add_deduct_tax": "Add"})
                 tax_row.db_insert()
 
 
 @frappe.whitelist()
 def update_invoice(data):
     data = json.loads(data)
+
     if data.get("name"):
         invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
         invoice_doc.update(data)
@@ -558,8 +546,7 @@ def update_invoice(data):
     frappe.flags.ignore_account_permission = True
 
     if invoice_doc.is_return and invoice_doc.return_against:
-        ref_doc = frappe.get_cached_doc(
-            invoice_doc.doctype, invoice_doc.return_against)
+        ref_doc = frappe.get_cached_doc(invoice_doc.doctype, invoice_doc.return_against)
         if not ref_doc.update_stock:
             invoice_doc.update_stock = 0
         if len(invoice_doc.payments) == 0:
@@ -580,8 +567,7 @@ def update_invoice(data):
                 item.is_free_item = 1
             else:
                 frappe.throw(
-                    _("Rate cannot be zero for item {0}").format(
-                        item.item_code)
+                    _("Rate cannot be zero for item {0}").format(item.item_code)
                 )
         else:
             item.is_free_item = 0
@@ -612,8 +598,7 @@ def submit_invoice(invoice, data):
         if "cash" in i.mode_of_payment.lower() and i.type == "Cash"
     ]
     if len(mop_cash_list) > 0:
-        cash_account = get_bank_cash_account(
-            mop_cash_list[0], invoice_doc.company)
+        cash_account = get_bank_cash_account(mop_cash_list[0], invoice_doc.company)
     else:
         cash_account = {
             "account": frappe.get_value(
@@ -645,8 +630,7 @@ def submit_invoice(invoice, data):
     # calculating cash
     total_cash = 0
     if data.get("redeemed_customer_credit"):
-        total_cash = invoice_doc.total - \
-            float(data.get("redeemed_customer_credit"))
+        total_cash = invoice_doc.total - float(data.get("redeemed_customer_credit"))
 
     is_payment_entry = 0
     if data.get("redeemed_customer_credit"):
@@ -726,8 +710,7 @@ def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
                     d.item_code, warehouse, qty, throw, d.serial_no
                 )
             else:
-                batch_qty = get_batch_qty(
-                    batch_no=d.batch_no, warehouse=warehouse)
+                batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
                 if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")):
                     frappe.throw(
                         _(
@@ -974,14 +957,12 @@ def get_items_details(pos_profile, items_data):
 
                 batch_no_data = []
 
-                batch_list = get_batch_qty(
-                    warehouse=warehouse, item_code=item_code)
+                batch_list = get_batch_qty(warehouse=warehouse, item_code=item_code)
 
                 if batch_list:
                     for batch in batch_list:
                         if batch.qty > 0 and batch.batch_no:
-                            batch_doc = frappe.get_cached_doc(
-                                "Batch", batch.batch_no)
+                            batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
                             if (
                                 str(batch_doc.expiry_date) > str(today)
                                 or batch_doc.expiry_date in ["", None]
@@ -1097,8 +1078,7 @@ def create_customer(
 ):
     pos_profile = json.loads(pos_profile_doc)
     if method == "create":
-        is_exist = frappe.db.exists(
-            "Customer", {"customer_name": customer_name})
+        is_exist = frappe.db.exists("Customer", {"customer_name": customer_name})
         if pos_profile.get("posa_allow_duplicate_customer_names") or not is_exist:
             customer_data = {
                 "doctype": "Customer",
@@ -1112,15 +1092,12 @@ def create_customer(
                 "posa_birthday": birthday,
                 "customer_type": customer_type,
                 "gender": gender,
-                "default_sales_partner": default_sales_partner
+                "default_sales_partner": default_sales_partner,
             }
-            if pos_profile.get('custom_posa_different_mobile_no_field'):
-                field_name = pos_profile.get(
-                    'custom_posa_mobile_number_field_name')
+            if pos_profile.get("custom_posa_different_mobile_no_field"):
+                field_name = pos_profile.get("custom_posa_mobile_number_field_name")
                 customer_data[field_name] = mobile_no
-            customer = frappe.get_doc(
-                customer_data
-            )
+            customer = frappe.get_doc(customer_data)
             if customer_group:
                 customer.customer_group = customer_group
             else:
@@ -1228,19 +1205,16 @@ def set_customer_info(customer, fieldname, value=""):
         frappe.db.set_value("Customer", customer, "loyalty_program", value)
 
     contact = (
-        frappe.get_cached_value("Customer", customer,
-                                "customer_primary_contact") or ""
+        frappe.get_cached_value("Customer", customer, "customer_primary_contact") or ""
     )
 
     if contact:
         contact_doc = frappe.get_doc("Contact", contact)
         if fieldname == "email_id":
-            contact_doc.set(
-                "email_ids", [{"email_id": value, "is_primary": 1}])
+            contact_doc.set("email_ids", [{"email_id": value, "is_primary": 1}])
             frappe.db.set_value("Customer", customer, "email_id", value)
         elif fieldname == "mobile_no":
-            contact_doc.set(
-                "phone_nos", [{"phone": value, "is_primary_mobile_no": 1}])
+            contact_doc.set("phone_nos", [{"phone": value, "is_primary_mobile_no": 1}])
             frappe.db.set_value("Customer", customer, "mobile_no", value)
         contact_doc.save()
 
@@ -1250,14 +1224,12 @@ def set_customer_info(customer, fieldname, value=""):
         contact_doc.is_primary_contact = 1
         contact_doc.is_billing_contact = 1
         if fieldname == "mobile_no":
-            contact_doc.add_phone(
-                value, is_primary_mobile_no=1, is_primary_phone=1)
+            contact_doc.add_phone(value, is_primary_mobile_no=1, is_primary_phone=1)
 
         if fieldname == "email_id":
             contact_doc.add_email(value, is_primary=1)
 
-        contact_doc.append(
-            "links", {"link_doctype": "Customer", "link_name": customer})
+        contact_doc.append("links", {"link_doctype": "Customer", "link_name": customer})
 
         contact_doc.flags.ignore_mandatory = True
         contact_doc.save()
@@ -1268,13 +1240,14 @@ def set_customer_info(customer, fieldname, value=""):
 
 @frappe.whitelist()
 def search_invoices_for_return(invoice_name, company):
-    '''
+    """
     This function is used to get all the invoices for return function
     ETMS EDIT: We edited this function so if the checkbox in the settings Panel, is checked,
     It will get all the invoices
-    '''
+    """
     allow_cross_branch_return = frappe.get_single(
-        'POS Settings Panel').allow_cross_branch_return
+        "POS Settings Panel"
+    ).allow_cross_branch_return
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
@@ -1295,7 +1268,6 @@ def search_invoices_for_return(invoice_name, company):
         fields=["name"],
         order_by="customer",
         ignore_permissions=allow_cross_branch_return,
-
     )
     if len(is_returned):
         return data
@@ -1403,8 +1375,7 @@ def make_address(args):
             "country": args.get("country"),
             "address_type": "Shipping",
             "links": [
-                {"link_doctype": args.get("doctype"),
-                 "link_name": args.get("customer")}
+                {"link_doctype": args.get("doctype"), "link_name": args.get("customer")}
             ],
         }
     ).insert()
@@ -1433,14 +1404,12 @@ def build_item_cache(item_code):
         as_list=1,
     )
 
-    disabled_items = set(
-        [i.name for i in frappe.db.get_all("Item", {"disabled": 1})])
+    disabled_items = set([i.name for i in frappe.db.get_all("Item", {"disabled": 1})])
 
     attribute_value_item_map = frappe._dict({})
     item_attribute_value_map = frappe._dict({})
 
-    item_variants_data = [
-        r for r in item_variants_data if r[0] not in disabled_items]
+    item_variants_data = [r for r in item_variants_data if r[0] not in disabled_items]
     for row in item_variants_data:
         item_code, attribute, attribute_value = row
         # (attr, value) => [item1, item2]
@@ -1448,8 +1417,7 @@ def build_item_cache(item_code):
             item_code
         )
         # item => {attr1: value1, attr2: value2}
-        item_attribute_value_map.setdefault(
-            item_code, {})[attribute] = attribute_value
+        item_attribute_value_map.setdefault(item_code, {})[attribute] = attribute_value
 
     optional_attributes = set()
     for item_code, attr_dict in item_attribute_value_map.items():
@@ -1507,8 +1475,7 @@ def create_payment_request(doc):
     for pay in doc.get("payments"):
         if pay.get("type") == "Phone":
             if pay.get("amount") <= 0:
-                frappe.throw(
-                    _("Payment amount cannot be less than or equal to 0"))
+                frappe.throw(_("Payment amount cannot be less than or equal to 0"))
 
             if not doc.get("contact_mobile"):
                 frappe.throw(_("Please enter the phone number first"))
@@ -1582,8 +1549,7 @@ def make_payment_request(**args):
     args = frappe._dict(args)
 
     ref_doc = frappe.get_doc(args.dt, args.dn)
-    gateway_account = get_payment_gateway_account(
-        args.get("payment_gateway_account"))
+    gateway_account = get_payment_gateway_account(args.get("payment_gateway_account"))
     if not gateway_account:
         frappe.throw(_("Payment Gateway Account not found"))
 
@@ -1593,8 +1559,7 @@ def make_payment_request(**args):
             validate_loyalty_points,
         )
 
-        loyalty_amount = validate_loyalty_points(
-            ref_doc, int(args.loyalty_points))
+        loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
         frappe.db.set_value(
             "Sales Order",
             args.dn,
