@@ -25,6 +25,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
+from posawesome.posawesome.api.utils import get_outstanding_amount
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
@@ -585,10 +586,29 @@ def update_invoice(data):
 
 
 @frappe.whitelist()
+def get_sales_invoice_items(invoice):
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice)
+    items = invoice_doc.items
+    return items
+
+
+##################################
+#                                #
+#                                #
+#             ETMS               #
+#                                #
+#                                #
+##################################
+
+
+# Added the 'custom_customer_outstanding_balance' in the utils
+@frappe.whitelist()
 def submit_invoice(invoice, data):
     data = json.loads(data)
     invoice = json.loads(invoice)
     invoice_doc = frappe.get_doc("Sales Invoice", invoice.get("name"))
+    panel_settings = frappe.get_single("POS Settings Panel")
+
     invoice_doc.update(invoice)
     if invoice.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
@@ -654,6 +674,11 @@ def submit_invoice(invoice, data):
 
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
         set_batch_nos(invoice_doc, "warehouse", throw=True)
+    # Edited to get the outstanding amount
+    if panel_settings.use_outstanding_amount_in_sales_invoice:
+        outstanding = get_outstanding_amount(invoice_doc.name, invoice_doc.customer)
+        invoice_doc.custom_customer_outstanding_after_invoice = outstanding
+
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
