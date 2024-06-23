@@ -287,6 +287,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
+
             evntBus.$emit("set_all_items", vm.items);
             vm.loading = false;
             console.info("Items Loaded");
@@ -580,11 +581,16 @@ export default {
           });
         });
       }
-      if (!this.search || this.search.length < 3) {
+      // Changed Thid from < 3 to > 0 so that variants are hidden
+      if (!this.search || this.search.length > 0) {
         if (
           this.pos_profile.posa_show_template_items &&
           this.pos_profile.posa_hide_variants_items
         ) {
+          console.log(
+            "fil",
+            filtred_group_list.filter((item) => !item.variant_of).slice(0, 50)
+          );
           return (filtred_list = filtred_group_list
             .filter((item) => !item.variant_of)
             .slice(0, 50));
