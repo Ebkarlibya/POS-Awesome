@@ -270,6 +270,7 @@ fixtures = [
                     "POS Profile-custom_posa_use_amount_discount",
                     "POS Profile-custom_posa_max_discount_amount_allowed",
                     "POS Profile-custom_posa_is_credit_sale",
+                    "POS Profile-custom_posa_items_per_page",
                     # Sales invoice
                     # Option Enabled in the panel settings
                     "Sales Invoice-custom_customer_outstanding_after_invoice",

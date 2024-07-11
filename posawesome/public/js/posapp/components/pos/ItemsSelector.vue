@@ -561,6 +561,7 @@ export default {
 
   computed: {
     filtred_items() {
+      console.log(this.pos_profile);
       this.search = this.get_search(this.first_search);
       // if (!this.pos_profile.pose_use_limit_search) {
       let filtred_list = [];
@@ -581,21 +582,20 @@ export default {
           });
         });
       }
-      // Changed Thid from < 3 to > 0 so that variants are hidden
-      if (!this.search || this.search.length > 0) {
+      // ETMS
+      if (!this.search || this.search.length < 3) {
         if (
           this.pos_profile.posa_show_template_items &&
           this.pos_profile.posa_hide_variants_items
         ) {
-          console.log(
-            "fil",
-            filtred_group_list.filter((item) => !item.variant_of).slice(0, 50)
-          );
           return (filtred_list = filtred_group_list
             .filter((item) => !item.variant_of)
-            .slice(0, 50));
+            .slice(0, this.pos_profile.custom_posa_items_per_page));
         } else {
-          return (filtred_list = filtred_group_list.slice(0, 50));
+          return (filtred_list = filtred_group_list.slice(
+            0,
+            this.pos_profile.custom_posa_items_per_page
+          ));
         }
       } else if (this.search) {
         filtred_list = filtred_group_list.filter((item) => {
@@ -659,9 +659,12 @@ export default {
       ) {
         filtered_list = filtred_list
           .filter((item) => !item.variant_of)
-          .slice(0, 50);
+          .slice(0, this.pos_profile.custom_posa_items_per_page);
       } else {
-        filtered_list = filtred_list.slice(0, 50);
+        filtered_list = filtred_list.slice(
+          0,
+          this.pos_profile.custom_posa_items_per_page
+        );
       }
       // Implement fuzzy search using Levenshtein distance algorithm
       if (filtred_list.length == 0 && this.search) {
