@@ -10,7 +10,10 @@
   "allow_cross_branch_return",
   "country_code",
   "column_break_1mdhc",
-  "use_outstanding_amount_in_sales_invoice"
+  "use_outstanding_amount_in_sales_invoice",
+  "customer_defaults_section",
+  "default_customer_group",
+  "default_customer_territory"
  ],
  "fields": [
   {
@@ -34,12 +37,29 @@
    "fieldname": "use_outstanding_amount_in_sales_invoice",
    "fieldtype": "Check",
    "label": "Use Outstanding Amount In Sales Invoice"
+  },
+  {
+   "fieldname": "customer_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Defaults"
+  },
+  {
+   "fieldname": "default_customer_group",
+   "fieldtype": "Link",
+   "label": "Default Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "default_customer_territory",
+   "fieldtype": "Link",
+   "label": "Default Customer Territory",
+   "options": "Territory"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-04 09:28:59.790484",
+ "modified": "2024-07-11 12:18:13.440052",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Settings Panel",

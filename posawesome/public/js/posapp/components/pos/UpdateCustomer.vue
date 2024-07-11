@@ -419,7 +419,14 @@ export default {
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
       this.pos_settings_panel = data.pos_settings_panel;
-      this.countryCode = this.pos_settings_panel.country_code || '+218';
+      this.countryCode = this.pos_settings_panel.country_code || "+218";
+      this.group =
+        this.pos_settings_panel.default_customer_group ||
+        frappe.defaults.get_user_default("Customer Group");
+      this.territory =
+        this.pos_settings_panel.default_customer_territory ||
+        frappe.defaults.get_user_default("Territory");
+      console.log(this.group, this.territory);
     });
     evntBus.$on("payments_register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
@@ -429,8 +436,10 @@ export default {
     this.getGenders();
     this.getSalesPartners();
     // set default values for customer group and territory from user defaults
+
     this.group = frappe.defaults.get_user_default("Customer Group");
     this.territory = frappe.defaults.get_user_default("Territory");
+    console.log(this.group, this.territory);
   },
 };
 </script>
