@@ -283,7 +283,6 @@ def get_invoices_list():
             """,
             as_dict=True,
         )
-
         for invoice in invoices:
             si_items = frappe.get_all(
                 "Sales Invoice Item",
