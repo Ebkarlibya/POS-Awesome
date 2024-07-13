@@ -5,7 +5,7 @@ frappe.pages['posapp'].on_page_load = function (wrapper) {
 		title: 'POS Awesome',
 		single_column: true
 	});
-
+	console.log(frappe)
 	this.page.$PosApp = new frappe.PosApp.posapp(this.page);
 
 	$('div.navbar-fixed-top').find('.container').css('padding', '0');

@@ -262,6 +262,8 @@ fixtures = [
                     # Item
                     "Item-custom_posa_pos_tag",  # tab break
                     "Item-custom_posa_pos_tags",  # table
+                    "Item-posa_has_warranty",  # From old pos
+                    "Item-posa_warranty_no_of_years",  # From old pos
                     # POS Profile
                     "POS Profile-custom_posa_different_mobile_no_field",
                     "POS Profile-custom_posa_mobile_number_field_name",
@@ -271,9 +273,14 @@ fixtures = [
                     "POS Profile-custom_posa_max_discount_amount_allowed",
                     "POS Profile-custom_posa_is_credit_sale",
                     "POS Profile-custom_posa_items_per_page",
+                    "POS Profile-posa_enable_warranty_print_system",  # Old Pos
+                    "POS Profile-posa_warranty_print_format",  # Old POS
                     # Sales invoice
                     # Option Enabled in the panel settings
                     "Sales Invoice-custom_customer_outstanding_after_invoice",
+                    # Sales Invoice Item
+                    "Sales Invoice Item-posa_has_warranty",  # checkbox
+                    "Sales Invoice Item-posa_warranty_no_of_years",  # int
                 ),
             ]
         ],

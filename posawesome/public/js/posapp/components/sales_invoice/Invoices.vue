@@ -150,6 +150,23 @@
               <v-btn block color="primary" dark @click="print_invoice">
                 {{ __("Print") }}
               </v-btn>
+              <!-- {{ pos_profile_details }} -->
+              <!-- {{ this.selected_invoices[0] }}
+              {{ this.selected_invoices[0].posa_has_warranty }} -->
+              <v-btn
+                class="mt-4"
+                v-if="
+                  pos_profile_details.posa_enable_warranty_print_system &&
+                  this.selected_invoices[0] &&
+                  this.selected_invoices[0].posa_has_warranty === 'Yes'
+                "
+                block
+                color="orange"
+                dark
+                @click="print_warranty_invoice"
+              >
+                {{ __("Print Warranty") }}
+              </v-btn>
             </div>
           </template>
         </v-card>
@@ -221,6 +238,12 @@ export default {
           sortable: true,
           value: "outstanding_amount",
         },
+        {
+          text: __("Has Warranty"),
+          align: "end",
+          sortable: true,
+          value: "posa_has_warranty",
+        },
       ],
 
       selected_invoice_items: [],
@@ -270,7 +293,7 @@ export default {
                   : "yellow";
               return el;
             });
-            console.log(this.invoice_data);
+            // console.log(this.invoice_data);
           } else {
           }
 
@@ -321,9 +344,9 @@ export default {
     },
     load_print_page(invoice_name) {
       const print_format =
-        this.pos_profile.print_format_for_online ||
-        this.pos_profile.print_format;
-      const letter_head = this.pos_profile.letter_head || 0;
+        this.pos_profile_details.print_format_for_online ||
+        this.pos_profile_details.print_format;
+      const letter_head = this.pos_profile_details.letter_head || 0;
       const url =
         frappe.urllib.get_base_url() +
         "/printview?doctype=Sales%20Invoice&name=" +
@@ -340,6 +363,37 @@ export default {
           printWindow.print();
           // printWindow.close();
           // NOTE : uncomoent this to auto closing printing window
+        },
+        true
+      );
+    },
+    print_warranty_invoice() {
+      if (
+        this.selected_invoices.length > 0 &&
+        this.selected_invoices[0].posa_has_warranty === "Yes"
+      ) {
+        this.load_warranty_print_page(this.selected_invoices[0].name);
+        // evntBus.$emit('load_invoice', this.selected[0]);
+        // this.invoicesListDialog = false;
+      }
+    },
+    load_warranty_print_page(invoice_name) {
+      const letter_head = this.pos_profile_details.letter_head || 0;
+      const url =
+        frappe.urllib.get_base_url() +
+        "/printview?doctype=Sales%20Invoice&name=" +
+        invoice_name +
+        "&trigger_print=1" +
+        "&format=" +
+        this.pos_profile_details.posa_warranty_print_format +
+        "&no_letterhead=" +
+        letter_head;
+      const printWindow = window.open(url, "PrintWarranty");
+      printWindow.addEventListener(
+        "load",
+        function () {
+          printWindow.print();
+          // printWindow.close();
         },
         true
       );

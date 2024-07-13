@@ -247,6 +247,7 @@ def calc_delivery_charges(doc):
 @frappe.whitelist()
 def get_invoices_list():
     import json
+
     try:
         term_sql_cond = ""
         include_drafts = json.loads(frappe.form_dict["include_drafts"])
@@ -280,18 +281,20 @@ def get_invoices_list():
                 order by creation desc
                 limit 20
             """,
-            as_dict=True
+            as_dict=True,
         )
 
-        # for invoice in invoices:
-        #     si_items = frappe.get_all(
-        #         "Sales Invoice Item",
-        #         fields=["posa_has_warranty"],
-        #         filters={"parent": invoice["name"]}
-        #     )
-        #     for si_item in si_items:
-        #         if (si_item["posa_has_warranty"]):
-        #             invoice["posa_has_warranty"] = "Yes"
+        for invoice in invoices:
+            si_items = frappe.get_all(
+                "Sales Invoice Item",
+                fields=["posa_has_warranty"],
+                filters={"parent": invoice["name"]},
+            )
+            for si_item in si_items:
+                if si_item["posa_has_warranty"]:
+                    invoice["posa_has_warranty"] = "Yes"
+                else:
+                    invoice["posa_has_warranty"] = "No"
         return invoices
     except:
         tb = frappe.get_traceback()
@@ -301,6 +304,7 @@ def get_invoices_list():
 @frappe.whitelist()
 def get_invoice_items():
     import json
+
     try:
         invoice = json.loads(frappe.form_dict["invoice"])
         items = frappe.db.sql(
@@ -312,7 +316,7 @@ def get_invoice_items():
                 order by creation desc
                 limit 20
             """,
-            as_dict=True
+            as_dict=True,
         )
         return items
     except:

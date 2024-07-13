@@ -993,8 +993,20 @@ export default {
         async: true,
         callback: function (r) {
           if (r.message) {
+            has_warranty = vm.invoice_doc.items.filter(
+              (item) => item.posa_has_warranty === 1
+            ).length;
+            if (
+              vm.pos_profile.posa_enable_warranty_print_system &&
+              has_warranty > 0
+            ) {
+              vm.load_warranty_print_page();
+            }
             if (print) {
               vm.load_print_page();
+            }
+            if (print_warranty) {
+              vm.load_warranty_print_page();
             }
             evntBus.$emit("set_last_invoice", vm.invoice_doc.name);
             evntBus.$emit("show_mesage", {
@@ -1052,6 +1064,27 @@ export default {
           printWindow.print();
           // printWindow.close();
           // NOTE : uncomoent this to auto closing printing window
+        },
+        true
+      );
+    },
+    load_warranty_print_page() {
+      const letter_head = this.pos_profile.letter_head || 0;
+      const url =
+        frappe.urllib.get_base_url() +
+        "/printview?doctype=Sales%20Invoice&name=" +
+        this.invoice_doc.name +
+        "&trigger_print=1" +
+        "&format=" +
+        this.pos_profile.posa_warranty_print_format +
+        "&no_letterhead=" +
+        letter_head;
+      const printWindow = window.open(url, "PrintWarranty");
+      printWindow.addEventListener(
+        "load",
+        function () {
+          printWindow.print();
+          // printWindow.close();
         },
         true
       );
