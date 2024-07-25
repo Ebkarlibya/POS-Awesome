@@ -855,6 +855,26 @@ export default {
         }
       }
       // ETMS
+      // Validate that the paid amount is the same as the amount given
+      if (this.pos_settings_panel.exact_payment){
+        total_paid = this.invoice_doc.payments.reduce((val, obj)=>{
+          return val + obj.amount
+        },0)
+        if (total_paid !== this.invoice_doc.total_amount){
+
+          
+          evntBus.$emit("show_mesage", {
+            text: __(
+              "The amount paid either exceeds or subceeds the total amount."
+            ),
+            color: "error",
+          });
+          frappe.utils.play_sound("error");
+          console.error("phone payment not requested");
+          return;
+        } 
+
+      }
       if (
         this.pos_profile.custom_posa_require_sales_partner &&
         !this.sales_partner
@@ -1005,9 +1025,12 @@ export default {
             if (print) {
               vm.load_print_page();
             }
-            if (print_warranty) {
-              vm.load_warranty_print_page();
-            }
+            setTimeout(() => {
+              if (!vm.pos_profile.posa_disable_payment_print_popup) {
+                vm.load_print_page();
+              }
+            }, 1000);
+            evntBus.$emit("etms_pos__submitted_invoice", r.message);
             evntBus.$emit("set_last_invoice", vm.invoice_doc.name);
             evntBus.$emit("show_mesage", {
               text: `Invoice ${r.message.name} is Submited`,
@@ -1598,6 +1621,18 @@ export default {
   },
   created() {
     document.addEventListener("keydown", this.shortPay.bind(this));
+    evntBus.$on("register_pos_profile", (data) => {
+      this.pos_profile = data.pos_profile;
+      this.pos_settings_panel = data.pos_settings_panel;
+      this.countryCode = this.pos_settings_panel.country_code || "+218";
+      this.group =
+        this.pos_settings_panel.default_customer_group ||
+        frappe.defaults.get_user_default("Customer Group");
+      this.territory =
+        this.pos_settings_panel.default_customer_territory ||
+        frappe.defaults.get_user_default("Territory");
+      console.log(this.group, this.territory);
+    });
   },
   beforeDestroy() {
     evntBus.$off("send_invoice_doc_payment");

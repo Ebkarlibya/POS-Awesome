@@ -13,7 +13,9 @@
   "use_outstanding_amount_in_sales_invoice",
   "customer_defaults_section",
   "default_customer_group",
-  "default_customer_territory"
+  "default_customer_territory",
+  "payment_section",
+  "exact_payment"
  ],
  "fields": [
   {
@@ -54,12 +56,24 @@
    "fieldtype": "Link",
    "label": "Default Customer Territory",
    "options": "Territory"
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "default": "0",
+   "description": "When checked, only amount is accepted from customer is the exact total amount.",
+   "fieldname": "exact_payment",
+   "fieldtype": "Check",
+   "label": "Exact Payment"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-11 12:18:13.440052",
+ "modified": "2024-07-25 12:38:56.060726",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Settings Panel",
