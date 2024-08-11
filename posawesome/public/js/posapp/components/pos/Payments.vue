@@ -73,9 +73,11 @@
         <v-divider></v-divider>
 
         <div v-if="is_cashback">
+          <!-- v-for="payment in invoice_doc.payments" -->
           <v-row
             class="pyments px-1 py-0"
-            v-for="payment in invoice_doc.payments"
+            v-for="payment in this.pos_profile.payments"
+            v-if="!invoice_doc.is_return || payment.allow_in_returns"
             :key="payment.name"
           >
             <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
@@ -823,6 +825,7 @@ export default {
       evntBus.$emit("set_customer_readonly", false);
     },
     submit(event, payment_received = false, print = false) {
+      debugger;
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
         evntBus.$emit("show_mesage", {
           text: `Payments not correct`,
@@ -856,13 +859,12 @@ export default {
       }
       // ETMS
       // Validate that the paid amount is the same as the amount given
-      if (this.pos_settings_panel.exact_payment){
-        total_paid = this.invoice_doc.payments.reduce((val, obj)=>{
-          return val + obj.amount
-        },0)
-        if (total_paid !== this.invoice_doc.total_amount){
-
-          
+      if (this.pos_settings_panel.exact_payment) {
+        total_paid = this.invoice_doc.payments.reduce((val, obj) => {
+          return val + obj.amount;
+        }, 0);
+        console.log(total_paid, this.invoice_doc.total);
+        if (total_paid !== this.invoice_doc.total) {
           evntBus.$emit("show_mesage", {
             text: __(
               "The amount paid either exceeds or subceeds the total amount."
@@ -872,8 +874,7 @@ export default {
           frappe.utils.play_sound("error");
           console.error("phone payment not requested");
           return;
-        } 
-
+        }
       }
       if (
         this.pos_profile.custom_posa_require_sales_partner &&
