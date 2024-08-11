@@ -825,7 +825,7 @@ export default {
       evntBus.$emit("set_customer_readonly", false);
     },
     submit(event, payment_received = false, print = false) {
-      debugger;
+      // debugger;
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
         evntBus.$emit("show_mesage", {
           text: `Payments not correct`,
