@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card
-      class="selection mx-auto grey lighten-5 pa-1"
+      class="selection mx-auto grey lighten-5 d-1"
       style="max-height: 76vh; height: 76vh"
     >
       <v-progress-linear
@@ -73,10 +73,10 @@
         <v-divider></v-divider>
 
         <div v-if="is_cashback">
-          <!-- v-for="payment in invoice_doc.payments" -->
+          <!-- v-for="payment in this.pos_profile.payments" -->
           <v-row
             class="pyments px-1 py-0"
-            v-for="payment in this.pos_profile.payments"
+            v-for="payment in invoice_doc.payments"
             v-if="!invoice_doc.is_return || payment.allow_in_returns"
             :key="payment.name"
           >
@@ -794,8 +794,9 @@ export default {
       }
       const acc = 0;
       const payment_total = this.invoice_doc.payments.reduce(
-        (accumulator, currentValue) =>
-          flt(accumulator) + flt(currentValue["amount"]),
+        (accumulator, currentValue) => {
+          return accumulator + currentValue["amount"];
+        },
         acc
       );
       for (var i = 0; i < this.invoice_doc.payments.length; i++) {
@@ -825,7 +826,6 @@ export default {
       evntBus.$emit("set_customer_readonly", false);
     },
     submit(event, payment_received = false, print = false) {
-      // debugger;
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
         evntBus.$emit("show_mesage", {
           text: `Payments not correct`,
@@ -861,9 +861,8 @@ export default {
       // Validate that the paid amount is the same as the amount given
       if (this.pos_settings_panel.exact_payment) {
         total_paid = this.invoice_doc.payments.reduce((val, obj) => {
-          return val + obj.amount;
+          return flt(val) + flt(obj.amount);
         }, 0);
-        console.log(total_paid, this.invoice_doc.total);
         if (total_paid !== this.invoice_doc.total) {
           evntBus.$emit("show_mesage", {
             text: __(
@@ -1556,6 +1555,22 @@ export default {
       }
       return res;
     },
+    addAdditionalDataToPayments() {
+      var newArr = this.invoice_doc.payments.map((item) => {
+        const found = this.pos_profile.payments.find(
+          (el) => el.mode_of_payment === item.mode_of_payment
+        );
+        if (found) {
+          return {
+            ...item,
+            allow_in_returns: found.allow_in_returns,
+            default: found.default,
+          };
+        }
+        return item;
+      });
+      this.invoice_doc.payments = newArr;
+    },
   },
 
   mounted: function () {
@@ -1585,6 +1600,20 @@ export default {
         this.get_sales_person_names();
         this.get_sales_partner_names();
         this.get_default_sales_partner_name();
+        var newArr = this.invoice_doc.payments.map((item) => {
+          const found = this.pos_profile.payments.find(
+            (el) => el.mode_of_payment === item.mode_of_payment
+          );
+          if (found) {
+            return {
+              ...item,
+              allow_in_returns: found.allow_in_returns,
+              default: found.default,
+            };
+          }
+          return item;
+        });
+        this.invoice_doc.payments = newArr;
       });
       evntBus.$on("register_pos_profile", (data) => {
         this.pos_profile = data.pos_profile;
@@ -1600,6 +1629,20 @@ export default {
           this.invoice_doc.posa_delivery_date = null;
           this.invoice_doc.posa_notes = null;
           this.invoice_doc.shipping_address_name = null;
+          var newArr = this.invoice_doc.payments.map((item) => {
+            const found = this.pos_profile.payments.find(
+              (el) => el.mode_of_payment === item.mode_of_payment
+            );
+            if (found) {
+              return {
+                ...item,
+                allow_in_returns: found.allow_in_returns,
+                default: found.default,
+              };
+            }
+            return item;
+          });
+          this.invoice_doc.payments = newArr;
         }
       });
     });
@@ -1632,7 +1675,6 @@ export default {
       this.territory =
         this.pos_settings_panel.default_customer_territory ||
         frappe.defaults.get_user_default("Territory");
-      console.log(this.group, this.territory);
     });
   },
   beforeDestroy() {
