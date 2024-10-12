@@ -82,13 +82,6 @@
 import { evntBus } from '../../bus';
 import UpdateCustomer from './UpdateCustomer.vue';
 export default {
-  props: {
-    invoice_doc: {
-      type: Object, // Change to Object if you're passing an object
-      default: () => ({}), // Default to an empty object
-    },
-  },
-
   data: () => ({
     pos_profile: '',
     customers: [],
@@ -219,22 +212,12 @@ export default {
   },
 
   watch: {
-    invoice_doc: {
-      immediate: true,
-      handler(newVal) {
-        // Set related_customer to the value of custom_related_customer from invoice_doc
-        if (newVal && newVal.custom_related_customer) {
-          this.related_customer = newVal.custom_related_customer;
-        } else {
-          this.related_customer = ''; // Reset if not available
-        }
-      },
-    },
     customer() {
+      console.log('customer change')
       evntBus.$emit('update_customer', this.customer);
 
       this.get_related_customers(this.customer); // Fetch related customers when customer changes
-      //this.related_customer = ''; // Clear related customer when customer changes
+      this.related_customer = ''; // Clear related customer when customer changes
 
     },
     related_customer(newVal) {

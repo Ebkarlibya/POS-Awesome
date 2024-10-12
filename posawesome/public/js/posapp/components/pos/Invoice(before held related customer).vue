@@ -28,14 +28,14 @@
           cols="9"
           class="pb-2 pr-0"
         >
-          <Customer :invoice_doc="invoice_doc"></Customer>
+          <Customer></Customer>
         </v-col>
         <v-col
           v-if="!pos_profile.posa_allow_sales_order"
           cols="12"
           class="pb-2"
         >
-          <Customer :invoice_doc="invoice_doc"></Customer>
+          <Customer></Customer>
         </v-col>
         <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2">
           <v-select
@@ -932,7 +932,7 @@ export default {
       pos_profile: "",
       pos_opening_shift: "",
       stock_settings: "",
-      invoice_doc: {},
+      invoice_doc: "",
       return_doc: "",
       customer: "",
 
@@ -1234,12 +1234,6 @@ export default {
           },
         });
       }
-
-
-      this.attachment_path = ''; // Clear the attachment path if not present
-      this.attachment_name = ''; // Clear the attachment name if not present
-      this.attachment = null; // Clear the attachment data if not present
-
       this.items = [];
       this.posa_offers = [];
       evntBus.$emit("set_pos_coupons", []);
@@ -1273,11 +1267,6 @@ export default {
       }
       if (!data.name && !data.is_return) {
         this.items = [];
-
-        this.attachment_path = ''; // Clear the attachment path if not present
-        this.attachment_name = ''; // Clear the attachment name if not present
-        this.attachment = null; // Clear the attachment data if not present
-
         this.customer = this.pos_profile.customer;
         this.invoice_doc = "";
         this.discount_amount = 0;
@@ -1340,26 +1329,25 @@ export default {
       doc.customer = this.customer;
 
 
-
+      console.log('$$$$$$$..')
+      console.log(doc.custom_attachment)
+      console.log('$$$$$$$')
       
-
-      if(this.invoice_doc.name){
-        if (doc.custom_attachment) {
-            // Assuming you want to get the file name and path from the file manager
-            this.attachment_path = doc.custom_attachment; // Set the attachment path
-            this.attachment_name = doc.custom_attachment.split('/').pop(); // Extract the file name from the path
-            this.attachment = { name: this.attachment_name, path: this.attachment_path }; // Store the attachment data
-        } else {
-            this.attachment_path = ''; // Clear the attachment path if not present
-            this.attachment_name = ''; // Clear the attachment name if not present
-            this.attachment = null; // Clear the attachment data if not present
-        }
-      }else{
-        doc.custom_attachment = this.attachment_path;
+      if (doc.custom_attachment) {
+          // Assuming you want to get the file name and path from the file manager
+          this.attachment_path = doc.custom_attachment; // Set the attachment path
+          this.attachment_name = doc.custom_attachment.split('/').pop(); // Extract the file name from the path
+          this.attachment = { name: this.attachment_name, path: this.attachment_path }; // Store the attachment data
+      } else {
+          this.attachment_path = ''; // Clear the attachment path if not present
+          this.attachment_name = ''; // Clear the attachment name if not present
+          this.attachment = null; // Clear the attachment data if not present
       }
 
-      
+
       doc.custom_related_customer = this.related_customer;
+      doc.custom_attachment = this.attachment_path;
+
 
 
       doc.items = this.get_invoice_items();
@@ -1431,7 +1419,7 @@ export default {
     },
 
     update_invoice(doc) {
-
+    console.log('update_invoice+ '+doc)
       const vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.update_invoice",
@@ -1445,8 +1433,13 @@ export default {
           }
         },
       });
+      console.log(this.invoice_doc)
 
-      return this.invoice_doc || {};
+      this.attachment_path = ''; // Clear the attachment path if not present
+      this.attachment_name = ''; // Clear the attachment name if not present
+      this.attachment = null; // Clear the attachment data if not present
+          
+      return this.invoice_doc;
     },
 
     proces_invoice() {
@@ -1771,10 +1764,7 @@ export default {
           item: {
             item_code: item.item_code,
             customer: this.customer,
-
             custom_related_customer: this.related_customer,
-            custom_attachment: this.attachment_path,
-
             doctype: "Sales Invoice",
             name: "New Sales Invoice 1",
             company: this.pos_profile.company,
@@ -1860,14 +1850,12 @@ export default {
     },
 
     fetch_customer_details() {
+      console.log('change cussomter')
       this.items.forEach((item) => {
         this.update_item_detail(item);
       });
       // comment empty item
-
-      if(!this.invoice_doc.name){
-        this.items = []
-      }
+      this.items = []
 
       const vm = this;
       if (this.customer) {
@@ -2949,11 +2937,7 @@ export default {
       this.fetch_customer_details();
     });
     evntBus.$on('set_related_customer', (relatedCustomer) => {
-      
-      if(!this.invoice_doc.name){
-        this.items = []
-      }
-
+      this.items = []
       this.related_customer = relatedCustomer; // Store the related customer
     });
     evntBus.$on("new_invoice", () => {
