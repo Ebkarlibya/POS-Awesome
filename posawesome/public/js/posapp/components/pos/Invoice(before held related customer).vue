@@ -439,7 +439,7 @@
                       :label="frappe._('Stock UOM')"
                       background-color="white"
                       hide-details
-                      v-model="item.sales_uom"
+                      v-model="item.stock_uom"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -1062,7 +1062,7 @@ export default {
     add_item(item) {
 
       if (!item.uom) {
-        item.uom = item.sales_uom;
+        item.uom = item.stock_uom;
       }
       let index = -1;
       if (!this.new_line) {
@@ -1195,7 +1195,7 @@ export default {
       new_item.discount_amount_per_item = 0;
       new_item.price_list_rate = item.rate;
       new_item.qty = item.qty;
-      new_item.uom = item.uom ? item.uom : item.sales_uom;
+      new_item.uom = item.uom ? item.uom : item.stock_uom;
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
       new_item.posa_offers = JSON.stringify([]);
@@ -1840,7 +1840,7 @@ export default {
             item.conversion_factor = data.conversion_factor;
             item.stock_qty = data.stock_qty;
             item.actual_qty = data.actual_qty;
-            item.sales_uom = data.sales_uom;
+            item.stock_uom = data.stock_uom;
             (item.has_serial_no = data.has_serial_no),
               (item.has_batch_no = data.has_batch_no),
               vm.calc_item_price(item);
@@ -2673,7 +2673,7 @@ export default {
           ? offer.discount_percentage
           : 0;
       new_item.discount_amount_per_item = 0;
-      new_item.uom = item.uom ? item.uom : item.sales_uom;
+      new_item.uom = item.uom ? item.uom : item.stock_uom;
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
       new_item.posa_offers = JSON.stringify([]);

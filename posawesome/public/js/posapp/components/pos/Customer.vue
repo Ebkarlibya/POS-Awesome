@@ -52,6 +52,26 @@
         </template>
       </template>
     </v-autocomplete>
+    <br>
+    <!-- Related Customer Autocomplete -->
+    <v-autocomplete
+      v-if="related_customers.length > 0"
+      dense
+      clearable
+      outlined
+      color="primary"
+      :label="__('Related Customer')"
+      v-model="related_customer"
+      :items="related_customers"
+      item-text="employee_name"
+      item-value="name"
+      background-color="white"
+      :no-data-text="__('No related customer found')"
+      hide-details
+      :disabled="readonly"
+    />
+    </v-autocomplete>
+
     <div class="mb-8">
       <UpdateCustomer></UpdateCustomer>
     </div>
@@ -62,10 +82,19 @@
 import { evntBus } from '../../bus';
 import UpdateCustomer from './UpdateCustomer.vue';
 export default {
+  props: {
+    invoice_doc: {
+      type: Object, // Change to Object if you're passing an object
+      default: () => ({}), // Default to an empty object
+    },
+  },
+
   data: () => ({
     pos_profile: '',
     customers: [],
     customer: '',
+    related_customers: [], // Store related customers
+    related_customer: '',  // Selected related customer
     readonly: false,
     customer_info: {},
   }),
@@ -103,6 +132,36 @@ export default {
         },
       });
     },
+
+    // Fetch related customers based on selected customer
+    get_related_customers(customer) {
+      const vm = this;
+      if (!customer) {
+        vm.related_customers = [];
+        evntBus.$emit('update_related_customers', vm.related_customers); // Emit empty array when no customer
+        return;
+      }
+      frappe.call({
+        method: 'frappe.client.get_list',
+        args: {
+          doctype: 'Related Customer',
+          filters: {
+            parent_customer: customer,
+          },
+          fields: ['name', 'employee_name'],
+        },
+        callback: function (r) {
+          if (r.message) {
+            vm.related_customers = r.message;
+            evntBus.$emit('update_related_customers', vm.related_customers); // Emit updated related customers
+          } else {
+            vm.related_customers = [];
+            evntBus.$emit('update_related_customers', vm.related_customers); // Emit empty array if no related customers found
+          }
+        },
+      });
+    },
+
     new_customer() {
       evntBus.$emit('open_update_customer', null);
     },
@@ -160,9 +219,27 @@ export default {
   },
 
   watch: {
+    invoice_doc: {
+      immediate: true,
+      handler(newVal) {
+        // Set related_customer to the value of custom_related_customer from invoice_doc
+        if (newVal && newVal.custom_related_customer) {
+          this.related_customer = newVal.custom_related_customer;
+        } else {
+          this.related_customer = ''; // Reset if not available
+        }
+      },
+    },
     customer() {
       evntBus.$emit('update_customer', this.customer);
+
+      this.get_related_customers(this.customer); // Fetch related customers when customer changes
+      //this.related_customer = ''; // Clear related customer when customer changes
+
     },
+    related_customer(newVal) {
+      evntBus.$emit('set_related_customer', newVal); // Emit after related customer change
+    }
   },
 };
 </script>

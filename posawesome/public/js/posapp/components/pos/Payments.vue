@@ -707,6 +707,7 @@ export default {
   data: () => ({
     loading: false,
     pos_profile: "",
+    min_invoice_payment_req: 0,
     invoice_doc: "",
     loyalty_amount: 0,
     is_credit_sale: 0,
@@ -728,6 +729,7 @@ export default {
     pos_settings: "",
     customer_info: "",
     mpesa_modes: [],
+    readonly: false,
   }),
 
   methods: {
@@ -781,6 +783,8 @@ export default {
         return;
       }
 
+      
+
       if (
         this.pos_profile.posa_allow_partial_payment &&
         !this.pos_profile.posa_allow_credit_sale &&
@@ -788,6 +792,20 @@ export default {
       ) {
         evntBus.$emit("show_mesage", {
           text: `Please enter the amount paid`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+        return;
+      }
+
+
+      if (
+        this.pos_profile.posa_allow_partial_payment &&
+        !this.pos_profile.posa_allow_credit_sale &&
+        this.total_payments < this.min_invoice_payment_req
+      ) {
+        evntBus.$emit("show_mesage", {
+          text: `Minimum amount paid must be `+this.min_invoice_payment_req,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -861,6 +879,8 @@ export default {
         payment.amount = flt(payment.amount);
         totalPayedAmount += payment.amount;
       });
+
+
       if (this.invoice_doc.is_return && totalPayedAmount == 0) {
         this.invoice_doc.is_pos = 0;
       }
@@ -904,12 +924,18 @@ export default {
       });
     },
     set_full_amount(idx) {
-      this.invoice_doc.payments.forEach((payment) => {
-        payment.amount =
-          payment.idx == idx
-            ? this.invoice_doc.rounded_total || this.invoice_doc.grand_total
-            : 0;
-      });
+      
+      if(this.invoice_doc.custom_related_customer){
+        evntBus.$emit("send_invoice_doc_payment", this.invoice_doc);
+      }else{
+        this.invoice_doc.payments.forEach((payment) => {
+          payment.amount =
+            payment.idx == idx
+              ? this.invoice_doc.rounded_total || this.invoice_doc.grand_total
+              : 0;
+        });
+      }
+      
     },
     set_rest_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
@@ -1348,10 +1374,61 @@ export default {
         this.is_credit_sale = 0;
         this.is_write_off_change = 0;
         if (default_payment && !invoice_doc.is_return) {
-          default_payment.amount = this.flt(
-            invoice_doc.rounded_total || invoice_doc.grand_total,
-            this.currency_precision
-          );
+          // default_payment.amount = this.flt(
+          //   invoice_doc.rounded_total || invoice_doc.grand_total,
+          //   this.currency_precision
+          // );
+
+
+
+          var total_cash = 0;
+
+
+          function getEmployeePercentage(invoice_name) {
+
+            return new Promise((resolve, reject) => {
+
+              frappe.call({
+                  method: "posawesome.api_utils.get_employee_percentage",
+                  args: {
+                      invoice_name: invoice_name
+                  },
+                  callback: function(response) {
+                      if (response.message) {
+                        resolve(response.message)
+                      }
+                  }
+              });
+            });
+          }
+
+          async function calculateTotal() {
+            for (let d of invoice_doc.items || []) {
+              let total_amount = 0;
+
+              const employee_percentage = await getEmployeePercentage(
+                invoice_doc.name,
+              );
+
+              total_cash = employee_percentage;
+
+            }
+
+            return total_cash; // Return the calculated total cash
+          }
+
+          calculateTotal().then((total_cash) => {
+            default_payment.amount = this.flt(total_cash, this.currency_precision);
+            this.min_invoice_payment_req = default_payment.amount
+          });
+
+
+
+          
+
+
+
+
         }
         if (invoice_doc.is_return) {
           this.is_return = true;
@@ -1364,6 +1441,7 @@ export default {
         this.get_addresses();
         this.get_sales_person_names();
       });
+
       evntBus.$on("register_pos_profile", (data) => {
         this.pos_profile = data.pos_profile;
         this.get_mpesa_modes();
