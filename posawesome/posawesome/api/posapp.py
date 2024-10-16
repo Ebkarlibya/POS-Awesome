@@ -188,7 +188,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                 name AS item_code,
                 item_name,
                 description,
-                stock_uom,
+                sales_uom,
                 image,
                 is_stock_item,
                 has_variants,
@@ -244,7 +244,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                 item_price = {}
                 if item_prices.get(item_code):
                     item_price = (
-                        item_prices.get(item_code).get(item.stock_uom)
+                        item_prices.get(item_code).get(item.sales_uom)
                         or item_prices.get(item_code).get("None")
                         or {}
                     )
@@ -1092,7 +1092,7 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
             "name",
             "item_name",
             "description",
-            "stock_uom",
+            "sales_uom",
             "image",
             "is_stock_item",
             "has_variants",
@@ -1111,14 +1111,14 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
             filters={
                 "price_list": selling_price_list,
                 "item_code": item_code,
-                "uom": item.stock_uom,
+                "uom": item.sales_uom,
             },
         )
 
         if prices_with_uom > 0:
-            filters["uom"] = item.stock_uom
+            filters["uom"] = item.sales_uom
         else:
-            filters["uom"] = ["in", ["", None, item.stock_uom]]
+            filters["uom"] = ["in", ["", None, item.sales_uom]]
 
         item_prices_data = frappe.get_all(
             "Item Price",
@@ -1689,7 +1689,7 @@ def auto_create_items():
                 "description": item_code,
                 "item_group": "Auto Items",
                 "is_stock_item": 0,
-                "stock_uom": "Nos",
+                "sales_uom": "Nos",
                 "is_sales_item": 1,
                 "is_purchase_item": 0,
                 "is_fixed_asset": 0,
