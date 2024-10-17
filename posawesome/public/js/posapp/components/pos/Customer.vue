@@ -147,6 +147,7 @@ export default {
           doctype: 'Related Customer',
           filters: {
             parent_customer: customer,
+            enabled: 1
           },
           fields: ['name', 'employee_name'],
         },
