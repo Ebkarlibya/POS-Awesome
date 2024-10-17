@@ -2981,6 +2981,17 @@ export default {
       });
     });
     evntBus.$on("load_return_invoice", (data) => {
+      this.related_customer = data.invoice_doc.custom_related_customer;
+      this.attachment_path = data.invoice_doc.custom_attachment;
+      this.attachment_name = data.invoice_doc.custom_attachment.split('/').pop();
+      this.attachment = { name: this.attachment_name, path: this.attachment_path };
+
+
+      console.log('### Load Return Invoice ###')
+      console.log(this.related_customer)
+      console.log(this.attachment_path)
+      console.log('############################')
+      
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
       this.additional_discount_percentage =
