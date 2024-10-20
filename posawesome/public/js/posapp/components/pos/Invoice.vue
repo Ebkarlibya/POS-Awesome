@@ -1180,6 +1180,24 @@ export default {
         return percentage_and_amount; // Return the calculated total cash
       }
 
+
+
+      if (!this.customer) {
+        evntBus.$emit("show_mesage", {
+          text: __(`There is no Customer !`),
+          color: "error",
+        });
+        return;
+      }
+
+      if (this.related_customers.length > 0 && !this.related_customer) {
+        evntBus.$emit("show_mesage", {
+          text: __(`There is no Related Customer !`),
+          color: "error",
+        });
+        return;
+      }
+
       updateItemValues(this.customer, this.related_customer, item).then((percentage_and_amount) => {
           new_item.custom_employee_percentage = percentage_and_amount[0];
           new_item.custom_company_percentage = percentage_and_amount[1];
@@ -1239,6 +1257,7 @@ export default {
       this.attachment_path = ''; // Clear the attachment path if not present
       this.attachment_name = ''; // Clear the attachment name if not present
       this.attachment = null; // Clear the attachment data if not present
+
 
       this.items = [];
       this.posa_offers = [];
@@ -1865,8 +1884,11 @@ export default {
       });
       // comment empty item
 
+      
       if(!this.invoice_doc.name){
-        this.items = []
+        if(!this.invoice_doc.is_return){
+          this.items = []
+        }
       }
 
       const vm = this;
@@ -2951,7 +2973,9 @@ export default {
     evntBus.$on('set_related_customer', (relatedCustomer) => {
       
       if(!this.invoice_doc.name){
-        this.items = []
+        if(!this.invoice_doc.is_return){
+          this.items = []
+        }
       }
 
       this.related_customer = relatedCustomer; // Store the related customer
@@ -2981,22 +3005,17 @@ export default {
       });
     });
     evntBus.$on("load_return_invoice", (data) => {
-      this.related_customer = data.invoice_doc.custom_related_customer;
-      this.attachment_path = data.invoice_doc.custom_attachment;
-      this.attachment_name = data.invoice_doc.custom_attachment.split('/').pop();
+      this.related_customer = data.return_doc.custom_related_customer;
+      this.attachment_path = data.return_doc.custom_attachment;
+      this.attachment_name = data.return_doc.custom_attachment.split('/').pop();
       this.attachment = { name: this.attachment_name, path: this.attachment_path };
-
-
-      console.log('### Load Return Invoice ###')
-      console.log(this.related_customer)
-      console.log(this.attachment_path)
-      console.log('############################')
       
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
       this.additional_discount_percentage =
         -data.return_doc.additional_discount_percentage;
       this.return_doc = data.return_doc;
+
     });
     evntBus.$on("set_new_line", (data) => {
       this.new_line = data;

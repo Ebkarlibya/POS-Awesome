@@ -802,7 +802,8 @@ export default {
       if (
         this.pos_profile.posa_allow_partial_payment &&
         !this.pos_profile.posa_allow_credit_sale &&
-        this.total_payments < this.min_invoice_payment_req
+        this.total_payments < this.min_invoice_payment_req &&
+        !this.invoice_doc.is_return
       ) {
         evntBus.$emit("show_mesage", {
           text: `Minimum amount paid must be `+this.min_invoice_payment_req,
@@ -1373,7 +1374,7 @@ export default {
         );
         this.is_credit_sale = 0;
         this.is_write_off_change = 0;
-        if (default_payment && !invoice_doc.is_return) {
+        if (default_payment && !this.invoice_doc.is_return) {
           // default_payment.amount = this.flt(
           //   invoice_doc.rounded_total || invoice_doc.grand_total,
           //   this.currency_precision
@@ -1417,10 +1418,12 @@ export default {
             return total_cash; // Return the calculated total cash
           }
 
-          calculateTotal().then((total_cash) => {
-            default_payment.amount = this.flt(total_cash, this.currency_precision);
-            this.min_invoice_payment_req = default_payment.amount
-          });
+          if(!this.invoice_doc.is_return){
+            calculateTotal().then((total_cash) => {
+              default_payment.amount = this.flt(total_cash, this.currency_precision);
+              this.min_invoice_payment_req = default_payment.amount
+            });
+          }
 
 
 

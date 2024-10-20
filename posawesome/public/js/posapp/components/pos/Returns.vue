@@ -142,9 +142,6 @@ export default {
           new_item.amount = item.amount * -1;
           items.push(new_item);
         });
-        console.log('***************')
-        console.log(invoice_doc)
-        console.log('***************')
         invoice_doc.items = items;
         invoice_doc.is_return = 1;
         invoice_doc.return_against = return_doc.name;
