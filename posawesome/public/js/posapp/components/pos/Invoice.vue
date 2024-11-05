@@ -1379,6 +1379,7 @@ export default {
 
       
       doc.custom_related_customer = this.related_customer;
+      doc.custom_user = frappe.session.user;
 
 
       doc.items = this.get_invoice_items();
@@ -1793,6 +1794,7 @@ export default {
 
             custom_related_customer: this.related_customer,
             custom_attachment: this.attachment_path,
+            custom_user: frappe.session.user,
 
             doctype: "Sales Invoice",
             name: "New Sales Invoice 1",
