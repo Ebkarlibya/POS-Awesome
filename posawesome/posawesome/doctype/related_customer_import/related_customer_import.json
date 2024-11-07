@@ -51,7 +51,8 @@
   {
    "fieldname": "output",
    "fieldtype": "Code",
-   "label": "Output"
+   "label": "Output",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_r7lxv",
@@ -69,7 +70,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-07 14:42:51.177711",
+ "modified": "2024-11-07 15:07:13.416116",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Related Customer Import",

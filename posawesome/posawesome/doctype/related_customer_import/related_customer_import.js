@@ -24,20 +24,18 @@ frappe.ui.form.on('Related Customer Import', {
     	frm.set_value("output", )
     },
     get_data: function (frm) {
-    	if(frm.doc.attach_file){
-    		frm.set_value("employee_overtime_dates", )
-    		frm.set_value("total_hours", 0)
+    	if(frm.doc.attach_file && frm.doc.customer){
 
             frappe.call({
 		        doc: cur_frm.doc,
-		        method: "get_monthly_overtime_request_file",
+		        method: "import_related_customer_data",
 		        callback: function(r) {
-		        	frm.set_value('total_hours', r.message)
-		            cur_frm.refresh_fields(['employee_overtime_dates']);
+		        	frm.set_value('output', r.message)
+		            cur_frm.refresh_fields(['output']);
 		        }
 		    });
 	    }else{
-	    	frappe.throw("من فضلك قم بارفاق ملف أولا.")
+	    	frappe.throw("Please attach a file first.")
 	    }
     }
 });
