@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-07 13:54:16.154673",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "percent_table",
+  "section_break_r7lxv",
+  "download_template",
+  "attach_file",
+  "get_data",
+  "output_section",
+  "output"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "description": "Download this template, and enter the Related Customer data in it. Please enter your data after the first row.",
+   "fieldname": "download_template",
+   "fieldtype": "Button",
+   "label": "Download Template"
+  },
+  {
+   "description": "Please upload the file after filling it out from here.",
+   "fieldname": "attach_file",
+   "fieldtype": "Attach",
+   "label": "Attach File",
+   "reqd": 1
+  },
+  {
+   "description": "Click here to add your data.",
+   "fieldname": "get_data",
+   "fieldtype": "Button",
+   "label": "Get Data"
+  },
+  {
+   "fieldname": "output_section",
+   "fieldtype": "Section Break",
+   "label": "Output"
+  },
+  {
+   "fieldname": "output",
+   "fieldtype": "Code",
+   "label": "Output"
+  },
+  {
+   "fieldname": "section_break_r7lxv",
+   "fieldtype": "Section Break",
+   "label": "Import Related Customer"
+  },
+  {
+   "fieldname": "percent_table",
+   "fieldtype": "Table",
+   "label": "Percent Table",
+   "options": "Percent Table",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-11-07 14:16:36.533224",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Related Customer Import",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

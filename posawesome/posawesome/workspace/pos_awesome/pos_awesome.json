@@ -128,7 +128,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "POS",
-   "link_count": 3,
+   "link_count": 4,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -162,9 +162,19 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Related Customer Import",
+   "link_count": 0,
+   "link_to": "Related Customer Import",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2024-11-07 12:05:24.905293",
+ "modified": "2024-11-07 14:00:11.394346",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",

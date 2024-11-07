@@ -12,12 +12,93 @@ from frappe.utils.data import flt, nowdate, getdate, cint, rounded, add_months, 
 from frappe.utils.password import update_password as _update_password
 from frappe.utils import cint, cstr, flt, nowdate, comma_and, date_diff, getdate, formatdate ,get_url
 import datetime
+import traceback
 from datetime import date
 from frappe.model.mapper import get_mapped_doc
 import sys
 from frappe.utils import cstr
 from frappe.model.document import Document
 import json
+
+from pymysql import MySQLError
+from datetime import datetime
+
+
+
+
+def add_related_customer_import_template():
+    doc = frappe.get_doc("Related Customer Import")
+    doc.download_template = '/posawesome/Related Customer Template.csv'
+    doc.flags.ignore_mandatory = True
+    doc.save(ignore_permissions=True)
+
+
+
+def add_related_customer():
+    print('*** Add Related Customer ***')
+    from frappe.utils.csvutils import read_csv_content
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, 'related_customer.csv')
+    try:
+        with open(file_path, "r") as infile:
+            rows = read_csv_content(infile.read())
+            i = 0
+            for index, row in enumerate(rows):
+                if index!=0:
+                    if not frappe.db.exists("Customer", {"name": row[5]}):
+                        return 'Customer: {0} not exists!'.format(row[5])
+                    else:
+                        if not frappe.get_doc("Customer", row[5]).custom_percent_table:
+                            return 'Customer: {0}, has no percent table data!'.format(row[5])
+
+                    if row[0] and row[1] and row[2] and row[3] and row[4] and row[5]:
+                        if not frappe.db.exists("Related Customer", {"employee_name": row[0], "phone": row[2]}):
+                            if row[0]:
+                                try:
+
+                                    try:
+                                        card_expiry_date = datetime.strptime(row[4], "%d/%m/%Y").strftime("%Y-%m-%d")
+                                    except ValueError:
+                                        card_expiry_date = None
+
+                                    doc = frappe.new_doc("Related Customer")
+                                    doc.update({
+                                        "doctype":"Related Customer",
+                                        "employee_name": row[0],
+                                        "employee_id": row[1],
+                                        "phone": row[2],
+                                        "card_number": row[3],
+                                        "card_expiry_date": card_expiry_date,
+                                        "parent_customer": row[5],
+                                        "designation": row[6]
+                                    })
+
+                                    for percent_table in frappe.get_doc("Customer", row[5]).custom_percent_table:
+                                        doc.append('percent_table',{
+                                            "doctype": "Percent Table",
+                                            "item_group": percent_table.item_group,
+                                            "employee_percentage": percent_table.employee_percentage,
+                                            "company_percentage": percent_table.company_percentage
+                                        })
+                                    
+                                    doc.save(ignore_permissions=True)
+                                    frappe.db.commit()
+                                except MySQLError as e:
+                                    if e.args[0] == 1292:
+                                        print(f"Incorrect date value: {e.args[1]}")
+                                    else:
+                                        print(f"Error adding percent table for customer {customer_name}: {e.args[1]}")
+                                    continue
+
+
+                                i+=1
+                                print(row[0])
+                    else:
+                        print("Missing Data!")
+            print('*************')
+            print(f"Total Related Customer added: {i}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 
