@@ -14,6 +14,7 @@
   "column_break_jhvip",
   "enabled",
   "designation",
+  "image",
   "section_break_wuvu2",
   "parent_customer",
   "percent_table"
@@ -78,11 +79,16 @@
    "label": "Phone",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 10:15:46.208314",
+ "modified": "2024-11-07 10:17:20.965332",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Related Customer",
