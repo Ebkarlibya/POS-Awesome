@@ -1,0 +1,32 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Related Customer",
+ "links": [],
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2024-11-07 11:27:43.446459",
+   "default_value": null,
+   "doc_type": "Related Customer",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2024-11-07 11:27:43.446459",
+   "modified_by": "Administrator",
+   "module": null,
+   "name": "Related Customer-main-default_print_format",
+   "owner": "Administrator",
+   "property": "default_print_format",
+   "property_type": "Data",
+   "row_name": null,
+   "value": "Related Customer Card"
+  }
+ ],
+ "sync_on_migrate": 1
+}
