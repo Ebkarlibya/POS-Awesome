@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('Related Customer Import', {
 	customer: function(frm) {
+		frm.set_value("output", )
 		cur_frm.doc.percent_table = []
 		frappe.model.with_doc("Customer", frm.doc.customer, function() {
 		    var tabletransfer= frappe.model.get_doc("Customer", frm.doc.customer)
@@ -18,5 +19,25 @@ frappe.ui.form.on('Related Customer Import', {
 	},
 	download_template: function(frm) {
 		window.location.href = '/assets/posawesome/file/Related Customer Template.csv';
-	}
+	},
+	attach_file: function (frm) {
+    	frm.set_value("output", )
+    },
+    get_data: function (frm) {
+    	if(frm.doc.attach_file){
+    		frm.set_value("employee_overtime_dates", )
+    		frm.set_value("total_hours", 0)
+
+            frappe.call({
+		        doc: cur_frm.doc,
+		        method: "get_monthly_overtime_request_file",
+		        callback: function(r) {
+		        	frm.set_value('total_hours', r.message)
+		            cur_frm.refresh_fields(['employee_overtime_dates']);
+		        }
+		    });
+	    }else{
+	    	frappe.throw("من فضلك قم بارفاق ملف أولا.")
+	    }
+    }
 });

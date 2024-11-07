@@ -35,8 +35,7 @@
    "description": "Please upload the file after filling it out from here.",
    "fieldname": "attach_file",
    "fieldtype": "Attach",
-   "label": "Attach File",
-   "reqd": 1
+   "label": "Attach File"
   },
   {
    "description": "Click here to add your data.",
@@ -70,7 +69,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-07 14:16:36.533224",
+ "modified": "2024-11-07 14:42:51.177711",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Related Customer Import",
