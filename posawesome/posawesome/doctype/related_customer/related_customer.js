@@ -6,21 +6,23 @@ frappe.ui.form.on('Related Customer', {
         let item_group_counts = {};
         let duplicate_item_groups = {};
 
-        frm.doc.percent_table.forEach((row, index) => {
-            if (item_group_counts[row.item_group]) {
-                duplicate_item_groups[row.item_group] = 
-                    (duplicate_item_groups[row.item_group] || [item_group_counts[row.item_group]]).concat(index + 1);
-            } else {
-                item_group_counts[row.item_group] = index + 1;
-            }
-        });
+        if (frm.doc.percent_table && frm.doc.percent_table.length > 0) {
+            frm.doc.percent_table.forEach((row, index) => {
+                if (item_group_counts[row.item_group]) {
+                    duplicate_item_groups[row.item_group] = 
+                        (duplicate_item_groups[row.item_group] || [item_group_counts[row.item_group]]).concat(index + 1);
+                } else {
+                    item_group_counts[row.item_group] = index + 1;
+                }
+            });
 
-        if (Object.keys(duplicate_item_groups).length > 0) {
-            let message = Object.entries(duplicate_item_groups)
-                .map(([group, lines]) => `Item Group <b>${group}</b> is duplicated in lines: ${lines.join(", ")}`)
-                .join("<br>");
-            frappe.msgprint(message);
-            frappe.validated = false;
+            if (Object.keys(duplicate_item_groups).length > 0) {
+                let message = Object.entries(duplicate_item_groups)
+                    .map(([group, lines]) => `Item Group <b>${group}</b> is duplicated in lines: ${lines.join(", ")}`)
+                    .join("<br>");
+                frappe.msgprint(message);
+                frappe.validated = false;
+            }
         }
     },
     parent_customer(frm) {
