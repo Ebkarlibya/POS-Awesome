@@ -20,6 +20,34 @@ from frappe.model.document import Document
 import json
 
 
+
+@frappe.whitelist()
+def validate_card_expiry():
+    related_customers = frappe.get_all(
+        'Related Customer', 
+        filters={},
+        fields=['name', 'card_expiry_date', 'enabled']
+    )
+    
+    for related_customer in related_customers:
+        doc = frappe.get_doc("Related Customer", related_customer['name'])
+        if getdate(related_customer['card_expiry_date']) < getdate(nowdate()):
+            if related_customer['enabled']==1:
+                doc.enabled = 0
+                doc.flags.ignore_mandatory = True
+                doc.save(ignore_permissions=True)
+                print('- Expiry Card for Related Customer: {0}'.format(related_customer['name']))
+        else:
+            if related_customer['enabled']==0:
+                doc.enabled = 1
+                doc.flags.ignore_mandatory = True
+                doc.save(ignore_permissions=True)
+                print('- Card Activated for Related Customer: {0}'.format(related_customer['name']))
+
+                
+
+
+
 @frappe.whitelist()
 def update_related_customer_percentages(parent_customer):
     # Get the current customer's percent table

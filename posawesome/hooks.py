@@ -106,23 +106,11 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"posawesome.tasks.all"
-# 	],
-# 	"daily": [
-# 		"posawesome.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"posawesome.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"posawesome.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"posawesome.tasks.monthly"
-# 	]
-# }
+scheduler_events = {
+    "daily": [
+        "posawesome.api_utils.validate_card_expiry"
+    ]
+}
 
 # Testing
 # -------
