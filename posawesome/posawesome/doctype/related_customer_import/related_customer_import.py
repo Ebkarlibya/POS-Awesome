@@ -3,7 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
-
+from pymysql import MySQLError
+from datetime import datetime
 
 class RelatedCustomerImport(Document):
     @frappe.whitelist()
@@ -60,20 +61,24 @@ class RelatedCustomerImport(Document):
                                         frappe.db.commit()
                                     except MySQLError as e:
                                         if e.args[0] == 1292:
+                                            frappe.msgprint("Error!", alert=True, indicator='red')
                                             return f"Incorrect date value: {e.args[1]}"
                                         else:
+                                            frappe.msgprint("Error!", alert=True, indicator='red')
                                             return f"Error adding percent table for customer {customer_name}: {e.args[1]}"
                                         continue
 
                                     i+=1
-                                    return f"- Successfully add related customer: {row[0]}"
+                                    print(f"- Successfully add related customer: {row[0]}")
+                                    frappe.msgprint(f"- Successfully add related customer: {row[0]}", alert=True, indicator='green')
                         else:
                             return "Missing Data!" 
                 print('*************')
-                frappe.msgprint(f"Total Related Customer added: {i}")
+                frappe.msgprint("Success!", alert=True, indicator='green')
                 return f"Total Related Customer added: {i}"
         except Exception as e:
+            frappe.msgprint("Error!", alert=True, indicator='red')
             return f"An error occurred: {e}"
-            frappe.msgprint(f"An error occurred: {e}")
+            
 
 
