@@ -13,11 +13,14 @@ class RelatedCustomer(Document):
         self.validate_card_expiry()
 
     def validate_card_expiry(self):
-        if getdate(self.card_expiry_date) < getdate(nowdate()):
+        if self.enabled==0:
+            self.enabled=0
+        elif getdate(self.card_expiry_date) < getdate(nowdate()):
             self.enabled=0
             frappe.msgprint(_("The card has expired. Please use a valid card."))
         else:
             self.enabled=1
+
 
     def before_save(self):
         if not self.card_number:
