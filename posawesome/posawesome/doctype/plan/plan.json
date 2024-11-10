@@ -16,21 +16,24 @@
    "fieldname": "plan_name",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Plan Name",
    "reqd": 1,
    "unique": 1
   },
   {
+   "bold": 1,
    "fieldname": "plan_percent",
    "fieldtype": "Percent",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Plan Percent",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-10 16:13:07.320659",
+ "modified": "2024-11-10 16:18:13.220854",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Plan",
