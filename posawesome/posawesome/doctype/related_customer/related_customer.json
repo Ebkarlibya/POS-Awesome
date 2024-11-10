@@ -17,9 +17,9 @@
   "designation",
   "image",
   "section_break_soxya",
-  "card_number",
-  "column_break_qwpr8",
   "card_expiry_date",
+  "column_break_qwpr8",
+  "card_number",
   "section_break_wuvu2",
   "parent_customer",
   "percent_table"
@@ -97,7 +97,8 @@
    "fieldname": "card_number",
    "fieldtype": "Data",
    "label": "Card Number",
-   "reqd": 1
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "column_break_qwpr8",
@@ -112,7 +113,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-10 14:29:47.147053",
+ "modified": "2024-11-10 15:08:59.863511",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Related Customer",
