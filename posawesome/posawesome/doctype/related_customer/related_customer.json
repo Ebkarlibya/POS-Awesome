@@ -38,7 +38,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Employee ID",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "column_break_jhvip",
@@ -113,7 +114,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-10 15:08:59.863511",
+ "modified": "2024-11-10 15:18:17.290318",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Related Customer",
