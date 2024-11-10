@@ -67,8 +67,7 @@
    "fieldname": "percent_table",
    "fieldtype": "Table",
    "label": "Percent Table",
-   "options": "Percent Table",
-   "reqd": 1
+   "options": "Percent Table"
   },
   {
    "default": "1",
@@ -113,7 +112,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 12:06:45.529479",
+ "modified": "2024-11-10 14:29:47.147053",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Related Customer",
