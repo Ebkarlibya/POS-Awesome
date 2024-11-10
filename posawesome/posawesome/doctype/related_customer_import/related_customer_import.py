@@ -5,6 +5,8 @@ import frappe
 from frappe.model.document import Document
 from pymysql import MySQLError
 from datetime import datetime
+from frappe.utils import cint, cstr, flt, nowdate, comma_and, date_diff, getdate, time_diff, time_diff_in_hours
+
 
 class RelatedCustomerImport(Document):
     @frappe.whitelist()
@@ -27,15 +29,10 @@ class RelatedCustomerImport(Document):
                 for index, row in enumerate(rows):
                     if index!=0:
 
-                        if row[0] and row[1] and row[2] and row[3] and row[4]:
+                        if row[0] and row[1] and row[2]:
                             if not frappe.db.exists("Related Customer", {"employee_name": row[0], "phone": row[2]}):
                                 if row[0]:
                                     try:
-
-                                        try:
-                                            card_expiry_date = datetime.strptime(row[4], "%d/%m/%Y").strftime("%Y-%m-%d")
-                                        except ValueError:
-                                            card_expiry_date = None
 
                                         doc = frappe.new_doc("Related Customer")
                                         doc.update({
@@ -43,9 +40,8 @@ class RelatedCustomerImport(Document):
                                             "employee_name": row[0],
                                             "employee_id": row[1],
                                             "phone": row[2],
-                                            "card_number": row[3],
-                                            "card_expiry_date": card_expiry_date,
-                                            "designation": row[5],
+                                            "card_expiry_date": getdate(self.card_expiry_date),
+                                            "designation": row[3],
                                             "parent_customer": self.customer
                                         })
 

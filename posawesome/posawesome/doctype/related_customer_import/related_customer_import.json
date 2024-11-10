@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "customer",
+  "card_expiry_date",
   "percent_table",
   "section_break_r7lxv",
   "download_template",
@@ -66,12 +67,18 @@
    "label": "Percent Table",
    "options": "Percent Table",
    "read_only": 1
+  },
+  {
+   "fieldname": "card_expiry_date",
+   "fieldtype": "Date",
+   "label": "Card Expiry Date",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-07 15:43:22.051781",
+ "modified": "2024-11-10 15:13:43.278264",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Related Customer Import",
