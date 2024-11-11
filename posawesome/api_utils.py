@@ -32,7 +32,7 @@ def get_customer_plans(customer):
                            fields=['plan_name', 'plan_percent'])
     
     return plans
-    
+
 
 def add_related_customer_import_template():
     doc = frappe.get_doc("Related Customer Import")
@@ -214,7 +214,8 @@ def get_employee_percentage(invoice_name):
 
 
 @frappe.whitelist()
-def get_item_percentage_and_amount(customer, related_customer, item):
+def get_item_percentage_and_amount(customer, related_customer, plan, item):
+    
     item = json.loads(item)
 
     employee_percentage = 0
@@ -224,20 +225,33 @@ def get_item_percentage_and_amount(customer, related_customer, item):
 
     total_amount = item['rate'] * item['qty']
 
-    employee_percentage, company_percentage = frappe.get_value(
-        "Percent Table", 
-        filters={
-            "parenttype": 'Related Customer', 
-            "parent": related_customer, 
-            "item_group": item['item_group']
-        }, 
-        fieldname=["employee_percentage", "company_percentage"]
-    ) or (100, 0)
+    if related_customer:
+        employee_percentage, company_percentage = frappe.get_value(
+            "Percent Table", 
+            filters={
+                "parenttype": 'Related Customer', 
+                "parent": related_customer, 
+                "item_group": item['item_group']
+            }, 
+            fieldname=["employee_percentage", "company_percentage"]
+        ) or (100, 0)
 
+    if plan:
+        plan_percent = frappe.get_value(
+            "Plan", 
+            filters={
+                "plan_name": plan
+            }, 
+            fieldname="plan_percent"
+        ) or 100
+
+        employee_percentage = plan_percent
+        company_percentage = 100 - plan_percent
 
     employee_amount = total_amount * (employee_percentage / 100)
     company_amount = total_amount * (company_percentage / 100)
-    
+
+
     return employee_percentage, company_percentage, employee_amount, company_amount
 
 
