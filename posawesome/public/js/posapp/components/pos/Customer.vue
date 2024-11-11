@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row>
-      <v-col :cols="12" :md="8">
+      <v-col :cols="12" :md="10">
         <v-autocomplete
           dense
           clearable
@@ -57,19 +57,19 @@
       </v-col>
 
       <!-- Plan Autocomplete -->
-      <v-col :cols="12" :md="4">
+      <v-col :cols="12" :md="2">
         <v-autocomplete
           dense
           clearable
           outlined
           color="primary"
-          :label="__('Related Customer')"
-          v-model="related_customer"
-          :items="related_customers"
-          item-text="employee_name"
+          :label="__('Plan')"
+          v-model="plan"
+          :items="plans"
+          item-text="plan_name"
           item-value="name"
           background-color="white"
-          :no-data-text="__('No related customer found')"
+          :no-data-text="__('No plan found')"
           hide-details
           :disabled="readonly"
         />
@@ -117,8 +117,13 @@ export default {
     pos_profile: '',
     customers: [],
     customer: '',
+    
     related_customers: [], // Store related customers
     related_customer: '',  // Selected related customer
+
+    plans: [], // Store related plans
+    plan: '',  // Selected related plan
+
     readonly: false,
     customer_info: {},
   }),
