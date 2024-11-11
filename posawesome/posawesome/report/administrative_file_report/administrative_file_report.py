@@ -35,6 +35,8 @@ def get_conditions(filters):
 
 def check_file_exists(employee, document_title):
     exists = frappe.db.exists("Employee Files", {"parent": employee, "title": document_title})
+    print(f"Checking {document_title} for {employee}: {exists}")  # Debug print
+
     if exists:
         return "<div style='text-align:center;'>√√√</div>"
     else:
@@ -67,10 +69,9 @@ def get_data(filters):
         ]
 
         row.extend([check_file_exists(emp.employee, title) for title in document_titles])
-
         data.append(row)
 
-
+    print(f"Generated Data: {data}")
     return data
 
 

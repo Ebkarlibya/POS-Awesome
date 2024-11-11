@@ -1,0 +1,61 @@
+<style type="text/css">
+    th{
+        background-color: #c0c0c0!important;
+        font-weight: bolder!important;
+    }
+    
+    .header_title{
+        background-color: #a7a8a8!important;
+    }
+    table, table tr, table tr th, table tr td{
+        border: solid 1px #000!important;
+        color: #000!important;
+        text-align: center!important;
+        line-height: 1.2;
+    }
+    .reduce_height td{
+        line-height: 0.2!important;
+    }
+</style>
+
+<h1 class="text-right"><b>تقرير عن الملف الإداري الخاص بموظفين صيدلية فشلوم</b></h1>
+
+<table class="table table-bordered" dir="rtl">
+    <thead>
+        <tr class="text-center">
+            <th>اسم الموظف</th>
+            <th>صورة جواز سفر</th>
+            <th>صورة رقم وطني</th>
+            <th>صور شخصية</th>
+            <th>افادة التخرج</th>
+            <th>اذن مزاولة</th>
+            <th>مباشرة عمل</th>
+            <th>نموذج بطاقة موظف</th>
+            <th>نموذج افشاء السر</th>
+            <th>نموذج الرؤيا المشتركة</th>
+            <th>تأمين طبي</th>
+            <th>شهادة صحيه</th>
+        </tr>
+        <tr>
+            <th colspan=12 class="header_title" style="text-align: right!important;">موظفين صيدلية فشلوم:</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for(var i=0, l=data.length; i<l; i++) { %}
+            <tr class="reduce_height">
+                {% for(var key in data[i]) { %}
+                    {% if(key!='employee' && data[i].hasOwnProperty(key)) { %}
+                        {% 
+                            var value = data[i][key];
+                            var cellStyle = '';
+                            if (value.indexOf('ˣ') !== -1) {
+                                cellStyle = 'style="background-color:#ff0000;"';
+                            }
+                        %}
+                        <td {{ cellStyle }}>{%= value %}</td>
+                    {% } %}
+                {% } %}
+            </tr>
+        {% } %}
+    </tbody>
+</table>
