@@ -4,6 +4,11 @@
 
 frappe.query_reports["Administrative File Report"] = {
 	"filters": [
-
+		{
+			"fieldname":"employee",
+			"label": __("Employee"),
+			"fieldtype": "Link",
+			"options": "Employee"
+		}
 	]
 };
