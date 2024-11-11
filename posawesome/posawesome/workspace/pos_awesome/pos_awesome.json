@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"cJigdSD9mh\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"id\":\"4D2sc3CbN3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"id\":\"nVBkn7nfDw\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"-B_qEZqEA6\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"tsAHaUCd5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"2-3HMkGou3\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"GdPtnrazDS\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"cABO53xhGv\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}},{\"id\":\"xIPxiVEL6_\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"cJigdSD9mh\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"id\":\"4D2sc3CbN3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"id\":\"p72Sai1axe\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Administrative File Report\",\"col\":3}},{\"id\":\"nVBkn7nfDw\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"-B_qEZqEA6\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"tsAHaUCd5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"2-3HMkGou3\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"GdPtnrazDS\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"cABO53xhGv\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
  "creation": "2022-11-29 14:33:45.038200",
  "custom_blocks": [],
  "docstatus": 0,
@@ -183,28 +183,9 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Reports",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Administrative File Report",
-   "link_count": 0,
-   "link_to": "Administrative File Report",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2024-11-11 11:11:34.017065",
+ "modified": "2024-11-11 12:26:02.608510",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",
@@ -216,6 +197,13 @@
  "roles": [],
  "sequence_id": 1.0,
  "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Administrative File Report",
+   "link_to": "Administrative File Report",
+   "type": "Report"
+  },
   {
    "color": "Grey",
    "doc_view": "List",

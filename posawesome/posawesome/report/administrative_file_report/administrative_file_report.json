@@ -9,13 +9,14 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2024-11-10 13:21:15.145878",
+ "modified": "2024-11-11 12:22:08.665336",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Administrative File Report",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Employee",
+ "reference_report": "",
  "report_name": "Administrative File Report",
  "report_type": "Script Report",
  "roles": [
@@ -24,6 +25,9 @@
   },
   {
    "role": "HR Manager"
+  },
+  {
+   "role": "System Manager"
   }
  ]
 }

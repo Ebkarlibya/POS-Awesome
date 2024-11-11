@@ -5480,13 +5480,13 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2024-11-10 13:21:15.145878",
+  "modified": "2024-11-11 12:22:08.665336",
   "module": "POSAwesome",
   "name": "Administrative File Report",
   "prepared_report": 0,
   "query": null,
   "ref_doctype": "Employee",
-  "reference_report": null,
+  "reference_report": "",
   "report_name": "Administrative File Report",
   "report_script": null,
   "report_type": "Script Report",
@@ -5502,6 +5502,12 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "HR Manager"
+   },
+   {
+    "parent": "Administrative File Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
    }
   ]
  },
