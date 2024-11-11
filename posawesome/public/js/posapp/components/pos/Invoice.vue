@@ -1190,7 +1190,7 @@ export default {
         return;
       }
 
-      if (this.related_customers.length > 0 && !this.related_customer) {
+      if (this.related_customers.length > 0 && !this.related_customer && !this.plan) {
         evntBus.$emit("show_mesage", {
           text: __(`There is no Related Customer !`),
           color: "error",
@@ -1489,7 +1489,7 @@ export default {
 
 
 
-      if (this.related_customers.length > 0 && !this.related_customer) {
+      if (this.related_customers.length > 0 && !this.related_customer && !this.plan) {
         evntBus.$emit("show_mesage", {
           text: __(`There is no Related Customer !`),
           color: "error",
@@ -2982,6 +2982,16 @@ export default {
 
       this.related_customer = relatedCustomer; // Store the related customer
     });
+    evntBus.$on('set_plan', (plan) => {
+      
+      if(!this.invoice_doc.name){
+        if(!this.invoice_doc.is_return){
+          this.items = []
+        }
+      }
+
+      this.plan = plan; // Store the plan
+    });
     evntBus.$on("new_invoice", () => {
       this.invoice_doc = "";
       this.cancel_invoice();
@@ -3037,6 +3047,10 @@ export default {
   created() {
     evntBus.$on('update_related_customers', (customers) => {
       this.related_customers = customers;
+    });
+
+    evntBus.$on('update_plans', (plans) => {
+      this.plans = plans;
     });
 
     document.addEventListener("keydown", this.shortOpenPayment.bind(this));

@@ -59,6 +59,7 @@
       <!-- Plan Autocomplete -->
       <v-col :cols="12" :md="2">
         <v-autocomplete
+          v-if="plans.length > 0"
           dense
           clearable
           outlined
@@ -79,7 +80,7 @@
     <br>
     <!-- Related Customer Autocomplete -->
     <v-autocomplete
-      v-if="related_customers.length > 0"
+      v-if="related_customers.length > 0 && !plan"
       dense
       clearable
       outlined
@@ -191,6 +192,30 @@ export default {
         },
       });
     },
+    // Fetch plans based on selected customer
+    get_plans(customer) {
+      const vm = this;
+      if (!customer) {
+        vm.plans = [];
+        evntBus.$emit('update_plans', vm.plans); // Emit empty array when no customer
+        return;
+      }
+      frappe.call({
+        method: 'posawesome.api_utils.get_customer_plans',
+        args: {
+          customer: customer
+        },
+        callback: function (r) {
+          if (r.message && Array.isArray(r.message)) {
+            vm.plans = r.message;
+            evntBus.$emit('update_plans', vm.plans); // Emit updated related customers
+          } else {
+            vm.plans = [];
+            evntBus.$emit('update_plans', vm.plans); // Emit empty array if no related customers found
+          }
+        },
+      });
+    },
 
     new_customer() {
       evntBus.$emit('open_update_customer', null);
@@ -266,9 +291,16 @@ export default {
       this.get_related_customers(this.customer); // Fetch related customers when customer changes
       //this.related_customer = ''; // Clear related customer when customer changes
 
+      this.get_plans(this.customer); // Fetch plans when customer changes
+      //this.plan = ''; // Clear plans when customer changes
+
     },
     related_customer(newVal) {
       evntBus.$emit('set_related_customer', newVal); // Emit after related customer change
+    },
+    plan(newVal) {
+      evntBus.$emit('set_plan', newVal); // Emit after plan change
+      this.related_customer = '';
     }
   },
 };

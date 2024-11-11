@@ -25,6 +25,14 @@ from datetime import datetime
 
 
 
+@frappe.whitelist(allow_guest=True)
+def get_customer_plans(customer):
+    plans = frappe.get_all('Customer Plan', 
+                           filters={'parent': customer, 'parenttype': 'Customer'},
+                           fields=['plan_name', 'plan_percent'])
+    
+    return plans
+    
 
 def add_related_customer_import_template():
     doc = frappe.get_doc("Related Customer Import")
