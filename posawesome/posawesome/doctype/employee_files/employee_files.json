@@ -7,7 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "attach_file"
+  "attach_file",
+  "column_break_f3mvj",
+  "expiry_date"
  ],
  "fields": [
   {
@@ -24,12 +26,25 @@
    "in_list_view": 1,
    "label": "Attach File",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_f3mvj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.title=='License to Practice' || doc.title=='Health Insurance' || doc.title=='Health Certificate'",
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Expiry Date",
+   "mandatory_depends_on": "eval:doc.title=='License to Practice' || doc.title=='Health Insurance' || doc.title=='Health Certificate'",
+   "read_only_depends_on": "eval:doc.title!='License to Practice' && doc.title!='Health Insurance' && doc.title!='Health Certificate'"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-11 10:33:41.891510",
+ "modified": "2024-11-12 15:34:10.003173",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Employee Files",
