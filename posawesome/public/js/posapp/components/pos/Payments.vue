@@ -926,7 +926,7 @@ export default {
     },
     set_full_amount(idx) {
       
-      if(this.invoice_doc.custom_related_customer){
+      if(this.invoice_doc.custom_related_customer || this.invoice_doc.custom_plan){
         evntBus.$emit("send_invoice_doc_payment", this.invoice_doc);
       }else{
         this.invoice_doc.payments.forEach((payment) => {

@@ -283,6 +283,13 @@ export default {
         } else {
           this.related_customer = ''; // Reset if not available
         }
+
+        // Set plan to the value of custom_plan from invoice_doc
+        if (newVal && newVal.custom_plan) {
+          this.plan = newVal.custom_plan;
+        } else {
+          this.plan = ''; // Reset if not available
+        }
       },
     },
     customer() {
