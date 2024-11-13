@@ -138,6 +138,51 @@ def validate_card_expiry():
 
 
 @frappe.whitelist()
+def employee_files_expiry_email_notification():
+    emps = frappe.db.sql_list("select name from `tabEmployee` where status='Active'")
+        
+    for emp in emps:
+        doc = frappe.get_doc("Employee", emp)
+        for empfile in doc.custom_employee_files:
+            if empfile.title in ["License to Practice", "Health Insurance", "Health Certificate"]:
+                if empfile.expiry_date:
+                    notification_date = add_months(getdate(empfile.expiry_date), -1)
+                    if getdate(notification_date) == getdate(nowdate()):
+                        print("{0} file will expired after 1 month, for employee: {1}".format(empfile.title, doc.employee_name))
+    
+                        msg = "<b>{0}</b> file will expired after 1 month, for employee: <b>{1}</b>".format(empfile.title, doc.employee_name)
+
+                        sender = frappe.get_value("Email Account", filters = {"default_outgoing": 1}, fieldname = "email_id") or None
+                        
+                        hr_managers = frappe.db.sql("""
+                            SELECT DISTINCT u.email
+                            FROM `tabUser` u
+                            JOIN `tabHas Role` hr ON hr.parent = u.name
+                            WHERE hr.role = 'HR Manager'
+                              AND u.enabled = 1
+                              AND u.email IS NOT NULL
+                              AND u.name NOT IN (
+                                  SELECT parent
+                                  FROM `tabHas Role`
+                                  WHERE role = 'Administrator'
+                              )
+                        """, as_dict=True)
+
+                        for user in hr_managers:
+                            recipient = user['email']
+
+                            frappe.sendmail(sender=sender, recipients= recipient,
+                                content=msg, subject="File Expired After 1 Month!", delayed=False)
+
+      
+
+
+
+                
+
+
+
+@frappe.whitelist()
 def update_related_customer_percentages(parent_customer):
     # Get the current customer's percent table
     current_customer = frappe.get_doc("Customer", parent_customer)

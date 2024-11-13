@@ -108,7 +108,8 @@ doc_events = {
 
 scheduler_events = {
     "daily": [
-        "posawesome.api_utils.validate_card_expiry"
+        "posawesome.api_utils.validate_card_expiry",
+        "posawesome.api_utils.employee_files_expiry_email_notification"
     ]
 }
 
