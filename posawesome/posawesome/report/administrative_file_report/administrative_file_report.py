@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint, cstr, flt, nowdate, comma_and, date_diff, getdate, time_diff, time_diff_in_hours
 
 def execute(filters=None):
     columns, data = get_columns(filters), get_data(filters)
@@ -33,14 +34,31 @@ def get_conditions(filters):
     return conditions
 
 
-def check_file_exists(employee, document_title):
-    exists = frappe.db.exists("Employee Files", {"parent": employee, "title": document_title})
-    print(f"Checking {document_title} for {employee}: {exists}")  # Debug print
 
+def check_file_exists(employee, document_title):
+    if document_title in ["License to Practice", "Health Insurance", "Health Certificate"]:
+        file_entry = frappe.db.get_value("Employee Files", 
+                                         {"parent": employee, "title": document_title}, 
+                                         ["name", "expiry_date"], 
+                                         as_dict=True)
+        
+        if file_entry:
+            expiry_date = file_entry.get("expiry_date")
+            if expiry_date:
+                if getdate(expiry_date) < getdate(nowdate()):
+                    return "<div style='text-align:center; background-color:#ff0000;'>Expired</div>"
+            
+            return "<div style='text-align:center;'>√√√</div>"
+        else:
+            return "<div style='text-align:center; background-color:#ff0000;'>ˣ</div>"
+    
+
+    exists = frappe.db.exists("Employee Files", {"parent": employee, "title": document_title})
     if exists:
         return "<div style='text-align:center;'>√√√</div>"
     else:
         return "<div style='text-align:center; background-color:#ff0000;'>ˣ</div>"
+
 
 
 def get_data(filters):
@@ -71,7 +89,6 @@ def get_data(filters):
         row.extend([check_file_exists(emp.employee, title) for title in document_titles])
         data.append(row)
 
-    print(f"Generated Data: {data}")
     return data
 
 
