@@ -141,6 +141,6 @@ override_doctype_dashboards = {
 #
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
 
-fixtures = ['Client Script', 'Custom Field', 'Property Setter', 'Print Format', 'Report', 'Gender']
+fixtures = ['Client Script', 'Custom Field', 'Property Setter', 'Print Format', 'Report']
 
 
