@@ -927,7 +927,10 @@ export default {
     set_full_amount(idx) {
       
       if(this.invoice_doc.custom_related_customer || this.invoice_doc.custom_plan){
-        evntBus.$emit("send_invoice_doc_payment", this.invoice_doc);
+        // evntBus.$emit("send_invoice_doc_payment", this.invoice_doc);
+        this.invoice_doc.payments.forEach((payment) => {
+          payment.amount = payment.idx == idx ? this.min_invoice_payment_req : 0;
+        });
       }else{
         this.invoice_doc.payments.forEach((payment) => {
           payment.amount =
