@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:employee_name",
+ "creation": "2024-10-05 16:16:00.580586",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_name",
+  "employee_id",
+  "phone",
+  "column_break_jhvip",
+  "enabled",
+  "designation",
+  "image",
+  "section_break_soxya",
+  "card_expiry_date",
+  "column_break_qwpr8",
+  "card_number",
+  "section_break_wuvu2",
+  "parent_customer",
+  "percent_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_jhvip",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Designation"
+  },
+  {
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Parent Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_wuvu2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "percent_table",
+   "fieldtype": "Table",
+   "label": "Percent Table",
+   "options": "Percent Table"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
+  },
+  {
+   "fieldname": "section_break_soxya",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "card_number",
+   "fieldtype": "Data",
+   "label": "Card Number",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_qwpr8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "card_expiry_date",
+   "fieldtype": "Date",
+   "label": "Card Expiry Date",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-10 15:18:17.290318",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Related Customer",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

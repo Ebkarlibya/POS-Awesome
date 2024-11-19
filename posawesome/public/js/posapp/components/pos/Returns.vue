@@ -146,6 +146,8 @@ export default {
         invoice_doc.is_return = 1;
         invoice_doc.return_against = return_doc.name;
         invoice_doc.customer = return_doc.customer;
+        invoice_doc.custom_related_customer = return_doc.custom_related_customer;
+        invoice_doc.custom_attachment = return_doc.custom_attachment;
         const data = { invoice_doc, return_doc };
         evntBus.$emit('load_return_invoice', data);
         this.invoicesDialog = false;

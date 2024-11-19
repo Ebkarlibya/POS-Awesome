@@ -937,7 +937,6 @@ export default {
       customer: "",
 
       related_customer: '', // New property to store related customer selection
-      plan: '', // New property to store plan selection
       employee_percentage: '', // New property to store Employee Percentage fetched
       company_percentage: '', // New property to store Company Percentage fetched
       employee_amount: '', // New property to store Employee Amount fetched
@@ -1153,7 +1152,7 @@ export default {
 
       
 
-      function getItemData(customer, related_customer, plan, item) {
+      function getItemData(customer, related_customer, item) {
 
         return new Promise((resolve, reject) => {
 
@@ -1162,7 +1161,6 @@ export default {
               args: {
                   customer: customer,
                   related_customer: related_customer,
-                  plan: plan,
                   item: item
               },
               callback: function(response) {
@@ -1174,9 +1172,9 @@ export default {
         });
       }
 
-      async function updateItemValues(customer, related_customer, plan, item) {
+      async function updateItemValues(customer, related_customer, item) {
           const percentage_and_amount = await getItemData(
-            customer, related_customer, plan, item
+            customer, related_customer, item
           );
 
         return percentage_and_amount; // Return the calculated total cash
@@ -1192,7 +1190,7 @@ export default {
         return;
       }
 
-      if (this.related_customers.length > 0 && !this.related_customer && !this.plan) {
+      if (this.related_customers.length > 0 && !this.related_customer) {
         evntBus.$emit("show_mesage", {
           text: __(`There is no Related Customer !`),
           color: "error",
@@ -1200,7 +1198,7 @@ export default {
         return;
       }
 
-      updateItemValues(this.customer, this.related_customer, this.plan, item).then((percentage_and_amount) => {
+      updateItemValues(this.customer, this.related_customer, item).then((percentage_and_amount) => {
           new_item.custom_employee_percentage = percentage_and_amount[0];
           new_item.custom_company_percentage = percentage_and_amount[1];
           new_item.custom_employee_amount = percentage_and_amount[2];
@@ -1325,7 +1323,6 @@ export default {
         });
         this.customer = data.customer;
         this.related_customer = data.custom_related_customer;
-        this.plan = data.custom_plan;
         this.posting_date = data.posting_date || frappe.datetime.nowdate();
         this.discount_amount = data.discount_amount;
         this.additional_discount_percentage =
@@ -1382,7 +1379,6 @@ export default {
 
       
       doc.custom_related_customer = this.related_customer;
-      doc.custom_plan = this.plan;
       doc.custom_user = frappe.session.user;
 
 
@@ -1493,7 +1489,7 @@ export default {
 
 
 
-      if (this.related_customers.length > 0 && !this.related_customer && !this.plan) {
+      if (this.related_customers.length > 0 && !this.related_customer) {
         evntBus.$emit("show_mesage", {
           text: __(`There is no Related Customer !`),
           color: "error",
@@ -1797,7 +1793,6 @@ export default {
             customer: this.customer,
 
             custom_related_customer: this.related_customer,
-            custom_plan: this.plan,
             custom_attachment: this.attachment_path,
             custom_user: frappe.session.user,
 
@@ -2987,16 +2982,6 @@ export default {
 
       this.related_customer = relatedCustomer; // Store the related customer
     });
-    evntBus.$on('set_plan', (plan) => {
-      
-      if(!this.invoice_doc.name){
-        if(!this.invoice_doc.is_return){
-          this.items = []
-        }
-      }
-
-      this.plan = plan; // Store the plan
-    });
     evntBus.$on("new_invoice", () => {
       this.invoice_doc = "";
       this.cancel_invoice();
@@ -3023,7 +3008,6 @@ export default {
     });
     evntBus.$on("load_return_invoice", (data) => {
       this.related_customer = data.return_doc.custom_related_customer;
-      this.plan = data.return_doc.custom_plan;
       this.attachment_path = data.return_doc.custom_attachment;
       this.attachment_name = data.return_doc.custom_attachment.split('/').pop();
       this.attachment = { name: this.attachment_name, path: this.attachment_path };
@@ -3053,10 +3037,6 @@ export default {
   created() {
     evntBus.$on('update_related_customers', (customers) => {
       this.related_customers = customers;
-    });
-
-    evntBus.$on('update_plans', (plans) => {
-      this.plans = plans;
     });
 
     document.addEventListener("keydown", this.shortOpenPayment.bind(this));

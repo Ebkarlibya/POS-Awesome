@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row>
-      <v-col :cols="12" :md="10">
+      <v-col :cols="12" :md="8">
         <v-autocomplete
           dense
           clearable
@@ -57,20 +57,19 @@
       </v-col>
 
       <!-- Plan Autocomplete -->
-      <v-col :cols="12" :md="2">
+      <v-col :cols="12" :md="4">
         <v-autocomplete
-          v-if="plans.length > 0"
           dense
           clearable
           outlined
           color="primary"
-          :label="__('Plan')"
-          v-model="plan"
-          :items="plans"
-          item-text="plan_name"
+          :label="__('Related Customer')"
+          v-model="related_customer"
+          :items="related_customers"
+          item-text="employee_name"
           item-value="name"
           background-color="white"
-          :no-data-text="__('No plan found')"
+          :no-data-text="__('No related customer found')"
           hide-details
           :disabled="readonly"
         />
@@ -80,7 +79,7 @@
     <br>
     <!-- Related Customer Autocomplete -->
     <v-autocomplete
-      v-if="related_customers.length > 0 && !plan"
+      v-if="related_customers.length > 0"
       dense
       clearable
       outlined
@@ -118,13 +117,8 @@ export default {
     pos_profile: '',
     customers: [],
     customer: '',
-    
     related_customers: [], // Store related customers
     related_customer: '',  // Selected related customer
-
-    plans: [], // Store related plans
-    plan: '',  // Selected related plan
-
     readonly: false,
     customer_info: {},
   }),
@@ -188,30 +182,6 @@ export default {
           } else {
             vm.related_customers = [];
             evntBus.$emit('update_related_customers', vm.related_customers); // Emit empty array if no related customers found
-          }
-        },
-      });
-    },
-    // Fetch plans based on selected customer
-    get_plans(customer) {
-      const vm = this;
-      if (!customer) {
-        vm.plans = [];
-        evntBus.$emit('update_plans', vm.plans); // Emit empty array when no customer
-        return;
-      }
-      frappe.call({
-        method: 'posawesome.api_utils.get_customer_plans',
-        args: {
-          customer: customer
-        },
-        callback: function (r) {
-          if (r.message && Array.isArray(r.message)) {
-            vm.plans = r.message;
-            evntBus.$emit('update_plans', vm.plans); // Emit updated related customers
-          } else {
-            vm.plans = [];
-            evntBus.$emit('update_plans', vm.plans); // Emit empty array if no related customers found
           }
         },
       });
@@ -283,13 +253,6 @@ export default {
         } else {
           this.related_customer = ''; // Reset if not available
         }
-
-        // Set plan to the value of custom_plan from invoice_doc
-        if (newVal && newVal.custom_plan) {
-          this.plan = newVal.custom_plan;
-        } else {
-          this.plan = ''; // Reset if not available
-        }
       },
     },
     customer() {
@@ -298,16 +261,9 @@ export default {
       this.get_related_customers(this.customer); // Fetch related customers when customer changes
       //this.related_customer = ''; // Clear related customer when customer changes
 
-      this.get_plans(this.customer); // Fetch plans when customer changes
-      //this.plan = ''; // Clear plans when customer changes
-
     },
     related_customer(newVal) {
       evntBus.$emit('set_related_customer', newVal); // Emit after related customer change
-    },
-    plan(newVal) {
-      evntBus.$emit('set_plan', newVal); // Emit after plan change
-      this.related_customer = '';
     }
   },
 };

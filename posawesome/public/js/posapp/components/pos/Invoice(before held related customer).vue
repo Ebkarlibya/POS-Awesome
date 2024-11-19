@@ -28,14 +28,14 @@
           cols="9"
           class="pb-2 pr-0"
         >
-          <Customer :invoice_doc="invoice_doc"></Customer>
+          <Customer></Customer>
         </v-col>
         <v-col
           v-if="!pos_profile.posa_allow_sales_order"
           cols="12"
           class="pb-2"
         >
-          <Customer :invoice_doc="invoice_doc"></Customer>
+          <Customer></Customer>
         </v-col>
         <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2">
           <v-select
@@ -439,7 +439,7 @@
                       :label="frappe._('Stock UOM')"
                       background-color="white"
                       hide-details
-                      v-model="item.sales_uom"
+                      v-model="item.stock_uom"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -932,12 +932,11 @@ export default {
       pos_profile: "",
       pos_opening_shift: "",
       stock_settings: "",
-      invoice_doc: {},
+      invoice_doc: "",
       return_doc: "",
       customer: "",
 
       related_customer: '', // New property to store related customer selection
-      plan: '', // New property to store plan selection
       employee_percentage: '', // New property to store Employee Percentage fetched
       company_percentage: '', // New property to store Company Percentage fetched
       employee_amount: '', // New property to store Employee Amount fetched
@@ -1063,7 +1062,7 @@ export default {
     add_item(item) {
 
       if (!item.uom) {
-        item.uom = item.sales_uom;
+        item.uom = item.stock_uom;
       }
       let index = -1;
       if (!this.new_line) {
@@ -1153,7 +1152,7 @@ export default {
 
       
 
-      function getItemData(customer, related_customer, plan, item) {
+      function getItemData(customer, related_customer, item) {
 
         return new Promise((resolve, reject) => {
 
@@ -1162,7 +1161,6 @@ export default {
               args: {
                   customer: customer,
                   related_customer: related_customer,
-                  plan: plan,
                   item: item
               },
               callback: function(response) {
@@ -1174,33 +1172,15 @@ export default {
         });
       }
 
-      async function updateItemValues(customer, related_customer, plan, item) {
+      async function updateItemValues(customer, related_customer, item) {
           const percentage_and_amount = await getItemData(
-            customer, related_customer, plan, item
+            customer, related_customer, item
           );
 
         return percentage_and_amount; // Return the calculated total cash
       }
 
-
-
-      if (!this.customer) {
-        evntBus.$emit("show_mesage", {
-          text: __(`There is no Customer !`),
-          color: "error",
-        });
-        return;
-      }
-
-      if (this.related_customers.length > 0 && !this.related_customer && !this.plan) {
-        evntBus.$emit("show_mesage", {
-          text: __(`There is no Related Customer !`),
-          color: "error",
-        });
-        return;
-      }
-
-      updateItemValues(this.customer, this.related_customer, this.plan, item).then((percentage_and_amount) => {
+      updateItemValues(this.customer, this.related_customer, item).then((percentage_and_amount) => {
           new_item.custom_employee_percentage = percentage_and_amount[0];
           new_item.custom_company_percentage = percentage_and_amount[1];
           new_item.custom_employee_amount = percentage_and_amount[2];
@@ -1215,7 +1195,7 @@ export default {
       new_item.discount_amount_per_item = 0;
       new_item.price_list_rate = item.rate;
       new_item.qty = item.qty;
-      new_item.uom = item.uom ? item.uom : item.sales_uom;
+      new_item.uom = item.uom ? item.uom : item.stock_uom;
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
       new_item.posa_offers = JSON.stringify([]);
@@ -1254,13 +1234,6 @@ export default {
           },
         });
       }
-
-
-      this.attachment_path = ''; // Clear the attachment path if not present
-      this.attachment_name = ''; // Clear the attachment name if not present
-      this.attachment = null; // Clear the attachment data if not present
-
-
       this.items = [];
       this.posa_offers = [];
       evntBus.$emit("set_pos_coupons", []);
@@ -1294,11 +1267,6 @@ export default {
       }
       if (!data.name && !data.is_return) {
         this.items = [];
-
-        this.attachment_path = ''; // Clear the attachment path if not present
-        this.attachment_name = ''; // Clear the attachment name if not present
-        this.attachment = null; // Clear the attachment data if not present
-
         this.customer = this.pos_profile.customer;
         this.invoice_doc = "";
         this.discount_amount = 0;
@@ -1325,7 +1293,6 @@ export default {
         });
         this.customer = data.customer;
         this.related_customer = data.custom_related_customer;
-        this.plan = data.custom_plan;
         this.posting_date = data.posting_date || frappe.datetime.nowdate();
         this.discount_amount = data.discount_amount;
         this.additional_discount_percentage =
@@ -1362,28 +1329,25 @@ export default {
       doc.customer = this.customer;
 
 
-
+      console.log('$$$$$$$..')
+      console.log(doc.custom_attachment)
+      console.log('$$$$$$$')
       
-
-      if(this.invoice_doc.name){
-        if (doc.custom_attachment) {
-            // Assuming you want to get the file name and path from the file manager
-            this.attachment_path = doc.custom_attachment; // Set the attachment path
-            this.attachment_name = doc.custom_attachment.split('/').pop(); // Extract the file name from the path
-            this.attachment = { name: this.attachment_name, path: this.attachment_path }; // Store the attachment data
-        } else {
-            this.attachment_path = ''; // Clear the attachment path if not present
-            this.attachment_name = ''; // Clear the attachment name if not present
-            this.attachment = null; // Clear the attachment data if not present
-        }
-      }else{
-        doc.custom_attachment = this.attachment_path;
+      if (doc.custom_attachment) {
+          // Assuming you want to get the file name and path from the file manager
+          this.attachment_path = doc.custom_attachment; // Set the attachment path
+          this.attachment_name = doc.custom_attachment.split('/').pop(); // Extract the file name from the path
+          this.attachment = { name: this.attachment_name, path: this.attachment_path }; // Store the attachment data
+      } else {
+          this.attachment_path = ''; // Clear the attachment path if not present
+          this.attachment_name = ''; // Clear the attachment name if not present
+          this.attachment = null; // Clear the attachment data if not present
       }
 
-      
+
       doc.custom_related_customer = this.related_customer;
-      doc.custom_plan = this.plan;
-      doc.custom_user = frappe.session.user;
+      doc.custom_attachment = this.attachment_path;
+
 
 
       doc.items = this.get_invoice_items();
@@ -1455,7 +1419,7 @@ export default {
     },
 
     update_invoice(doc) {
-
+    console.log('update_invoice+ '+doc)
       const vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.update_invoice",
@@ -1469,8 +1433,13 @@ export default {
           }
         },
       });
+      console.log(this.invoice_doc)
 
-      return this.invoice_doc || {};
+      this.attachment_path = ''; // Clear the attachment path if not present
+      this.attachment_name = ''; // Clear the attachment name if not present
+      this.attachment = null; // Clear the attachment data if not present
+          
+      return this.invoice_doc;
     },
 
     proces_invoice() {
@@ -1493,7 +1462,7 @@ export default {
 
 
 
-      if (this.related_customers.length > 0 && !this.related_customer && !this.plan) {
+      if (this.related_customers.length > 0 && !this.related_customer) {
         evntBus.$emit("show_mesage", {
           text: __(`There is no Related Customer !`),
           color: "error",
@@ -1795,12 +1764,7 @@ export default {
           item: {
             item_code: item.item_code,
             customer: this.customer,
-
             custom_related_customer: this.related_customer,
-            custom_plan: this.plan,
-            custom_attachment: this.attachment_path,
-            custom_user: frappe.session.user,
-
             doctype: "Sales Invoice",
             name: "New Sales Invoice 1",
             company: this.pos_profile.company,
@@ -1876,7 +1840,7 @@ export default {
             item.conversion_factor = data.conversion_factor;
             item.stock_qty = data.stock_qty;
             item.actual_qty = data.actual_qty;
-            item.sales_uom = data.sales_uom;
+            item.stock_uom = data.stock_uom;
             (item.has_serial_no = data.has_serial_no),
               (item.has_batch_no = data.has_batch_no),
               vm.calc_item_price(item);
@@ -1886,17 +1850,12 @@ export default {
     },
 
     fetch_customer_details() {
+      console.log('change cussomter')
       this.items.forEach((item) => {
         this.update_item_detail(item);
       });
       // comment empty item
-
-      
-      if(!this.invoice_doc.name){
-        if(!this.invoice_doc.is_return){
-          this.items = []
-        }
-      }
+      this.items = []
 
       const vm = this;
       if (this.customer) {
@@ -2714,7 +2673,7 @@ export default {
           ? offer.discount_percentage
           : 0;
       new_item.discount_amount_per_item = 0;
-      new_item.uom = item.uom ? item.uom : item.sales_uom;
+      new_item.uom = item.uom ? item.uom : item.stock_uom;
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
       new_item.posa_offers = JSON.stringify([]);
@@ -2978,24 +2937,8 @@ export default {
       this.fetch_customer_details();
     });
     evntBus.$on('set_related_customer', (relatedCustomer) => {
-      
-      if(!this.invoice_doc.name){
-        if(!this.invoice_doc.is_return){
-          this.items = []
-        }
-      }
-
+      this.items = []
       this.related_customer = relatedCustomer; // Store the related customer
-    });
-    evntBus.$on('set_plan', (plan) => {
-      
-      if(!this.invoice_doc.name){
-        if(!this.invoice_doc.is_return){
-          this.items = []
-        }
-      }
-
-      this.plan = plan; // Store the plan
     });
     evntBus.$on("new_invoice", () => {
       this.invoice_doc = "";
@@ -3022,18 +2965,11 @@ export default {
       });
     });
     evntBus.$on("load_return_invoice", (data) => {
-      this.related_customer = data.return_doc.custom_related_customer;
-      this.plan = data.return_doc.custom_plan;
-      this.attachment_path = data.return_doc.custom_attachment;
-      this.attachment_name = data.return_doc.custom_attachment.split('/').pop();
-      this.attachment = { name: this.attachment_name, path: this.attachment_path };
-      
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
       this.additional_discount_percentage =
         -data.return_doc.additional_discount_percentage;
       this.return_doc = data.return_doc;
-
     });
     evntBus.$on("set_new_line", (data) => {
       this.new_line = data;
@@ -3053,10 +2989,6 @@ export default {
   created() {
     evntBus.$on('update_related_customers', (customers) => {
       this.related_customers = customers;
-    });
-
-    evntBus.$on('update_plans', (plans) => {
-      this.plans = plans;
     });
 
     document.addEventListener("keydown", this.shortOpenPayment.bind(this));
