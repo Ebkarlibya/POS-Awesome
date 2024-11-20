@@ -234,6 +234,7 @@ def update_related_customer_percentages(parent_customer):
 
 @frappe.whitelist()
 def get_employee_percentage(invoice_name):
+    employee_percentage = 100
     invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
 
     total_cash = 0
