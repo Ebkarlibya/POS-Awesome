@@ -267,8 +267,6 @@ def get_employee_percentage(invoice_name):
 
 
         total_cash += amount * (employee_percentage / 100)
-
-    frappe.msgprint(str(total_cash))
     
     return total_cash
 
