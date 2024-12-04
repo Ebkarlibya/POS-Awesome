@@ -180,9 +180,11 @@ export default {
             enabled: 1
           },
           fields: ['name', 'employee_name'],
+          limit_page_length: null
         },
         callback: function (r) {
           if (r.message) {
+            console.log(r.message)
             vm.related_customers = r.message;
             evntBus.$emit('update_related_customers', vm.related_customers); // Emit updated related customers
           } else {
