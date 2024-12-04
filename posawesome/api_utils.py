@@ -242,6 +242,8 @@ def get_employee_percentage(invoice_name):
     for item in invoice_doc.items:
         amount = item.rate * item.qty
 
+        employee_percentage = 100
+
         if invoice_doc.custom_related_customer:
             employee_percentage = frappe.get_value(
                 "Percent Table", 
@@ -251,7 +253,7 @@ def get_employee_percentage(invoice_name):
                     "item_group": item.item_group
                 }, 
                 fieldname="employee_percentage"
-            ) or 100
+            )
 
         if invoice_doc.custom_plan:
             employee_percentage = frappe.get_value(
@@ -260,11 +262,13 @@ def get_employee_percentage(invoice_name):
                     "plan_name": invoice_doc.custom_plan
                 }, 
                 fieldname="plan_percent"
-            ) or 100
+            )
 
 
 
         total_cash += amount * (employee_percentage / 100)
+
+    frappe.msgprint(str(total_cash))
     
     return total_cash
 
