@@ -217,6 +217,8 @@ export default {
           }
         },
       });
+      console.log(this.plans)
+      console.log(this.plan)
     },
 
     new_customer() {
