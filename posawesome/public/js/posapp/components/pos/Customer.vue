@@ -80,7 +80,7 @@
     <br>
     <!-- Related Customer Autocomplete -->
     <v-autocomplete
-      v-if="related_customers.length > 0 && !plan"
+      v-if="related_customers.length > 0"
       dense
       clearable
       outlined
@@ -309,7 +309,6 @@ export default {
     },
     plan(newVal) {
       evntBus.$emit('set_plan', newVal); // Emit after plan change
-      this.related_customer = '';
     }
   },
 };
