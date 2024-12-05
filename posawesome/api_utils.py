@@ -288,7 +288,6 @@ def get_item_percentage_and_amount(customer, related_customer, plan, item):
     total_amount = item['rate'] * item['qty']
 
     if related_customer:
-        frappe.msgprint('1111')
         employee_percentage, company_percentage = frappe.get_value(
             "Percent Table", 
             filters={
@@ -302,7 +301,6 @@ def get_item_percentage_and_amount(customer, related_customer, plan, item):
     plan_percent = 100
 
     if plan:
-        frappe.msgprint('2222')
         plan_percent = frappe.get_value(
             "Plan", 
             filters={
@@ -317,8 +315,6 @@ def get_item_percentage_and_amount(customer, related_customer, plan, item):
     employee_amount = total_amount * (employee_percentage / 100)
     company_amount = total_amount * (company_percentage / 100)
 
-    frappe.msgprint(str(employee_percentage))
-    frappe.msgprint(str(company_percentage))
 
     return employee_percentage, company_percentage, employee_amount, company_amount
 

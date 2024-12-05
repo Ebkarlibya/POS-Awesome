@@ -94,7 +94,19 @@
       :no-data-text="__('No related customer found')"
       hide-details
       :disabled="readonly"
-    />
+      :filter="relatedCustomerFilter"
+      scoped-slots="{ item }"
+      >
+        <!-- 
+        <template v-slot:item="{ item }">
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="subtitle-1" v-html="item.employee_name"></v-list-item-title>
+              <v-list-item-subtitle v-if="item.employee_id" v-html="`ID: ${item.employee_id}`"></v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+        -->
     </v-autocomplete>
 
     <div class="mb-8">
@@ -179,12 +191,12 @@ export default {
             parent_customer: customer,
             enabled: 1
           },
-          fields: ['name', 'employee_name'],
+          fields: ['name', 'employee_name', 'employee_id'],
           limit_page_length: null
         },
         callback: function (r) {
           if (r.message) {
-            console.log(r.message)
+            console.log('Related Customers:', r.message);
             vm.related_customers = r.message;
             evntBus.$emit('update_related_customers', vm.related_customers); // Emit updated related customers
           } else {
@@ -241,6 +253,18 @@ export default {
         textThree.indexOf(searchText) > -1 ||
         textFour.indexOf(searchText) > -1 ||
         textFifth.indexOf(searchText) > -1
+      );
+    },
+    relatedCustomerFilter(item, queryText) {
+      console.log('Filter Input:', queryText, 'Item:', item);
+
+      const employeeId = item.employee_id ? item.employee_id.toString().toLowerCase() : '';
+      const employeeName = item.employee_name ? item.employee_name.toLowerCase() : '';
+      const searchText = queryText.toLowerCase();
+
+      return (
+        employeeId.indexOf(searchText) > -1 ||
+        employeeName.indexOf(searchText) > -1
       );
     },
   },
