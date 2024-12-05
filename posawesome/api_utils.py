@@ -264,6 +264,8 @@ def get_employee_percentage(invoice_name):
                 fieldname="plan_percent"
             )
 
+        if employee_percentage is None:
+            employee_percentage = 100
 
 
         total_cash += amount * (employee_percentage / 100)
