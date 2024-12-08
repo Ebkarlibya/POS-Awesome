@@ -217,6 +217,7 @@ export default {
           customer: customer
         },
         callback: function (r) {
+          console.log(r.message)
           if (r.message && Array.isArray(r.message)) {
             vm.plans = r.message;
             evntBus.$emit('update_plans', vm.plans); // Emit updated related customers
