@@ -208,6 +208,7 @@ export default {
       const vm = this;
       if (!customer) {
         vm.plans = [];
+        vm.plan = '';
         evntBus.$emit('update_plans', vm.plans); // Emit empty array when no customer
         return;
       }
@@ -220,10 +221,18 @@ export default {
           console.log(r.message)
           if (r.message && Array.isArray(r.message)) {
             vm.plans = r.message;
-            evntBus.$emit('update_plans', vm.plans); // Emit updated related customers
+            evntBus.$emit('update_plans', vm.plans); // Emit updated plans
+
+            // Automatically select the default plan
+            const defaultPlan = vm.plans.find((plan) => plan.is_default === 1);
+            if (defaultPlan) {
+              vm.plan = defaultPlan.plan_name; // Set the default plan to the v-model
+            }
+
           } else {
             vm.plans = [];
-            evntBus.$emit('update_plans', vm.plans); // Emit empty array if no related customers found
+            vm.plan = '';
+            evntBus.$emit('update_plans', vm.plans); // Reset the selected plan if no plans found
           }
         },
       });

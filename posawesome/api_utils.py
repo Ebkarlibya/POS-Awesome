@@ -29,7 +29,7 @@ from datetime import datetime
 def get_customer_plans(customer):
     plans = frappe.get_all('Customer Plan', 
                            filters={'parent': customer, 'parenttype': 'Customer'},
-                           fields=['plan_name', 'plan_percent'])
+                           fields=['plan_name', 'plan_percent', 'is_default'])
     
     return plans
 
