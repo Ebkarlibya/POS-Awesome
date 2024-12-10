@@ -218,15 +218,17 @@ export default {
           customer: customer
         },
         callback: function (r) {
-          console.log(r.message)
           if (r.message && Array.isArray(r.message)) {
             vm.plans = r.message;
             evntBus.$emit('update_plans', vm.plans); // Emit updated plans
 
-            // Automatically select the default plan
-            const defaultPlan = vm.plans.find((plan) => plan.is_default === 1);
-            if (defaultPlan) {
-              vm.plan = defaultPlan.plan_name; // Set the default plan to the v-model
+            // Only set the default plan if no plan is already set
+            if (!vm.plan) {
+              // Automatically select the default plan
+              const defaultPlan = vm.plans.find((plan) => plan.is_default === 1);
+              if (defaultPlan) {
+                vm.plan = defaultPlan.plan_name; // Set the default plan to the v-model
+              }
             }
 
           } else {
@@ -321,6 +323,8 @@ export default {
           this.plan = newVal.custom_plan;
         } else {
           this.plan = ''; // Reset if not available
+          // If plan is reset, re-run get_plans to set the default plan
+          this.get_plans(this.customer);
         }
       },
     },
