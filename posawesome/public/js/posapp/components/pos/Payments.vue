@@ -788,7 +788,8 @@ export default {
         this.pos_profile.posa_allow_partial_payment &&
         !this.pos_profile.posa_allow_credit_sale &&
         this.total_payments == 0 &&
-        this.invoice_doc.custom_plan_percent!=0
+        this.invoice_doc.custom_plan_percent!=0 &&
+        !this.invoice_doc.is_return
       ) {
         evntBus.$emit("show_mesage", {
           text: `Please enter the amount paid`,
