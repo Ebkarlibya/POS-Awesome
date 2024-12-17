@@ -34,6 +34,7 @@ def calculate_enterprise_rate(doc, method):
     for item in doc.items:
         if item.rate:
             item.custom_item_enterprise_rate = item.rate * (enterprise_percent / 100)
+            item.custom_item_enterprise_amount = item.qty * item.custom_item_enterprise_rate
 
 
 
