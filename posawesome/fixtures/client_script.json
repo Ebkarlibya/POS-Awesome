@@ -26,10 +26,10 @@
   "doctype": "Client Script",
   "dt": "Purchase Receipt",
   "enabled": 1,
-  "modified": "2024-12-18 13:16:23.731199",
+  "modified": "2024-12-18 13:29:15.888220",
   "module": "POSAwesome",
   "name": "Purchase Receipt Script",
-  "script": "frappe.ui.form.on('Purchase Receipt', {\n\trefresh(frm) {\n\t\t// your code here\n\t}\n})",
+  "script": "frappe.ui.form.on('Purchase Receipt Item', {\n    item_code: function (frm, cdt, cdn) {\n        let row = locals[cdt][cdn];\n        frappe.run_serially([\n            () => frappe.timeout(0.1),\n            () => {\n                if (row.item_code && row.warehouse) {\n                    update_available_qty(frm, cdt, cdn);\n                }\n            }\n        ]);\n    },\n    warehouse: function (frm, cdt, cdn) {\n        update_available_qty(frm, cdt, cdn);\n    }\n});\n\nfunction update_available_qty(frm, cdt, cdn) {\n    let row = locals[cdt][cdn];\n    if (row.item_code && row.warehouse) {\n        frappe.call({\n            method: \"posawesome.api_utils.get_item_available_qty\",\n            args: {\n                item_code: row.item_code,\n                warehouse: row.warehouse\n            },\n            callback: function (r) {\n                if (r.message !== undefined) {\n                    frappe.model.set_value(cdt, cdn, \"custom_available_qty_at_warehouse\", r.message);\n                }\n            }\n        });\n    }\n}\n",
   "view": "Form"
  }
 ]

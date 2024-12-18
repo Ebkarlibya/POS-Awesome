@@ -38,6 +38,18 @@ def get_available_qty_stock(doc, method):
             d.custom_available_qty_at_warehouse = bin and flt(bin[0]["actual_qty"]) or 0
 
 
+@frappe.whitelist()
+def get_item_available_qty(item_code, warehouse):
+    if item_code and warehouse:
+        bin = frappe.db.sql(
+            "select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
+            (item_code, warehouse),
+            as_dict=1,
+        )
+        return flt(bin[0]["actual_qty"]) if bin else 0
+    return 0
+    
+
 
 @frappe.whitelist()
 def calculate_enterprise_rate(doc, method):
