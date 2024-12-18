@@ -30,11 +30,12 @@ def calculate_enterprise_rate(doc, method):
     # Fetch the enterprise percent for the customer
     enterprise_percent = frappe.db.get_value("Customer", doc.customer, "custom_item_enterprise_percent")
 
-    # Loop through items and update custom field
-    for item in doc.items:
-        if item.rate:
-            item.custom_item_enterprise_rate = item.rate * (enterprise_percent / 100)
-            item.custom_item_enterprise_amount = item.qty * item.custom_item_enterprise_rate
+    if enterprise_percent>0:
+        # Loop through items and update custom field
+        for item in doc.items:
+            if item.rate:
+                item.custom_item_enterprise_rate = item.rate * (enterprise_percent / 100)
+                item.custom_item_enterprise_amount = item.qty * item.custom_item_enterprise_rate
 
 
 
