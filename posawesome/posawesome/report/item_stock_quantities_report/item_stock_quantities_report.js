@@ -11,12 +11,6 @@ frappe.query_reports["Item Stock Quantities Report"] = {
 			"options": "Item"
 		},
 		{
-			"fieldname":"brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
-		},
-		{
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
@@ -29,13 +23,13 @@ frappe.query_reports["Item Stock Quantities Report"] = {
 			"options": "Supplier"
 		},
 		{
-			"fieldname":"start_date",
-			"label": __("Start Date"),
+			"fieldname":"from",
+			"label": __("From"),
 			"fieldtype": "Date"
 		},
 		{
-			"fieldname":"end_date",
-			"label": __("End Date"),
+			"fieldname":"to",
+			"label": __("To"),
 			"fieldtype": "Date"
 		}
 	]
