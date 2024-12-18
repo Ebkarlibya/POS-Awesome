@@ -104,6 +104,11 @@ doc_events = {
         "validate": "posawesome.posawesome.api.customer.validate",
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
     },
+    "Purchase Receipt": {
+        "validate": [
+                "posawesome.api_utils.get_available_qty_stock"
+            ],
+    },
 }
 
 # Scheduled Tasks

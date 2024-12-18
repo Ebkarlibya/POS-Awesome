@@ -25,6 +25,20 @@ from datetime import datetime
 
 
 
+
+@frappe.whitelist()
+def get_available_qty_stock(doc, method):
+    for d in doc.get("items"):
+        if d.item_code and d.warehouse:
+            bin = frappe.db.sql(
+                "select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
+                (d.item_code, d.warehouse),
+                as_dict=1,
+            )
+            d.custom_available_qty_at_warehouse = bin and flt(bin[0]["actual_qty"]) or 0
+
+
+
 @frappe.whitelist()
 def calculate_enterprise_rate(doc, method):
     # Fetch the enterprise percent for the customer
