@@ -66,41 +66,35 @@ def calculate_enterprise_rate(doc, method):
 
 
 @frappe.whitelist()
-def update_related_customer_item_percent(invoice_name, related_customer):
-    doc = frappe.get_doc("Sales Invoice", invoice_name)
+def update_related_customer_item_percent(doc, method):
+    if not doc.custom_plan:
+        for item in doc.items:
+            total_amount = item.rate * item.qty
 
-    for item in doc.items:
-        total_amount = item.rate * item.qty
+            employee_percentage = 0
+            company_percentage = 0
+            employee_amount = 0
+            company_amount = 0
 
-        employee_percentage = 0
-        company_percentage = 0
-        employee_amount = 0
-        company_amount = 0
+            if doc.custom_related_customer:
+                employee_percentage, company_percentage = frappe.get_value(
+                    "Percent Table", 
+                    filters={
+                        "parenttype": 'Related Customer', 
+                        "parent": doc.custom_related_customer, 
+                        "item_group": item.item_group
+                    }, 
+                    fieldname=["employee_percentage", "company_percentage"]
+                ) or (100, 0)
 
-        if related_customer:
-            employee_percentage, company_percentage = frappe.get_value(
-                "Percent Table", 
-                filters={
-                    "parenttype": 'Related Customer', 
-                    "parent": related_customer, 
-                    "item_group": item.item_group
-                }, 
-                fieldname=["employee_percentage", "company_percentage"]
-            ) or (100, 0)
+            employee_amount = total_amount * (employee_percentage / 100)
+            company_amount = total_amount * (company_percentage / 100)
 
-        employee_amount = total_amount * (employee_percentage / 100)
-        company_amount = total_amount * (company_percentage / 100)
+            frappe.db.sql("""update `tabSales Invoice Item` set custom_employee_percentage={0}, custom_company_percentage={1},
+                custom_employee_amount={2}, custom_company_amount={3} where parent='{4}' and name='{5}'
+                    """.format(employee_percentage, company_percentage, employee_amount, company_amount, doc.name, item.name))
 
-        item.custom_employee_percentage = employee_percentage
-        item.custom_company_percentage = company_percentage
-        item.custom_employee_amount = employee_amount
-        item.custom_company_amount = company_amount
-
-    doc.save()
-        
-
-
-
+            doc.reload()
 
 
 

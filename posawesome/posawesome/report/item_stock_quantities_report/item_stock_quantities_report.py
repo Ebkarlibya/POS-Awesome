@@ -20,27 +20,33 @@ def get_columns(filters):
     ]
 
 def get_conditions(filters):
-    conditions = ""
+    conditions = []
 
     # Apply filters if provided
-    if filters.get("item"): 
-        conditions += " AND pri.item_code = '{0}' ".format(filters.get("item"))
-    if filters.get("supplier"): 
-        conditions += " AND pr.supplier = '{0}' ".format(filters.get("supplier"))
-    if filters.get("warehouse"): 
-        conditions += " AND pri.warehouse = '{0}' ".format(filters.get("warehouse"))
-    if filters.get("from"): 
-        conditions += " AND pr.posting_date >= '{0}' ".format(filters.get("from"))
-    if filters.get("to"): 
-        conditions += " AND pr.posting_date <= '{0}' ".format(filters.get("to"))
+    if filters.get("item"):
+        conditions.append("pri.item_code = %s")
+    if filters.get("supplier"):
+        conditions.append("pr.supplier = %s")
+    if filters.get("warehouse"):
+        conditions.append("pri.warehouse = %s")
+    if filters.get("from"):
+        conditions.append("pr.posting_date >= %s")
+    if filters.get("to"):
+        conditions.append("pr.posting_date <= %s")
     
-    return conditions
+    return " AND ".join(conditions), [
+        filters.get("item"),
+        filters.get("supplier"),
+        filters.get("warehouse"),
+        filters.get("from"),
+        filters.get("to"),
+    ]
 
 def get_data(filters):
     data = []
-    conditions = get_conditions(filters)
+    conditions, values = get_conditions(filters)
 
-    items = frappe.db.sql("""
+    query = f"""
         SELECT 
             pri.item_code AS item_code, 
             item.brand AS brand, 
@@ -50,26 +56,29 @@ def get_data(filters):
         FROM `tabPurchase Receipt Item` AS pri
         JOIN `tabPurchase Receipt` AS pr ON pri.parent = pr.name
         JOIN `tabItem` AS item ON pri.item_code = item.name
-        LEFT JOIN `tabBin` AS bin ON pri.item_code = bin.item_code AND pri.warehouse = bin.warehouse
-        WHERE pr.docstatus = 1 {0}
+        WHERE pr.docstatus = 1
+        {f"AND {conditions}" if conditions else ""}
         GROUP BY pri.item_code, pr.supplier, pri.warehouse
-    """.format(conditions), as_dict=1)
+    """
+    items = frappe.db.sql(query, [v for v in values if v], as_dict=1)
 
     for item in items:
+        # Fetch available quantity from Bin
         available_qty = frappe.db.sql("""
             SELECT IFNULL(SUM(actual_qty), 0) AS available_qty
             FROM `tabBin`
-            WHERE item_code = '{0}' AND warehouse = '{1}'
-        """.format(item.item_code, item.warehouse), as_dict=1)
+            WHERE item_code = %s AND warehouse = %s
+        """, (item.item_code, item.warehouse), as_dict=1)
         
-        available_qty = available_qty and flt(available_qty[0]["available_qty"]) or 0
+        available_qty = available_qty[0]["available_qty"] if available_qty else 0
 
+        # Append the data row
         row = [
             item.item_code,
             item.brand,
             item.supplier,
             item.warehouse,
-            available_qty,
+            flt(available_qty),
             item.quantity_in
         ]
         data.append(row)
