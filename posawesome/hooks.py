@@ -95,7 +95,8 @@ doc_events = {
     "Sales Invoice": {
         "validate": [
                 "posawesome.posawesome.api.invoice.validate",
-                "posawesome.api_utils.calculate_enterprise_rate"
+                "posawesome.api_utils.calculate_enterprise_rate",
+                # "posawesome.api_utils.update_related_customer_item_percent"
             ],
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",

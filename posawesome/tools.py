@@ -22,7 +22,7 @@ def calculate_invoices_enterprise_rate():
             print('** Update Sales Invoice: {0}'.format(invoice))
             for item in doc.items:
                 print('- Update Item: {0}'.format(item.item_name))
-                item_enterprise_rate = item.rate * (enterprise_percent / 100)
+                item_enterprise_rate = item.rate + (item.rate * (enterprise_percent / 100))
                 item_enterprise_amount = item.qty * item_enterprise_rate
                 
                 frappe.db.sql("update `tabSales Invoice Item` set custom_item_enterprise_rate={0}, custom_item_enterprise_amount={1} where parent='{2}' and name='{3}'".format(item_enterprise_rate, item_enterprise_amount, invoice, item.name))

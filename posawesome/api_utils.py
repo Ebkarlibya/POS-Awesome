@@ -60,8 +60,51 @@ def calculate_enterprise_rate(doc, method):
         # Loop through items and update custom field
         for item in doc.items:
             if item.rate:
-                item.custom_item_enterprise_rate = item.rate * (enterprise_percent / 100)
+                item.custom_item_enterprise_rate = item.rate+ (item.rate * (enterprise_percent / 100))
                 item.custom_item_enterprise_amount = item.qty * item.custom_item_enterprise_rate
+
+
+
+@frappe.whitelist()
+def update_related_customer_item_percent(invoice_name, related_customer):
+    doc = frappe.get_doc("Sales Invoice", invoice_name)
+
+    for item in doc.items:
+        total_amount = item.rate * item.qty
+
+        employee_percentage = 0
+        company_percentage = 0
+        employee_amount = 0
+        company_amount = 0
+
+        if related_customer:
+            employee_percentage, company_percentage = frappe.get_value(
+                "Percent Table", 
+                filters={
+                    "parenttype": 'Related Customer', 
+                    "parent": related_customer, 
+                    "item_group": item.item_group
+                }, 
+                fieldname=["employee_percentage", "company_percentage"]
+            ) or (100, 0)
+
+        employee_amount = total_amount * (employee_percentage / 100)
+        company_amount = total_amount * (company_percentage / 100)
+
+        item.custom_employee_percentage = employee_percentage
+        item.custom_company_percentage = company_percentage
+        item.custom_employee_amount = employee_amount
+        item.custom_company_amount = company_amount
+
+    doc.save()
+        
+
+
+
+
+
+
+
 
 
 
