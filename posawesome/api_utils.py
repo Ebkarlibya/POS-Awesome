@@ -98,10 +98,28 @@ def update_related_customer_item_percent(doc, method):
                 custom_employee_amount={2}, custom_company_amount={3} where parent='{4}' and name='{5}'
                     """.format(employee_percentage, company_percentage, employee_amount, company_amount, doc.name, item.name))
 
+            
+            doc.paid_amount = sum(item.custom_employee_amount for item in doc.items)
+            doc.append("payments", {
+                "mode_of_payment": get_default_payment_method(doc.pos_profile),
+                "amount": doc.paid_amount
+            })
+
+            doc.save()
             doc.reload()
 
 
 
+
+def get_default_payment_method(pos_profile_name):
+    payments = frappe.get_all(
+        "POS Payment Method",
+        filters={"parent": pos_profile_name, "parenttype": "POS Profile"},
+        fields=["mode_of_payment", "default"]
+    )
+    for payment in payments:
+        if payment.get("default"):
+            return payment.get("mode_of_payment")
 
 
 

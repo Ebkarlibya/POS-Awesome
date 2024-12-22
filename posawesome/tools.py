@@ -35,3 +35,38 @@ def calculate_invoices_enterprise_rate():
         count+=1
         frappe.db.sql("update `tabSales Invoice` set custom_total_enterprise_amount={0} where name='{1}'".format(total_enterprise_amount, invoice))
 
+
+def check_pos_profiles_for_default():
+    """
+    Check if all POS Profiles have at least one default payment method checked.
+    """
+    # Fetch all POS Profiles
+    pos_profiles = frappe.get_all("POS Profile", fields=["name"])
+
+    # Initialize a list to store profiles without a default payment method
+    profiles_without_default = []
+
+    for profile in pos_profiles:
+        # Get the child table entries for the current POS Profile
+        payments = frappe.get_all(
+            "POS Payment Method",
+            filters={"parent": profile.name, "parenttype": "POS Profile"},
+            fields=["default"]
+        )
+
+        # Check if at least one payment method has default=True
+        if not any(payment.get("default") for payment in payments):
+            profiles_without_default.append(profile.name)
+
+    if profiles_without_default:
+        return {
+            "status": "failure",
+            "message": "Some POS Profiles do not have a default payment method.",
+            "profiles": profiles_without_default,
+        }
+
+    return {
+        "status": "success",
+        "message": "All POS Profiles have at least one default payment method.",
+    }
+    
