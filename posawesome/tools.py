@@ -14,10 +14,14 @@ from frappe.utils import cint, cstr, flt, nowdate, comma_and, date_diff, getdate
 
 
 def calculate_invoices_enterprise_rate():
+    count=0
     invoices = frappe.db.sql_list("select name from `tabSales Invoice`")
     for invoice in invoices:
+        print(count)
         doc = frappe.get_doc("Sales Invoice", invoice)
         enterprise_percent = frappe.get_value("Customer", filters = {"name": doc.customer}, fieldname = "custom_item_enterprise_percent") or None
+        
+        total_enterprise_amount = 0.0
         if enterprise_percent:
             print('** Update Sales Invoice: {0}'.format(invoice))
             for item in doc.items:
@@ -26,4 +30,8 @@ def calculate_invoices_enterprise_rate():
                 item_enterprise_amount = item.qty * item_enterprise_rate
                 
                 frappe.db.sql("update `tabSales Invoice Item` set custom_item_enterprise_rate={0}, custom_item_enterprise_amount={1} where parent='{2}' and name='{3}'".format(item_enterprise_rate, item_enterprise_amount, invoice, item.name))
+
+                total_enterprise_amount+=item_enterprise_amount
+        count+=1
+        frappe.db.sql("update `tabSales Invoice` set custom_total_enterprise_amount={0} where name='{1}'".format(total_enterprise_amount, invoice))
 

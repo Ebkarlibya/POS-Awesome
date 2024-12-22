@@ -53,6 +53,7 @@ def get_item_available_qty(item_code, warehouse):
 
 @frappe.whitelist()
 def calculate_enterprise_rate(doc, method):
+    total_enterprise_amount = 0.0
     # Fetch the enterprise percent for the customer
     enterprise_percent = frappe.db.get_value("Customer", doc.customer, "custom_item_enterprise_percent")
 
@@ -63,6 +64,9 @@ def calculate_enterprise_rate(doc, method):
                 item.custom_item_enterprise_rate = item.rate+ (item.rate * (enterprise_percent / 100))
                 item.custom_item_enterprise_amount = item.qty * item.custom_item_enterprise_rate
 
+                total_enterprise_amount += item.custom_item_enterprise_amount
+
+        doc.custom_total_enterprise_amount = total_enterprise_amount
 
 
 @frappe.whitelist()
