@@ -173,7 +173,8 @@ class Analytics:
         if self.filters["value_quantity"] == "Value":
             value_field = "base_net_amount"
         else:
-            value_field = "stock_qty"
+            # value_field = "stock_qty"
+            value_field = "qty"
 
         self.entries = frappe.db.sql(
             """
