@@ -72,6 +72,7 @@ frappe.query_reports["Sales Analytics"] = {
 			label: __("Range"),
 			fieldtype: "Select",
 			options: [
+				{ value: "Daily", label: __("Daily") },
 				{ value: "Weekly", label: __("Weekly") },
 				{ value: "Monthly", label: __("Monthly") },
 				{ value: "Quarterly", label: __("Quarterly") },
