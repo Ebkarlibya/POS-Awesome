@@ -19,13 +19,20 @@ import sys
 from frappe.utils import cstr
 from frappe.model.document import Document
 import json
-
+from erpnext.stock.doctype.item.item import get_last_purchase_details
 from pymysql import MySQLError
 from datetime import datetime
 
 
 
 
+@frappe.whitelist()
+def fetch_last_purchase_details(item_code):
+    return get_last_purchase_details(item_code=item_code)
+
+
+
+    
 @frappe.whitelist()
 def get_available_qty_stock(doc, method):
     for d in doc.get("items"):
