@@ -25,6 +25,101 @@ from datetime import datetime
 
 
 
+@frappe.whitelist()
+def make_delivery_note_purchase_invoice(source_name, target_doc=None):
+    # Get the Purchase Invoice document using the source_name
+    source_doc = frappe.get_doc("Purchase Invoice", source_name)
+
+    def postprocess(source, target):
+        if source.tc_name and frappe.db.get_value("Terms and Conditions", source.tc_name, "buying") != 1:
+            target.tc_name = None
+            target.terms = None
+
+    def update_item(source, target, source_parent):
+        target.item_code = source.item_code
+        target.qty = source.qty
+        target.stock_uom = source.stock_uom
+        target.rate = source.rate
+
+        # Additional field calculations can be added here if necessary
+        target.amount = target.qty * target.rate
+
+    # Using get_mapped_doc to map fields from Purchase Invoice to Delivery Note
+    doc = get_mapped_doc(
+        "Purchase Invoice",
+        source_name,
+        {
+            "Purchase Invoice": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+            "Purchase Invoice Item": {
+                "doctype": "Delivery Note Item",
+                "field_map": {
+                    "item_code": "item_code",
+                    "qty": "qty",
+                    "stock_uom": "stock_uom",
+                    "rate": "rate",
+                    "uom": "uom",
+                },
+                "postprocess": update_item,
+            },
+        },
+        target_doc,
+        postprocess,
+    )
+
+    return doc
+
+
+@frappe.whitelist()
+def make_delivery_note_purchase_receipt(source_name, target_doc=None, *args, **kwargs):
+    # Get the Purchase Receipt document using the source_name
+    source_doc = frappe.get_doc("Purchase Receipt", source_name)
+
+    def postprocess(source, target):
+        if source.tc_name and frappe.db.get_value("Terms and Conditions", source.tc_name, "buying") != 1:
+            target.tc_name = None
+            target.terms = None
+
+    def update_item(source, target, source_parent):
+        target.item_code = source.item_code
+        target.qty = source.qty
+        target.stock_uom = source.stock_uom
+        target.rate = source.rate
+
+        # Additional field calculations can be added here if necessary
+        target.amount = target.qty * target.rate
+
+    # Using get_mapped_doc to map fields from Purchase Receipt to Delivery Note
+    doc = get_mapped_doc(
+        "Purchase Receipt",
+        source_name,
+        {
+            "Purchase Receipt": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+            "Purchase Receipt Item": {
+                "doctype": "Delivery Note Item",
+                "field_map": {
+                    "item_code": "item_code",
+                    "qty": "qty",
+                    "stock_uom": "stock_uom",
+                    "rate": "rate",
+                    "uom": "uom",
+                },
+                "postprocess": update_item,
+            },
+        },
+        target_doc,
+        postprocess,
+    )
+
+    return doc
+
+
+
+
+
+
+
+
+
 
 # @frappe.whitelist()
 # def fetch_last_purchase_details(item_code):
