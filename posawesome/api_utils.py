@@ -19,20 +19,182 @@ import sys
 from frappe.utils import cstr
 from frappe.model.document import Document
 import json
-from erpnext.stock.doctype.item.item import get_last_purchase_details
+# from erpnext.stock.doctype.item.item import get_last_purchase_details
 from pymysql import MySQLError
 from datetime import datetime
 
 
 
 
+# @frappe.whitelist()
+# def fetch_last_purchase_details(item_code):
+#     return get_last_purchase_details(item_code=item_code, doc_name='PUR-ORD-2025-00004')
+
 @frappe.whitelist()
-def fetch_last_purchase_details(item_code):
-    return get_last_purchase_details(item_code=item_code)
+def user_has_role(role):
+    roles = frappe.get_all('Has Role', filters={'parent': frappe.session.user}, fields=['role'])
+    for user_role in roles:
+        if user_role.role == role:
+            return True
+    return False
 
 
 
+def custom_sales_order_validation(doc, method):
+    # Check if the user has the "Sales Rate Exception" role
+    has_sales_rate_exception_role = user_has_role("Sales Rate Exception")
+    invalid_rows = []
+
+    # Validate items
+    for idx, item in enumerate(doc.items, start=1):
+        if item.rate < item.custom_item_valuation_rate and not has_sales_rate_exception_role:
+            invalid_rows.append(str(idx))
+        
+        if item.custom_item_valuation_rate == 0:
+            frappe.throw(f"Please fill the Valuation Rate of item: {item.item_code}")
     
+    if invalid_rows:
+        row_numbers = ", ".join(invalid_rows)
+        frappe.throw(f"The rate in rows {row_numbers} is below the item valuation rate. This is not accepted.")
+
+
+def custom_quotation_validation(doc, method):
+    # Check if the user has the "Sales Rate Exception" role
+    has_sales_rate_exception_role = user_has_role("Sales Rate Exception")
+    invalid_rows = []
+
+    # Validate items
+    for idx, item in enumerate(doc.items, start=1):
+        if item.rate < item.custom_item_valuation_rate and not has_sales_rate_exception_role:
+            invalid_rows.append(str(idx))
+        
+        if item.custom_item_valuation_rate == 0:
+            frappe.throw(f"Please fill the Valuation Rate of item: {item.item_code}")
+    
+    if invalid_rows:
+        row_numbers = ", ".join(invalid_rows)
+        frappe.throw(f"The rate in rows {row_numbers} is below the item valuation rate. This is not accepted.")
+
+
+
+
+@frappe.whitelist()
+def get_last_buying_item_price(item_code, currency='LYD'):
+    if item_code and currency:
+        rate = frappe.db.sql(
+            "select price_list_rate from `tabItem Price` where item_code = %s and currency = %s and buying=1 order by modified desc",
+            (item_code, currency),
+            as_dict=1,
+        )
+        return flt(rate[0]["price_list_rate"]) if rate else 0
+
+
+
+
+from pypika import Order
+
+@frappe.whitelist()
+def get_last_purchase_details(item_code, doc_name=None, currency='LYD', conversion_rate=1.0):
+    """returns last purchase details in stock uom"""
+    # get last purchase order item details
+
+    last_purchase_order = get_purchase_voucher_details("Purchase Order", item_code, doc_name, currency)
+
+    # get last purchase receipt item details
+    last_purchase_receipt = get_purchase_voucher_details("Purchase Receipt", item_code, doc_name, currency)
+
+    purchase_order_date = getdate(
+        last_purchase_order and last_purchase_order[0].transaction_date or "1900-01-01"
+    )
+    purchase_receipt_date = getdate(
+        last_purchase_receipt and last_purchase_receipt[0].posting_date or "1900-01-01"
+    )
+
+    if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
+        # use purchase order
+
+        last_purchase = last_purchase_order[0]
+        purchase_date = purchase_order_date
+
+    elif last_purchase_receipt and (purchase_receipt_date > purchase_order_date or not last_purchase_order):
+        # use purchase receipt
+        last_purchase = last_purchase_receipt[0]
+        purchase_date = purchase_receipt_date
+
+    else:
+        last_purchase_invoice = get_purchase_voucher_details("Purchase Invoice", item_code, doc_name, currency)
+
+        if last_purchase_invoice:
+            last_purchase = last_purchase_invoice[0]
+            purchase_date = getdate(last_purchase.posting_date)
+        else:
+            return frappe._dict()
+
+    conversion_factor = flt(last_purchase.conversion_factor)
+    out = frappe._dict(
+        {
+            "base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
+            "base_rate": flt(last_purchase.base_rate) / conversion_factor,
+            "base_net_rate": flt(last_purchase.base_net_rate) / conversion_factor,
+            "discount_percentage": flt(last_purchase.discount_percentage),
+            "purchase_date": purchase_date,
+        }
+    )
+
+    conversion_rate = flt(conversion_rate) or 1.0
+    out.update(
+        {
+            "price_list_rate": out.base_price_list_rate / conversion_rate,
+            "rate": out.base_rate / conversion_rate,
+            "base_rate": out.base_rate,
+            "base_net_rate": out.base_net_rate,
+        }
+    )
+
+    return out
+
+
+def get_purchase_voucher_details(doctype, item_code, document_name, currency):
+    parent_doc = frappe.qb.DocType(doctype)
+    child_doc = frappe.qb.DocType(doctype + " Item")
+
+    query = (
+        frappe.qb.from_(parent_doc)
+        .inner_join(child_doc)
+        .on(parent_doc.name == child_doc.parent)
+        .select(
+            parent_doc.name,
+            parent_doc.currency,
+            parent_doc.conversion_rate,
+            child_doc.conversion_factor,
+            child_doc.base_price_list_rate,
+            child_doc.discount_percentage,
+            child_doc.base_rate,
+            child_doc.base_net_rate,
+        )
+        .where(parent_doc.docstatus == 1)
+        .where(child_doc.item_code == item_code)
+        .where(parent_doc.name.isnotnull())
+        .where(parent_doc.currency == currency)
+    )
+
+    if doctype in ("Purchase Receipt", "Purchase Invoice"):
+        query = query.select(parent_doc.posting_date, parent_doc.posting_time)
+        query = query.orderby(
+            parent_doc.posting_date, parent_doc.posting_time, parent_doc.name, order=Order.desc
+        )
+    else:
+        query = query.select(parent_doc.transaction_date)
+        query = query.orderby(parent_doc.transaction_date, parent_doc.name, order=Order.desc)
+
+    return query.run(as_dict=1)
+
+
+
+
+
+
+
 @frappe.whitelist()
 def get_available_qty_stock(doc, method):
     for d in doc.get("items"):

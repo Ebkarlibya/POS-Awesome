@@ -110,6 +110,16 @@ doc_events = {
                 "posawesome.api_utils.get_available_qty_stock"
             ],
     },
+    "Sales Order": {
+        "before_submit": [
+                "posawesome.api_utils.custom_sales_order_validation"
+            ],
+    },
+    "Quotation": {
+        "before_submit": [
+                "posawesome.api_utils.custom_quotation_validation"
+            ],
+    },
 }
 
 # Scheduled Tasks
