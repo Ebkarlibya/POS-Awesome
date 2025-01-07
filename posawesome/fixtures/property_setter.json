@@ -1905,19 +1905,35 @@
  },
  {
   "default_value": null,
+  "doc_type": "Project User",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocType",
+  "field_name": null,
+  "is_system_generated": 0,
+  "modified": "2025-01-07 13:07:38.966013",
+  "module": null,
+  "name": "Project User-main-field_order",
+  "property": "field_order",
+  "property_type": "Data",
+  "row_name": null,
+  "value": "[\"user\", \"email\", \"image\", \"column_break_2\", \"full_name\", null, \"welcome_email_sent\", \"view_attachments\", \"section_break_5\", \"project_status\"]"
+ },
+ {
+  "default_value": null,
   "doc_type": "Sales Order Item",
   "docstatus": 0,
   "doctype": "Property Setter",
   "doctype_or_field": "DocType",
   "field_name": null,
   "is_system_generated": 0,
-  "modified": "2025-01-06 16:01:50.705200",
+  "modified": "2025-01-07 13:25:00.317204",
   "module": null,
   "name": "Sales Order Item-main-field_order",
   "property": "field_order",
   "property_type": "Data",
   "row_name": null,
-  "value": "[\"item_code\", \"customer_item_code\", \"ensure_delivery_based_on_produced_serial_no\", \"posa_notes\", \"col_break1\", \"delivery_date\", \"item_name\", \"posa_row_id\", \"section_break_5\", \"description\", \"item_group\", \"brand\", \"image_section\", \"image\", \"image_view\", \"quantity_and_rate\", \"qty\", \"stock_uom\", \"col_break2\", \"uom\", \"conversion_factor\", \"stock_qty\", \"section_break_16\", \"price_list_rate\", \"base_price_list_rate\", \"discount_and_margin\", \"margin_type\", \"margin_rate_or_amount\", \"rate_with_margin\", \"column_break_19\", \"discount_percentage\", \"discount_amount\", \"base_rate_with_margin\", \"section_break_simple1\", \"rate\", \"amount\", \"item_tax_template\", \"col_break3\", \"base_rate\", \"base_amount\", \"pricing_rules\", \"stock_uom_rate\", \"is_free_item\", \"grant_commission\", \"section_break_24\", \"net_rate\", \"net_amount\", \"column_break_27\", \"base_net_rate\", \"base_net_amount\", \"billed_amt\", \"valuation_rate\", \"gross_profit\", \"custom_section_break_t4dsv\", \"custom_last_buying_price\", \"custom_last_buying_price_usd\", \"custom_column_break_taotb\", \"custom_margin_percentage\", \"custom_item_valuation_rate\", \"drop_ship_section\", \"delivered_by_supplier\", \"supplier\", \"item_weight_details\", \"weight_per_unit\", \"total_weight\", \"column_break_21\", \"weight_uom\", \"warehouse_and_reference\", \"warehouse\", \"target_warehouse\", \"prevdoc_docname\", \"quotation_item\", \"col_break4\", \"against_blanket_order\", \"blanket_order\", \"blanket_order_rate\", \"manufacturing_section_section\", \"bom_no\", \"planning_section\", \"projected_qty\", \"actual_qty\", \"ordered_qty\", \"planned_qty\", \"production_plan_qty\", \"column_break_69\", \"work_order_qty\", \"delivered_qty\", \"produced_qty\", \"returned_qty\", \"picked_qty\", \"shopping_cart_section\", \"additional_notes\", \"section_break_63\", \"page_break\", \"item_tax_rate\", \"transaction_date\", \"inter_transfer_reference_section\", \"material_request\", \"purchase_order\", \"column_break_89\", \"material_request_item\", \"purchase_order_item\"]"
+  "value": "[\"item_code\", \"customer_item_code\", \"ensure_delivery_based_on_produced_serial_no\", \"posa_notes\", \"col_break1\", \"delivery_date\", \"item_name\", \"posa_row_id\", \"section_break_5\", \"description\", \"item_group\", \"brand\", \"image_section\", \"image\", \"image_view\", \"quantity_and_rate\", \"qty\", \"stock_uom\", \"col_break2\", \"uom\", \"conversion_factor\", \"stock_qty\", \"section_break_16\", \"price_list_rate\", \"base_price_list_rate\", \"discount_and_margin\", \"margin_type\", \"margin_rate_or_amount\", \"rate_with_margin\", \"column_break_19\", \"discount_percentage\", \"discount_amount\", \"base_rate_with_margin\", \"section_break_simple1\", \"custom_margin_percentage\", \"rate\", \"amount\", \"item_tax_template\", \"col_break3\", \"base_rate\", \"base_amount\", \"pricing_rules\", \"stock_uom_rate\", \"is_free_item\", \"grant_commission\", \"section_break_24\", \"net_rate\", \"net_amount\", \"column_break_27\", \"base_net_rate\", \"base_net_amount\", \"billed_amt\", \"valuation_rate\", \"gross_profit\", \"custom_section_break_t4dsv\", \"custom_last_buying_price\", \"custom_last_buying_price_usd\", \"custom_column_break_taotb\", \"custom_item_valuation_rate\", \"drop_ship_section\", \"delivered_by_supplier\", \"supplier\", \"item_weight_details\", \"weight_per_unit\", \"total_weight\", \"column_break_21\", \"weight_uom\", \"warehouse_and_reference\", \"warehouse\", \"target_warehouse\", \"prevdoc_docname\", \"quotation_item\", \"col_break4\", \"against_blanket_order\", \"blanket_order\", \"blanket_order_rate\", \"manufacturing_section_section\", \"bom_no\", \"planning_section\", \"projected_qty\", \"actual_qty\", \"ordered_qty\", \"planned_qty\", \"production_plan_qty\", \"column_break_69\", \"work_order_qty\", \"delivered_qty\", \"produced_qty\", \"returned_qty\", \"picked_qty\", \"shopping_cart_section\", \"additional_notes\", \"section_break_63\", \"page_break\", \"item_tax_rate\", \"transaction_date\", \"inter_transfer_reference_section\", \"material_request\", \"purchase_order\", \"column_break_89\", \"material_request_item\", \"purchase_order_item\"]"
  },
  {
   "default_value": null,
@@ -1927,12 +1943,12 @@
   "doctype_or_field": "DocType",
   "field_name": null,
   "is_system_generated": 0,
-  "modified": "2025-01-06 16:02:33.080438",
+  "modified": "2025-01-07 13:25:26.457316",
   "module": null,
   "name": "Quotation Item-main-field_order",
   "property": "field_order",
   "property_type": "Data",
   "row_name": null,
-  "value": "[\"item_code\", \"customer_item_code\", \"col_break1\", \"item_name\", \"section_break_5\", \"description\", \"item_group\", \"brand\", \"image_section\", \"image\", \"image_view\", \"quantity_and_rate\", \"qty\", \"stock_uom\", \"col_break2\", \"uom\", \"conversion_factor\", \"stock_qty\", \"section_break_16\", \"price_list_rate\", \"base_price_list_rate\", \"discount_and_margin\", \"margin_type\", \"margin_rate_or_amount\", \"rate_with_margin\", \"column_break_18\", \"discount_percentage\", \"discount_amount\", \"base_rate_with_margin\", \"section_break1\", \"rate\", \"net_rate\", \"amount\", \"net_amount\", \"item_tax_template\", \"col_break3\", \"base_rate\", \"base_net_rate\", \"base_amount\", \"base_net_amount\", \"pricing_rules\", \"stock_uom_rate\", \"is_free_item\", \"is_alternative\", \"has_alternative_item\", \"custom_section_break_s551m\", \"custom_last_buying_price\", \"custom_last_buying_price_usd\", \"custom_column_break_uu23w\", \"custom_margin_percentage\", \"custom_item_valuation_rate\", \"section_break_43\", \"valuation_rate\", \"column_break_45\", \"gross_profit\", \"item_weight_details\", \"weight_per_unit\", \"total_weight\", \"column_break_20\", \"weight_uom\", \"reference\", \"warehouse\", \"against_blanket_order\", \"blanket_order\", \"blanket_order_rate\", \"column_break_30\", \"prevdoc_doctype\", \"prevdoc_docname\", \"item_balance\", \"projected_qty\", \"actual_qty\", \"col_break4\", \"stock_balance\", \"item_tax_rate\", \"shopping_cart_section\", \"additional_notes\", \"section_break_61\", \"page_break\"]"
+  "value": "[\"item_code\", \"customer_item_code\", \"col_break1\", \"item_name\", \"section_break_5\", \"description\", \"item_group\", \"brand\", \"image_section\", \"image\", \"image_view\", \"quantity_and_rate\", \"qty\", \"stock_uom\", \"col_break2\", \"uom\", \"conversion_factor\", \"stock_qty\", \"section_break_16\", \"price_list_rate\", \"base_price_list_rate\", \"discount_and_margin\", \"margin_type\", \"margin_rate_or_amount\", \"rate_with_margin\", \"column_break_18\", \"discount_percentage\", \"discount_amount\", \"base_rate_with_margin\", \"section_break1\", \"custom_margin_percentage\", \"rate\", \"net_rate\", \"amount\", \"net_amount\", \"item_tax_template\", \"col_break3\", \"base_rate\", \"base_net_rate\", \"base_amount\", \"base_net_amount\", \"pricing_rules\", \"stock_uom_rate\", \"is_free_item\", \"is_alternative\", \"has_alternative_item\", \"custom_section_break_s551m\", \"custom_last_buying_price\", \"custom_last_buying_price_usd\", \"custom_column_break_uu23w\", \"custom_item_valuation_rate\", \"section_break_43\", \"valuation_rate\", \"column_break_45\", \"gross_profit\", \"item_weight_details\", \"weight_per_unit\", \"total_weight\", \"column_break_20\", \"weight_uom\", \"reference\", \"warehouse\", \"against_blanket_order\", \"blanket_order\", \"blanket_order_rate\", \"column_break_30\", \"prevdoc_doctype\", \"prevdoc_docname\", \"item_balance\", \"projected_qty\", \"actual_qty\", \"col_break4\", \"stock_balance\", \"item_tax_rate\", \"shopping_cart_section\", \"additional_notes\", \"section_break_61\", \"page_break\"]"
  }
 ]
