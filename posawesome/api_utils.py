@@ -338,6 +338,70 @@ def calculate_enterprise_rate(doc, method):
         doc.custom_enterprise_paid_amount = enterprise_paid_amount
 
 
+@frappe.whitelist()
+def update_employee_and_company_percentage(doc, method):
+    if doc.custom_manually_entry and doc.is_pos and doc.pos_profile:
+        total_paid_amount = 0
+
+        for item in doc.items:
+            total_amount = item.rate * item.qty
+
+            employee_percentage = 100
+            company_percentage = 0
+
+            if doc.custom_related_customer:
+                employee_percentage = frappe.get_value(
+                    "Percent Table", 
+                    filters={
+                        "parenttype": 'Related Customer', 
+                        "parent": doc.custom_related_customer, 
+                        "item_group": item.item_group
+                    }, 
+                    fieldname="employee_percentage"
+                ) or 100
+
+            if doc.custom_plan:
+                employee_percentage = frappe.get_value(
+                    "Plan", 
+                    filters={
+                        "plan_name": doc.custom_plan
+                    }, 
+                    fieldname="plan_percent"
+                ) or 100
+
+            company_percentage = 100 - employee_percentage
+            employee_amount = total_amount * (employee_percentage / 100)
+            company_amount = total_amount * (company_percentage / 100)
+
+            item.db_set("custom_employee_percentage", employee_percentage)
+            item.db_set("custom_company_percentage", company_percentage)
+            item.db_set("custom_employee_amount", employee_amount)
+            item.db_set("custom_company_amount", company_amount)
+
+            total_paid_amount += employee_amount
+            
+        if doc.pos_profile:
+            doc.db_set("paid_amount", total_paid_amount)
+
+            default_payment_method = get_default_payment_method(doc.pos_profile)
+            payment_found = False
+
+            for payment in doc.payments:
+                if payment.mode_of_payment == default_payment_method:
+                    payment.amount = total_paid_amount
+                    payment_found = True
+                    break
+
+            if not payment_found:
+                doc.append("payments", {
+                    "mode_of_payment": default_payment_method,
+                    "amount": total_paid_amount
+                })
+
+
+
+
+
 
 @frappe.whitelist()
 def update_related_customer_item_percent(doc, method):
