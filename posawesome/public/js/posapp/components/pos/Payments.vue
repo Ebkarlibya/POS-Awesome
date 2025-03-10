@@ -814,6 +814,23 @@ export default {
         return;
       }
 
+
+      if (
+        this.pos_profile.posa_allow_partial_payment &&
+        !this.pos_profile.posa_allow_credit_sale &&
+        this.total_payments > this.min_invoice_payment_req &&
+        !this.invoice_doc.is_return
+      ) {
+        evntBus.$emit("show_mesage", {
+          text: `The payment amount is greater than the invoice amount.`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+        return;
+      }
+
+
+
       if (!this.paid_change) this.paid_change = 0;
 
       if (this.paid_change > -this.diff_payment) {

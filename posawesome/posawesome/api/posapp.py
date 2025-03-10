@@ -1645,6 +1645,7 @@ def get_customer_info(customer):
     res["gender"] = customer.gender
     res["tax_id"] = customer.tax_id
     res["posa_discount"] = customer.posa_discount
+    res["disable_round_up_total"] = customer.custom_disable_round_up_total
     res["name"] = customer.name
     res["customer_name"] = customer.customer_name
     res["customer_group_price_list"] = frappe.get_value(

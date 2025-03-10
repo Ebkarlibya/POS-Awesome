@@ -1514,6 +1514,8 @@ export default {
         return;
       }
       evntBus.$emit("show_payment", "true");
+      console.log(this.customer)
+      console.log(this.customer_info)
       const invoice_doc = this.proces_invoice();
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
