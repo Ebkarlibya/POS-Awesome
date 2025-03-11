@@ -144,6 +144,12 @@ scheduler_events = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "posawesome.event.get_events"
 # }
+
+override_whitelisted_methods = {
+    "erpnext.accounts.doctype.sales_invoice.sales_invoice.SalesInvoice.get_total_in_party_account_currency": "posawesome.override.sales_invoice.custom_get_total_in_party_account_currency"
+}
+
+
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
