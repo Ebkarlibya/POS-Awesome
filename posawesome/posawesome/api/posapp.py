@@ -534,13 +534,14 @@ def add_taxes_from_tax_template(item, parent_doc):
 
 @frappe.whitelist()
 def update_invoice(data):
-    data = json.loads(data)
+    payload = json.loads(data)
+    items_payload = payload.get("items", [])
 
-    if data.get("name"):
-        invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
-        invoice_doc.update(data)
+    if payload.get("name"):
+        invoice_doc = frappe.get_doc("Sales Invoice", payload["name"])
+        invoice_doc.update(payload)
     else:
-        invoice_doc = frappe.get_doc(data)
+        invoice_doc = frappe.get_doc(payload)
 
     invoice_doc.set_missing_values()
     invoice_doc.flags.ignore_permissions = True
@@ -561,7 +562,13 @@ def update_invoice(data):
     allow_zero_rated_items = frappe.get_cached_value(
         "POS Profile", invoice_doc.pos_profile, "posa_allow_zero_rated_items"
     )
-    for item in invoice_doc.items:
+
+    for idx, item in enumerate(invoice_doc.items):
+        if idx < len(items_payload):
+            desired_wh = items_payload[idx].get("warehouse")
+            if desired_wh:
+                item.warehouse = desired_wh
+        
         if not item.rate or item.rate == 0:
             if allow_zero_rated_items:
                 item.price_list_rate = 0.00
@@ -953,12 +960,13 @@ def get_items_details(pos_profile, items_data):
         today = nowdate()
         pos_profile = json.loads(pos_profile)
         items_data = json.loads(items_data)
-        warehouse = pos_profile.get("warehouse")
+        # warehouse = pos_profile.get("warehouse")
         result = []
 
         if len(items_data) > 0:
             for item in items_data:
                 item_code = item.get("item_code")
+                warehouse = item.get("warehouse", pos_profile.get("warehouse"))
                 item_stock_qty = get_stock_availability(item_code, warehouse)
                 has_batch_no, has_serial_no = frappe.get_value(
                     "Item", item_code, ["has_batch_no", "has_serial_no"]
@@ -1835,3 +1843,31 @@ def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
     return """ and (name like {item_code} or item_name like {item_code})""".format(
         item_code=frappe.db.escape("%" + item_code + "%")
     )
+
+
+@frappe.whitelist()
+def get_item_warehouse_stock(item_code, warehouses, main_warehouse):
+    if isinstance(warehouses, str):
+        warehouses = json.loads(warehouses)
+    stock_data = []
+    for warehouse in warehouses:
+        actual_qty = frappe.db.get_value('Bin', {
+            'item_code': item_code,
+            'warehouse': warehouse
+        }, 'actual_qty') or 0
+        stock_data.append({
+            'warehouse': warehouse,
+            'actual_qty': actual_qty,
+            'main_warehouse': False,
+        })
+    
+    main_warehouse_actual_qty = frappe.db.get_value('Bin', {
+        'item_code': item_code,
+        'warehouse': main_warehouse
+    }, 'actual_qty') or 0
+    stock_data.append({
+        'warehouse': main_warehouse,
+        'actual_qty': main_warehouse_actual_qty,
+        'main_warehouse': True,
+    })
+    return stock_data

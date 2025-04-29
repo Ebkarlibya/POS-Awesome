@@ -281,6 +281,8 @@ fixtures = [
                     # Sales Invoice Item
                     "Sales Invoice Item-posa_has_warranty",  # checkbox
                     "Sales Invoice Item-posa_warranty_no_of_years",  # int
+                    "POS Profile-pos_plus_additional_warehouses_section",
+                    "POS Profile-pos_plus_additional_warehouses",
                 ),
             ]
         ],

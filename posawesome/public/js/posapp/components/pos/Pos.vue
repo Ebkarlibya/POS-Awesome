@@ -57,6 +57,14 @@
         <Invoice></Invoice>
       </v-col>
     </v-row>
+    <warehouse-dialog
+      v-if="showWarehouseDialog"
+      :item="selectedItem"
+      :warehouses="pos_plus_additional_warehouses"
+      :main_warehouse="main_warehouse"
+      @select="handleWarehouseSelect"
+      @close="showWarehouseDialog = false"
+    />
   </div>
 </template>
 
@@ -74,6 +82,8 @@ import NewAddress from "./NewAddress.vue";
 import Variants from "./Variants.vue";
 import Returns from "./Returns.vue";
 import MpesaPayments from "./Mpesa-Payments.vue";
+import WarehouseDialog from './WarehouseDialog.vue';
+
 export default {
   data: function () {
     return {
@@ -83,6 +93,10 @@ export default {
       payment: false,
       offers: false,
       coupons: false,
+      showWarehouseDialog: false,
+      selectedItem: null,
+      pos_plus_additional_warehouses: [],
+      main_warehouse: "",
     };
   },
 
@@ -100,9 +114,20 @@ export default {
     NewAddress,
     Variants,
     MpesaPayments,
+    WarehouseDialog,
+  },
+
+  created() {
+    evntBus.$on('show_warehouse_dialog', (item) => {
+      this.selectedItem = item;
+      this.showWarehouseDialog = true;
+    });
   },
 
   methods: {
+    handleWarehouseSelect(itemWithWarehouse) {
+      evntBus.$emit('add_item', itemWithWarehouse);
+    },
     check_opening_entry() {
       return frappe
         .call("posawesome.posawesome.api.posapp.check_opening_shift", {
@@ -111,6 +136,8 @@ export default {
         .then((r) => {
           if (r.message) {
             this.pos_profile = r.message.pos_profile;
+            this.pos_plus_additional_warehouses =  r.message.pos_profile.pos_plus_additional_warehouses;
+            this.main_warehouse =  r.message.pos_profile.warehouse;
             this.pos_opening_shift = r.message.pos_opening_shift;
             this.get_offers(this.pos_profile.name);
             evntBus.$emit("register_pos_profile", r.message);

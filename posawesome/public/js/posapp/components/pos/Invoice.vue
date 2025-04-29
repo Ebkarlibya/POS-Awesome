@@ -444,6 +444,18 @@
                       disabled
                     ></v-text-field>
                   </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="primary"
+                      :label="frappe._('Warehouse')"
+                      background-color="white"
+                      hide-details
+                      v-model="item.warehouse"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
                   <v-col align="center" cols="4" v-if="item.posa_offer_applied">
                     <v-checkbox
                       dense
@@ -856,6 +868,7 @@ export default {
       invoice_posting_date: false,
       posting_date: frappe.datetime.nowdate(),
       posa_last_active_item_row_id: null,
+      posa_last_active_item_warehouse_row_id: null,
       items_headers: [
         {
           text: __("Name"),
@@ -867,6 +880,7 @@ export default {
         { text: __("QTY"), value: "qty", align: "center" },
         { text: __("Rate"), value: "rate", align: "center" },
         { text: __("Amount"), value: "amount", align: "center" },
+        { text: __("Warehouse"), value: "warehouse", align: "center" },
       ],
     };
   },
@@ -912,7 +926,10 @@ export default {
 
   methods: {
     posa_data_table_rows(item) {
-      if (this.posa_last_active_item_row_id === item.item_code) {
+      if (
+        this.posa_last_active_item_row_id === item.item_code &&
+        this.posa_last_active_item_warehouse_row_id === item.warehouse
+      ) {
         return "theme--light warning";
       } else {
         return "";
@@ -952,6 +969,7 @@ export default {
 
     add_item(item) {
       this.posa_last_active_item_row_id = item.item_code;
+      this.posa_last_active_item_warehouse_row_id = item.item_selected_warehouse;
 
       if (!item.uom) {
         item.uom = item.stock_uom;
@@ -961,6 +979,7 @@ export default {
         index = this.items.findIndex(
           (el) =>
             el.item_code === item.item_code &&
+            el.warehouse === item.item_selected_warehouse &&
             el.uom === item.uom &&
             !el.posa_is_offer &&
             !el.posa_is_replace &&
@@ -1057,6 +1076,8 @@ export default {
       new_item.posa_notes = "";
       new_item.posa_delivery_date = "";
       new_item.posa_row_id = this.makeid(20);
+      new_item.warehouse = item.item_selected_warehouse;
+      new_item.actual_qty = item.item_selected_warehouse_actual_qty;
       if (
         (!this.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
         new_item.has_serial_no
@@ -1223,6 +1244,7 @@ export default {
           posa_notes: item.posa_notes,
           posa_delivery_date: item.posa_delivery_date,
           price_list_rate: item.price_list_rate,
+          warehouse: item.warehouse,
         };
         items_list.push(new_item);
       });
@@ -1343,8 +1365,8 @@ export default {
           ) {
             evntBus.$emit("show_mesage", {
               text: __(
-                `The existing quantity '{0}' for item '{1}' is not enough`,
-                [item.actual_qty, item.item_name]
+                `The existing quantity '{0}' for item '{1}' is not enough in warehouse '{2}'`,
+                [item.actual_qty, item.item_name, item.warehouse]
               ),
               color: "error",
             });
@@ -1561,7 +1583,7 @@ export default {
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_item_detail",
         args: {
-          warehouse: this.pos_profile.warehouse,
+          warehouse: item.warehouse || this.pos_profile.warehouse,
           doc: this.get_invoice_doc(),
           price_list: this.pos_profile.price_list,
           item: {
@@ -1639,7 +1661,7 @@ export default {
             item.reserved_qty = data.reserved_qty;
             item.conversion_factor = data.conversion_factor;
             item.stock_qty = data.stock_qty;
-            item.actual_qty = data.actual_qty;
+            // item.actual_qty = data.actual_qty;
             item.stock_uom = data.stock_uom;
             (item.has_serial_no = data.has_serial_no),
               (item.has_batch_no = data.has_batch_no),

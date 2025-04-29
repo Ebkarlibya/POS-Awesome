@@ -85,9 +85,21 @@
                     ></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
-                    <div class="text-caption primary--text">
-                      {{ currencySymbol(item.currency) || "" }}
-                      {{ formtCurrency(item.rate) || 0 }}
+                    <div class="d-flex align-center justify-space-between">
+                      <div class="d-flex align-center">
+                        <span class="text-caption primary--text">
+                          {{ currencySymbol(item.currency) || "" }}
+                          {{ formtCurrency(item.rate) || 0 }}
+                        </span>
+                      </div>
+                      <v-btn
+                        small
+                        icon
+                        @click.stop="showWarehousesQuantities(item)"
+                        :title="__('Click to show quantity per warehouses')"
+                      >
+                        <v-icon>mdi-database-eye</v-icon>
+                      </v-btn>
                     </div>
                     <div class="text-caption golden--text">
                       {{ formtFloat(item.actual_qty) || 0 }}
@@ -120,6 +132,16 @@
                     <span class="golden--text">{{
                       formtFloat(item.actual_qty)
                     }}</span>
+                  </template>
+                  <template v-slot:item.actions="{ item }">
+                    <v-btn
+                      small
+                      icon
+                      @click.stop="showWarehousesQuantities(item)"
+                      :title="__('Click to show quantity per warehouses')"
+                    >
+                      <v-icon>mdi-database-eye</v-icon>
+                    </v-btn>
                   </template>
                 </v-data-table>
               </template>
@@ -245,6 +267,9 @@ export default {
   },
 
   methods: {
+    showWarehousesQuantities(item) {
+      evntBus.$emit('show_warehouse_dialog', item);
+    },
     show_offers() {
       evntBus.$emit("show_offers", "true");
     },
@@ -290,6 +315,7 @@ export default {
 
             evntBus.$emit("set_all_items", vm.items);
             vm.loading = false;
+            vm.update_items_details(vm.items);
             console.info("Items Loaded");
             if (
               vm.pos_profile.posa_local_storage &&
@@ -360,11 +386,21 @@ export default {
       if (!this.pos_profile.posa_display_item_code) {
         items_headers.splice(1, 1);
       }
+      items_headers.push({
+        text: __("Actions"),
+        value: "actions",
+        align: "end",
+        sortable: false,
+      });
 
       return items_headers;
     },
     add_item(item) {
-      item = { ...item };
+      item = {
+        ...item,
+        item_selected_warehouse: this.pos_profile.warehouse,
+        item_selected_warehouse_actual_qty: item.actual_qty
+      };
       if (item.has_variants) {
         evntBus.$emit("open_variants_model", item, this.items);
       } else {
