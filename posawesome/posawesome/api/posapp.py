@@ -730,6 +730,48 @@ def submit_invoice(invoice, data):
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
 
 
+@frappe.whitelist()
+def submit_order(data, invoice):
+    if isinstance(data, str):
+        data = json.loads(data)
+    if isinstance(invoice, str):
+        invoice = json.loads(invoice)
+    
+    so = frappe.get_doc({
+        "doctype": "Sales Order",
+        "customer": invoice.get("customer"),
+        "transaction_date": nowdate(),
+        "delivery_date": invoice.get("posa_delivery_date"),
+        "po_no": invoice.get("po_no"),
+        "po_date": invoice.get("po_date"),
+        "shipping_address_name": invoice.get("shipping_address_name"),
+        "sales_partner": invoice.get("sales_partner"),
+        "sales_person": invoice.get("sales_person"),
+        "posa_notes": invoice.get("posa_notes"),
+        "items": [
+            {
+                "item_code": item.get("item_code"),
+                "item_name": item.get("item_name"),
+                "description": (item.get("description")
+                                or item.get("posa_notes")
+                                or item.get("item_name")),
+                "posa_notes": item.get("posa_notes"),
+                "qty": item.get("qty"),
+                "rate": item.get("rate"),
+                "delivery_date": item.get("posa_delivery_date"),
+                "warehouse": item.get("warehouse"),
+
+            }
+            for item in invoice.get("items", [])
+        ]
+    })
+    so.flags.ignore_permissions = True
+    so.insert()
+    so.submit()
+    
+    return so.as_dict()
+
+
 def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
     """Automatically select `batch_no` for outgoing items in item table"""
     for d in doc.packed_items:
@@ -1871,3 +1913,44 @@ def get_item_warehouse_stock(item_code, warehouses, main_warehouse):
         'main_warehouse': True,
     })
     return stock_data
+
+
+@frappe.whitelist()
+def get_item_offers(item_code, warehouse, profile):
+    """
+    Return active POS Offers for a given item + warehouse under the specified POS Profile.
+    """
+    offers = frappe.get_all("POS Offer",
+        filters={
+            "disable": 0,
+            "pos_profile": profile,
+            "warehouse": warehouse,
+            "company": frappe.db.get_value("POS Profile", profile, "company"),
+            "valid_from": ["<=", frappe.utils.nowdate()],
+            "valid_upto": [">=", frappe.utils.nowdate()]
+        },
+        fields=[
+            "name", "title", "description", "offer", "apply_on",
+            "item", "item_group", "brand",
+            "valid_from", "valid_upto",
+            "min_qty", "max_qty", "min_amt", "max_amt",
+            "discount_type", "rate", "discount_amount", "discount_percentage",
+            "given_qty", "apply_item_code", "apply_item_group"
+        ]
+    )
+
+    valid = []
+    for o in offers:
+        if o.apply_on == "Item Code" and o.item == item_code:
+            valid.append(o)
+        elif o.apply_on == "Item Group":
+            grp = frappe.db.get_value("Item", item_code, "item_group")
+            if o.item_group == grp:
+                valid.append(o)
+        elif o.apply_on == "Brand":
+            brand = frappe.db.get_value("Item", item_code, "brand")
+            if o.brand == brand:
+                valid.append(o)
+        if o.offer == "Give Product" and o.apply_item_code == item_code:
+            valid.append(o)
+    return valid

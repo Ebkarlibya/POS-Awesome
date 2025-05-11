@@ -426,7 +426,7 @@ export default {
       this.territory =
         this.pos_settings_panel.default_customer_territory ||
         frappe.defaults.get_user_default("Territory");
-      console.log(this.group, this.territory);
+      // console.log(this.group, this.territory);
     });
     evntBus.$on("payments_register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
@@ -439,7 +439,7 @@ export default {
 
     this.group = frappe.defaults.get_user_default("Customer Group");
     this.territory = frappe.defaults.get_user_default("Territory");
-    console.log(this.group, this.territory);
+    // console.log(this.group, this.territory);
   },
 };
 </script>

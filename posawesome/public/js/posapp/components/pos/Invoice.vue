@@ -646,9 +646,25 @@
       </div>
     </v-card>
     <v-card class="cards mb-0 mt-3 py-0 grey lighten-5">
+      <v-row no-gutters v-if="pos_profile.posa_display_additional_notes && invoiceType==='Order'" class="mb-0">
+        <v-col cols="12">
+          <v-textarea
+            v-model="invoice_doc.posa_notes"
+            class="p-2"
+            outlined
+            dense
+            background-color="white"
+            clearable
+            color="primary"
+            auto-grow
+            rows="2"
+            :label="frappe._('Additional Notes')"
+          ></v-textarea>
+        </v-col>
+      </v-row>
       <v-row no-gutters>
         <v-col cols="7">
-          <v-row no-gutters class="pa-1 pt-9 pr-1">
+          <v-row no-gutters class="pa-1 pr-1" :class="invoiceType==='Invoice' ? 'pt-9' : ''">
             <v-col cols="6" class="pa-1">
               <v-text-field
                 :value="formtFloat(total_qty)"
@@ -754,7 +770,31 @@
             </v-col>
           </v-row>
         </v-col>
-        <v-col cols="5">
+        <v-col cols="5" v-if="invoiceType==='Order'">
+          <v-row no-gutters class="pa-1 pl-0">
+            <v-col cols="12" class="pa-1">
+              <v-btn
+                block
+                class="pa-0"
+                color="accent"
+                dark
+                @click="new_invoice"
+                >{{ __("Save") }}</v-btn
+              >
+            </v-col>
+            <v-col cols="12" class="pa-1">
+              <v-btn
+                block
+                class="pa-0"
+                color="error"
+                dark
+                @click="cancel_dialog = true"
+                >{{ __("Cancel") }}</v-btn
+              >
+            </v-col>
+          </v-row>
+        </v-col>
+        <v-col cols="5" v-else>
           <v-row no-gutters class="pa-1 pt-2 pl-0">
             <v-col cols="6" class="pa-1">
               <v-btn
@@ -840,7 +880,7 @@ export default {
       pos_profile: "",
       pos_opening_shift: "",
       stock_settings: "",
-      invoice_doc: "",
+      invoice_doc: { posa_notes: ""},
       return_doc: "",
       customer: "",
       customer_info: "",
@@ -1089,7 +1129,7 @@ export default {
 
     cancel_invoice() {
       const doc = this.get_invoice_doc();
-      this.invoiceType = "Invoice";
+      this.invoiceType = this.invoiceType === 'Order' ? "Order" : "Invoice";
       this.invoiceTypes = ["Invoice", "Order"];
       this.posting_date = frappe.datetime.nowdate();
       if (doc.name && this.pos_profile.posa_allow_delete) {
@@ -1112,7 +1152,7 @@ export default {
       evntBus.$emit("set_pos_coupons", []);
       this.posa_coupons = [];
       this.customer = this.pos_profile.customer;
-      this.invoice_doc = "";
+      this.invoice_doc = { posa_notes: ""};
       this.return_doc = "";
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
@@ -1130,6 +1170,33 @@ export default {
       evntBus.$emit("set_pos_coupons", []);
       this.posa_coupons = [];
       this.return_doc = "";
+      
+      if (this.invoiceType === "Order") {
+        const doc = this.get_invoice_doc();
+        frappe.call({
+            method: "posawesome.posawesome.api.posapp.submit_order",
+            args: {
+                data: {},
+                invoice: doc
+            },
+            callback: (r) => {
+                if (r.message) {
+                    evntBus.$emit("show_mesage", {
+                        text: `Sales Order ${r.message.name} Created`,
+                        color: "success",
+                    });
+                    frappe.utils.play_sound("submit");
+                }
+                this.items = [];
+                this.customer = this.pos_profile.customer;
+                this.invoice_doc = { posa_notes: "" };
+                this.discount_amount = 0;
+                this.additional_discount_percentage = 0;
+            }
+        });
+        return;
+      }
+
       const doc = this.get_invoice_doc();
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
@@ -1141,7 +1208,7 @@ export default {
       if (!data.name && !data.is_return) {
         this.items = [];
         this.customer = this.pos_profile.customer;
-        this.invoice_doc = "";
+        this.invoice_doc = { posa_notes: "" };
         this.discount_amount = 0;
         this.additional_discount_percentage = 0;
         this.invoiceType = "Invoice";
@@ -1190,9 +1257,19 @@ export default {
       if (this.invoice_doc.name) {
         doc = { ...this.invoice_doc };
       }
-      doc.doctype = "Sales Invoice";
-      doc.is_pos = 1;
-      doc.ignore_pricing_rule = 1;
+      
+      doc.doctype = this.invoiceType === 'Order' ? 'Sales Order' : 'Sales Invoice';
+      
+      if (doc.doctype === 'Sales Invoice') {
+        doc.is_pos = 1;
+        doc.ignore_pricing_rule = 1;
+        doc.posa_pos_opening_shift = this.pos_opening_shift.name;
+        doc.payments = this.get_payments();
+        doc.is_return = this.invoice_doc.is_return;
+        doc.return_against = this.invoice_doc.return_against;
+      }
+
+      doc.posa_notes = this.invoice_doc.posa_notes || "";
       doc.company = doc.company || this.pos_profile.company;
       doc.pos_profile = doc.pos_profile || this.pos_profile.name;
       doc.campaign = doc.campaign || this.pos_profile.campaign;
@@ -1202,22 +1279,18 @@ export default {
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
       doc.discount_amount = flt(this.discount_amount);
-      doc.additional_discount_percentage = flt(
-        this.additional_discount_percentage
-      );
-      doc.posa_pos_opening_shift = this.pos_opening_shift.name;
-      doc.payments = this.get_payments();
+      doc.additional_discount_percentage = flt(this.additional_discount_percentage);
       doc.taxes = [];
-      doc.is_return = this.invoice_doc.is_return;
-      doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
       doc.posa_coupons = this.posa_coupons;
       doc.posa_delivery_charges = this.selcted_delivery_charges.name;
       doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
       doc.posting_date = this.posting_date;
+
       if (this.pos_profile.custom_require_related_bausiness) {
         doc.custom_related_business = this.pos_profile.name;
       }
+      
       return doc;
     },
 
@@ -1563,9 +1636,12 @@ export default {
         callback: function (r) {
           if (r.message) {
             items.forEach((item) => {
-              const updated_item = r.message.find(
-                (element) => element.posa_row_id == item.posa_row_id
+              const updated_item = r.message.find(element =>
+                element.posa_row_id === item.posa_row_id &&
+                element.warehouse === item.warehouse
               );
+              if (!updated) return;
+
               item.actual_qty = updated_item.actual_qty;
               item.serial_no_data = updated_item.serial_no_data;
               item.batch_no_data = updated_item.batch_no_data;
@@ -2751,7 +2827,7 @@ export default {
       this.fetch_customer_details();
     });
     evntBus.$on("new_invoice", () => {
-      this.invoice_doc = "";
+      this.invoice_doc = { posa_notes: ""};
       this.cancel_invoice();
     });
     evntBus.$on("load_invoice", (data) => {

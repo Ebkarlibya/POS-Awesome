@@ -65,6 +65,22 @@
       @select="handleWarehouseSelect"
       @close="showWarehouseDialog = false"
     />
+    <item-information-dialog
+      v-if="showItemInformationDialog"
+      :item="selectedItem"
+      :warehouses="pos_plus_additional_warehouses"
+      :main_warehouse="main_warehouse"
+      @select="handleWarehouseSelect"
+      @close="showItemInformationDialog = false"
+    />
+    <offer-dialog
+      v-if="showOffersDialog"
+      :key="offersDialogArgs.item_code + '-' + offersDialogArgs.warehouse + '-' + Date.now()"
+      :item-code="offersDialogArgs.item_code"
+      :warehouse="offersDialogArgs.warehouse"
+      :pos_profile="pos_profile_name"
+      @close="showOffersDialog = false"
+    />
   </div>
 </template>
 
@@ -83,6 +99,8 @@ import Variants from "./Variants.vue";
 import Returns from "./Returns.vue";
 import MpesaPayments from "./Mpesa-Payments.vue";
 import WarehouseDialog from './WarehouseDialog.vue';
+import ItemInformationDialog from './ItemInformationDialog.vue';
+import OfferDialog from './OfferDialog.vue';
 
 export default {
   data: function () {
@@ -94,9 +112,13 @@ export default {
       offers: false,
       coupons: false,
       showWarehouseDialog: false,
+      showItemInformationDialog: false,
       selectedItem: null,
       pos_plus_additional_warehouses: [],
       main_warehouse: "",
+      showOffersDialog: false,
+      offersDialogArgs: null,
+      pos_profile_name: "",
     };
   },
 
@@ -115,12 +137,22 @@ export default {
     Variants,
     MpesaPayments,
     WarehouseDialog,
+    ItemInformationDialog,
+    OfferDialog,
   },
 
   created() {
     evntBus.$on('show_warehouse_dialog', (item) => {
       this.selectedItem = item;
       this.showWarehouseDialog = true;
+    });
+    evntBus.$on('show_item_details_dialog', (item) => {
+      this.selectedItem = item;
+      this.showItemInformationDialog = true;
+    });
+    evntBus.$on('show_offers_dialog', (args) => {
+      this.offersDialogArgs = args;
+      this.showOffersDialog = true;
     });
   },
 
@@ -136,6 +168,7 @@ export default {
         .then((r) => {
           if (r.message) {
             this.pos_profile = r.message.pos_profile;
+            this.pos_profile_name = r.message.pos_profile.name;
             this.pos_plus_additional_warehouses =  r.message.pos_profile.pos_plus_additional_warehouses;
             this.main_warehouse =  r.message.pos_profile.warehouse;
             this.pos_opening_shift = r.message.pos_opening_shift;
@@ -251,6 +284,7 @@ export default {
     evntBus.$off("show_coupons");
     evntBus.$off("open_closing_dialog");
     evntBus.$off("submit_closing_pos");
+    evntBus.$off('show_offers_dialog');
   },
 };
 </script>

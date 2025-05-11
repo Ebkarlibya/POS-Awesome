@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card
-      class="selection mx-auto grey lighten-5 d-1"
+      class="selection mx-auto grey lighten-5 d-1 mt-3"
       style="max-height: 76vh; height: 76vh"
     >
       <v-progress-linear
@@ -611,8 +611,8 @@
               :no-data-text="__('Sales Partner not found')"
               hide-details
               :filter="salesPartnerFilter"
-              :disabled="readonly"
             >
+              <!-- :disabled="readonly" -->
               <!-- !change the item text -->
               <template v-slot:item="data">
                 <template>
@@ -649,8 +649,8 @@
               :no-data-text="__('Sales Person not found')"
               hide-details
               :filter="salesPersonFilter"
-              :disabled="readonly"
             >
+              <!-- :disabled="readonly" -->
               <template v-slot:item="data">
                 <template>
                   <v-list-item-content>
@@ -965,7 +965,12 @@ export default {
         return;
       }
 
-      this.submit_invoice(print);
+      if (this.invoiceType === "Order") {
+        this.submit_order();
+      } else {
+        this.submit_invoice(print);
+      }
+
       this.customer_credit_dict = [];
       this.redeem_customer_credit = false;
       this.is_cashback = true;
@@ -1038,6 +1043,29 @@ export default {
             });
             frappe.utils.play_sound("submit");
             this.addresses = [];
+          }
+        },
+      });
+    },
+    submit_order() {
+      const args = {
+        data: {
+          change: this.paid_change,
+          paid_amount: this.paid_amount,
+          outstanding_amount: this.outstanding_amount,
+        },
+        invoice: this.invoice_doc,
+      };
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.submit_order",
+        args,
+        callback: (r) => {
+          if (r.message) {
+            evntBus.$emit("show_mesage", {
+              text: `Sales Order ${r.message.name} Created`,
+              color: "success",
+            });
+            frappe.utils.play_sound("submit");
           }
         },
       });

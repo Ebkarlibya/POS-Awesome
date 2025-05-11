@@ -201,7 +201,7 @@ export default {
             el.status = `(${el.docstatus === 0 ? "Draft" : "Submitted"})`;
             return el;
           });
-          console.log(this.invoices_data);
+          // console.log(this.invoices_data);
         },
       });
     },

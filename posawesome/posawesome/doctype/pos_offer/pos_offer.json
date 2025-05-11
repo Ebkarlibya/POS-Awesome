@@ -99,6 +99,7 @@
   },
   {
    "fetch_from": "pos_profile.warehouse",
+   "fetch_if_empty": 1,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -308,7 +309,7 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "modified": "2021-07-25 17:09:55.634113",
+ "modified": "2025-05-10 20:05:52.820573",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",
