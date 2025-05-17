@@ -147,6 +147,8 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
         search_batch_no = pos_profile.get("posa_search_batch_no")
         posa_show_template_items = pos_profile.get("posa_show_template_items")
         warehouse = pos_profile.get("warehouse")
+        pos_plus_additional_warehouses = pos_profile.get("pos_plus_additional_warehouses", [])
+        additional_warehouses = [row['warehouse'] for row in pos_plus_additional_warehouses]
         use_limit_search = pos_profile.get("pose_use_limit_search")
         search_limit = 0
 
@@ -277,6 +279,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                                             "manufacturing_date": batch_doc.manufacturing_date,
                                         }
                                     )
+                all_warehouses = [warehouse] + additional_warehouses
                 serial_no_data = []
                 if search_serial_no:
                     serial_no_data = frappe.get_all(
@@ -284,7 +287,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                         filters={
                             "item_code": item_code,
                             "status": "Active",
-                            "warehouse": warehouse,
+                            "warehouse": ["in", all_warehouses],
                         },
                         fields=["name as serial_no"],
                     )
@@ -1009,6 +1012,8 @@ def get_items_details(pos_profile, items_data):
             for item in items_data:
                 item_code = item.get("item_code")
                 warehouse = item.get("warehouse", pos_profile.get("warehouse"))
+                pos_plus_additional_warehouses = pos_profile.get("pos_plus_additional_warehouses", [])
+                additional_warehouses = [row['warehouse'] for row in pos_plus_additional_warehouses]
                 item_stock_qty = get_stock_availability(item_code, warehouse)
                 has_batch_no, has_serial_no = frappe.get_value(
                     "Item", item_code, ["has_batch_no", "has_serial_no"]
@@ -1020,15 +1025,18 @@ def get_items_details(pos_profile, items_data):
                     fields=["uom", "conversion_factor"],
                 )
 
-                serial_no_data = frappe.get_all(
+                all_warehouses = [warehouse] + additional_warehouses
+                warehouses_serial_no_data = frappe.get_all(
                     "Serial No",
                     filters={
                         "item_code": item_code,
                         "status": "Active",
-                        "warehouse": warehouse,
+                        "warehouse": ["in", all_warehouses],
                     },
-                    fields=["name as serial_no"],
+                    fields=["name as serial_no", "warehouse"],
                 )
+
+                serial_no_data = [row['serial_no'] for row in warehouses_serial_no_data]
 
                 batch_no_data = []
 
@@ -1058,6 +1066,7 @@ def get_items_details(pos_profile, items_data):
                     {
                         "item_uoms": uoms or [],
                         "serial_no_data": serial_no_data or [],
+                        "warehouses_serial_no_data": warehouses_serial_no_data or [],
                         "batch_no_data": batch_no_data or [],
                         "actual_qty": item_stock_qty or 0,
                         "has_batch_no": has_batch_no,
@@ -1376,17 +1385,51 @@ def get_app_branch(app):
         return ""
 
 
+# @frappe.whitelist()
+# def get_offers(profile):
+#     pos_profile = frappe.get_doc("POS Profile", profile)
+#     company = pos_profile.company
+#     warehouse = pos_profile.warehouse
+#     date = nowdate()
+
+#     values = {
+#         "company": company,
+#         "pos_profile": profile,
+#         "warehouse": warehouse,
+#         "valid_from": date,
+#         "valid_upto": date,
+#     }
+#     data = frappe.db.sql(
+#         """
+#         SELECT *
+#         FROM `tabPOS Offer`
+#         WHERE 
+#         disable = 0 AND
+#         company = %(company)s AND
+#         (pos_profile is NULL OR pos_profile  = '' OR  pos_profile = %(pos_profile)s) AND
+#         (warehouse is NULL OR warehouse  = '' OR  warehouse = %(warehouse)s) AND
+#         (valid_from is NULL OR valid_from  = '' OR  valid_from <= %(valid_from)s) AND
+#         (valid_upto is NULL OR valid_from  = '' OR  valid_upto >= %(valid_upto)s)
+#     """,
+#         values=values,
+#         as_dict=1,
+#     )
+#     return data
+
+
 @frappe.whitelist()
 def get_offers(profile):
     pos_profile = frappe.get_doc("POS Profile", profile)
     company = pos_profile.company
     warehouse = pos_profile.warehouse
+    additional_warehouses = [row.warehouse for row in pos_profile.pos_plus_additional_warehouses or []]
+    all_warehouses = tuple({warehouse, *additional_warehouses})
     date = nowdate()
 
     values = {
         "company": company,
         "pos_profile": profile,
-        "warehouse": warehouse,
+        "warehouses": all_warehouses,
         "valid_from": date,
         "valid_upto": date,
     }
@@ -1398,7 +1441,7 @@ def get_offers(profile):
         disable = 0 AND
         company = %(company)s AND
         (pos_profile is NULL OR pos_profile  = '' OR  pos_profile = %(pos_profile)s) AND
-        (warehouse is NULL OR warehouse  = '' OR  warehouse = %(warehouse)s) AND
+        (warehouse is NULL OR warehouse  = '' OR  warehouse IN %(warehouses)s) AND
         (valid_from is NULL OR valid_from  = '' OR  valid_from <= %(valid_from)s) AND
         (valid_upto is NULL OR valid_from  = '' OR  valid_upto >= %(valid_upto)s)
     """,
