@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+// import { evntBus } from "../../bus";
 export default {
   data: () => ({
     posTagsDialog: false,
@@ -107,7 +107,7 @@ export default {
       this.applyPosTags();
     },
     applyPosTags() {
-      evntBus.$emit("set_pos_tags_filters", this.selectedTags);
+      this.eventBus.emit("set_pos_tags_filters", this.selectedTags);
     },
     clearPosTags() {
       this.pos_tags.forEach((posTag) => (posTag.selected = 0));
@@ -124,7 +124,7 @@ export default {
   },
   created: function () {
     this.$nextTick(function () {
-      evntBus.$on("register_pos_profile", (pos_profile) => {
+      this.eventBus.on("register_pos_profile", (pos_profile) => {
         this.pos_profile = pos_profile;
       });
     });

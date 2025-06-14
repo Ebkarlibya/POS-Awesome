@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+// import { evntBus } from "../../bus";
 
 export default {
     name: 'OfferDialog',
@@ -70,15 +70,15 @@ export default {
             isOpen: true,
             offers: [],
             headers: [
-                { text: this.__('Title'), value: 'title' },
-                { text: this.__('Description'), value: 'description' },
-                { text: this.__('Promo Type'), value: 'offer' },
-                { text: this.__('Discount'),     value: 'discount_display' },
-                { text: this.__('Qty Range'),    value: 'qty_range' },
-                { text: this.__('Valid From'), value: 'valid_from' },
-                { text: this.__('Valid Upto'), value: 'valid_upto' },
-                { text: this.__('Conditions'), value: 'conditions' },
-                // { text: this.__('Action'), value: 'action', sortable: false }
+                { title: this.__('Title'), key: 'title' },
+                { title: this.__('Description'), key: 'description' },
+                { title: this.__('Promo Type'), key: 'offer' },
+                { title: this.__('Discount'),     key: 'discount_display' },
+                { title: this.__('Qty Range'),    key: 'qty_range' },
+                { title: this.__('Valid From'), key: 'valid_from' },
+                { title: this.__('Valid Upto'), key: 'valid_upto' },
+                { title: this.__('Conditions'), key: 'conditions' },
+                // { title: this.__('Action'), key: 'action', sortable: false }
             ]
         };
     },
@@ -119,7 +119,7 @@ export default {
                 },
                 error: () => {
                     this.$root.$emit('show_message', {
-                        text: this.__('Failed to load offers.'),
+                        title: this.__('Failed to load offers.'),
                         color: 'error'
                     });
                 }

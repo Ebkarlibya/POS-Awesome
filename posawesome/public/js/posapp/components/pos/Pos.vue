@@ -8,48 +8,16 @@
     <Variants></Variants>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
     <v-row v-show="!dialog">
-      <v-col
-        v-show="!payment && !offers && !coupons"
-        xl="6"
-        lg="6"
-        md="6"
-        sm="6"
-        cols="12"
-        class="pos pr-0"
-      >
+      <v-col v-show="!payment && !offers && !coupons" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
         <ItemsSelector></ItemsSelector>
       </v-col>
-      <v-col
-        v-show="offers"
-        xl="6"
-        lg="6"
-        md="6"
-        sm="6"
-        cols="12"
-        class="pos pr-0"
-      >
+      <v-col v-show="offers" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
         <PosOffers></PosOffers>
       </v-col>
-      <v-col
-        v-show="coupons"
-        xl="6"
-        lg="6"
-        md="6"
-        sm="6"
-        cols="12"
-        class="pos pr-0"
-      >
+      <v-col v-show="coupons" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
         <PosCoupons></PosCoupons>
       </v-col>
-      <v-col
-        v-show="payment"
-        xl="6"
-        lg="6"
-        md="6"
-        sm="6"
-        cols="12"
-        class="pos pr-0"
-      >
+      <v-col v-show="payment" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
         <Payments></Payments>
       </v-col>
 
@@ -85,7 +53,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+
 import ItemsSelector from "./ItemsSelector.vue";
 import Invoice from "./Invoice.vue";
 import OpeningDialog from "./OpeningDialog.vue";
@@ -142,15 +110,15 @@ export default {
   },
 
   created() {
-    evntBus.$on('show_warehouse_dialog', (item) => {
+    this.eventBus.on('show_warehouse_dialog', (item) => {
       this.selectedItem = item;
       this.showWarehouseDialog = true;
     });
-    evntBus.$on('show_item_details_dialog', (item) => {
+    this.eventBus.on('show_item_details_dialog', (item) => {
       this.selectedItem = item;
       this.showItemInformationDialog = true;
     });
-    evntBus.$on('show_offers_dialog', (args) => {
+    this.eventBus.on('show_offers_dialog', (args) => {
       this.offersDialogArgs = args;
       this.showOffersDialog = true;
     });
@@ -158,7 +126,7 @@ export default {
 
   methods: {
     handleWarehouseSelect(itemWithWarehouse) {
-      evntBus.$emit('add_item', itemWithWarehouse);
+      this.eventBus.emit('add_item', itemWithWarehouse);
     },
     check_opening_entry() {
       return frappe
@@ -173,8 +141,9 @@ export default {
             this.main_warehouse =  r.message.pos_profile.warehouse;
             this.pos_opening_shift = r.message.pos_opening_shift;
             this.get_offers(this.pos_profile.name);
-            evntBus.$emit("register_pos_profile", r.message);
-            evntBus.$emit("set_company", r.message.company);
+            this.eventBus.emit('register_pos_profile', r.message);
+            this.eventBus.emit('set_company', r.message.company);
+            frappe.realtime.emit('pos_profile_registered');
             console.info("LoadPosProfile");
           } else {
             this.create_opening_voucher();
@@ -194,7 +163,7 @@ export default {
         )
         .then((r) => {
           if (r.message) {
-            evntBus.$emit("open_ClosingDialog", r.message);
+            this.eventBus.emit("open_ClosingDialog", r.message);
           } else {
             // console.log(r);
           }
@@ -210,8 +179,8 @@ export default {
         )
         .then((r) => {
           if (r.message) {
-            evntBus.$emit("show_mesage", {
-              text: `POS Shift Closed`,
+            this.eventBus.emit('show_message', {
+              title: `POS Shift Closed`,
               color: "success",
             });
             this.check_opening_entry();
@@ -228,13 +197,13 @@ export default {
         .then((r) => {
           if (r.message) {
             console.info("LoadOffers");
-            evntBus.$emit("set_offers", r.message);
+            this.eventBus.emit("set_offers", r.message);
           }
         });
     },
     get_pos_setting() {
       frappe.db.get_doc("POS Settings", undefined).then((doc) => {
-        evntBus.$emit("set_pos_settings", doc);
+        this.eventBus.emit("set_pos_settings", doc);
       });
     },
   },
@@ -243,48 +212,48 @@ export default {
     this.$nextTick(function () {
       this.check_opening_entry();
       this.get_pos_setting();
-      evntBus.$on("close_opening_dialog", () => {
+      this.eventBus.on("close_opening_dialog", () => {
         this.dialog = false;
       });
-      evntBus.$on("register_pos_data", (data) => {
+      this.eventBus.on("register_pos_data", (data) => {
         this.pos_profile = data.pos_profile;
         this.get_offers(this.pos_profile.name);
         this.pos_opening_shift = data.pos_opening_shift;
-        evntBus.$emit("register_pos_profile", data);
+        this.eventBus.emit("register_pos_profile", data);
         console.info("LoadPosProfile");
       });
-      evntBus.$on("show_payment", (data) => {
+      this.eventBus.on("show_payment", (data) => {
         this.payment = true ? data === "true" : false;
         this.offers = false ? data === "true" : false;
         this.coupons = false ? data === "true" : false;
       });
-      evntBus.$on("show_offers", (data) => {
+      this.eventBus.on("show_offers", (data) => {
         this.offers = true ? data === "true" : false;
         this.payment = false ? data === "true" : false;
         this.coupons = false ? data === "true" : false;
       });
-      evntBus.$on("show_coupons", (data) => {
+      this.eventBus.on("show_coupons", (data) => {
         this.coupons = true ? data === "true" : false;
         this.offers = false ? data === "true" : false;
         this.payment = false ? data === "true" : false;
       });
-      evntBus.$on("open_closing_dialog", () => {
+      this.eventBus.on("open_closing_dialog", () => {
         this.get_closing_data();
       });
-      evntBus.$on("submit_closing_pos", (data) => {
+      this.eventBus.on("submit_closing_pos", (data) => {
         this.submit_closing_pos(data);
       });
     });
   },
-  beforeDestroy() {
-    evntBus.$off("close_opening_dialog");
-    evntBus.$off("register_pos_data");
-    evntBus.$off("LoadPosProfile");
-    evntBus.$off("show_offers");
-    evntBus.$off("show_coupons");
-    evntBus.$off("open_closing_dialog");
-    evntBus.$off("submit_closing_pos");
-    evntBus.$off('show_offers_dialog');
+  beforeUnmount() {
+    this.eventBus.off("close_opening_dialog");
+    this.eventBus.off("register_pos_data");
+    this.eventBus.off("LoadPosProfile");
+    this.eventBus.off("show_offers");
+    this.eventBus.off("show_coupons");
+    this.eventBus.off("open_closing_dialog");
+    this.eventBus.off("submit_closing_pos");
+    this.eventBus.off('show_offers_dialog');
   },
 };
 </script>

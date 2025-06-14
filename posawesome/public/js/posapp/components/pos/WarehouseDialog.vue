@@ -51,9 +51,9 @@ export default {
     computed: {
         computedHeaders() {
             return [
-                { text: this.__("Warehouse"), value: "warehouse" },
-                { text: this.__("Available Qty"), value: "actual_qty" },
-                { text: this.__("Actions"), value: "actions", sortable: false },
+                { title: this.__("Warehouse"), key: "warehouse" },
+                { title: this.__("Available Qty"), key: "actual_qty" },
+                { title: this.__("Actions"), key: "actions", sortable: false },
             ];
         },
     },

@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+// import { evntBus } from "../../bus";
 export default {
   // props: ["draftsDialog"],
   data: () => ({
@@ -81,33 +81,33 @@ export default {
     search: "",
     headers: [
       {
-        text: __("Customer"),
-        value: "customer",
+        title: __("Customer"),
+        key: "customer",
         align: "start",
         filterable: true,
         sortable: true,
       },
       {
-        text: __("Date"),
+        title: __("Date"),
         align: "start",
         sortable: true,
-        value: "delivery_date",
+        key: "delivery_date",
       },
       // {
-      //   text: __('Status'),
+      //   title: __('Status'),
       //   align: 'start',
       //   sortable: true,
-      //   value: 'status',
+      //   key: 'status',
       // },
       {
-        text: __("Order"),
-        value: "name",
+        title: __("Order"),
+        key: "name",
         align: "start",
         sortable: true,
       },
       {
-        text: __("Amount"),
-        value: "grand_total",
+        title: __("Amount"),
+        key: "grand_total",
         align: "start",
         sortable: false,
       },
@@ -204,27 +204,27 @@ export default {
     },
   },
   created: function () {
-    evntBus.$on("register_pos_profile", (data) => {
+    this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
 
       if (this.pos_profile.posa_enable_pos_restaurant_table) {
         this.headers.push({
-          text: __("Table"),
-          value: "posa_pos_restaurant_table",
+          title: __("Table"),
+          key: "posa_pos_restaurant_table",
           align: "start",
           sortable: true,
         });
       }
       // if (this.pos_profile.posa_enable_warranty_print_system) {
       //   this.headers.push({
-      //     text: __("Has Warranty"),
-      //     value: "posa_has_warranty",
+      //     title: __("Has Warranty"),
+      //     key: "posa_has_warranty",
       //     align: "start",
       //     sortable: true,
       //   });
       // }
     });
-    evntBus.$on("open_orders_list", (data) => {
+    this.eventBus.on("open_orders_list", (data) => {
       this.ordersListDialog = true;
       this.selected = [];
       this.search_order();

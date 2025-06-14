@@ -68,12 +68,12 @@
               <!-- @item-selected="onOrderSelected" -->
               <template v-slot:item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
-                {{ formtCurrency(item.grand_total) }}
+                {{ formatCurrency(item.grand_total) }}
               </template>
               <template v-slot:item.outstanding_amount="{ item }">
                 <span class="primary--text"
                   >{{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.outstanding_amount) }}</span
+                  {{ formatCurrency(item.outstanding_amount) }}</span
                 >
               </template>
             </v-data-table>
@@ -179,7 +179,7 @@
 import format from "../../format";
 import Customer from "../pos/Customer.vue";
 import UpdateCustomer from "../pos/UpdateCustomer.vue";
-import { evntBus } from "../../bus";
+// import { evntBus } from "../../bus";
 
 export default {
   mixins: [format],
@@ -197,80 +197,80 @@ export default {
       invoice_loading: false,
       invoice_headers: [
         {
-          text: __("Invoice Name"),
+          title: __("Invoice Name"),
           align: "start",
           sortable: true,
-          value: "name",
+          key: "name",
         },
         {
-          text: __("Customer"),
+          title: __("Customer"),
           align: "start",
           sortable: true,
-          value: "customer",
+          key: "customer",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "posting_date",
+          key: "posting_date",
         },
         {
-          text: __("Due Date"),
+          title: __("Due Date"),
           align: "start",
           sortable: true,
-          value: "due_date",
+          key: "due_date",
         },
         {
-          text: __("Total"),
+          title: __("Total"),
           align: "end",
           sortable: true,
-          value: "grand_total",
+          key: "grand_total",
         },
         {
-          text: __("Status"),
+          title: __("Status"),
           align: "end",
           sortable: true,
-          value: "status",
+          key: "status",
         },
         {
-          text: __("Outstanding"),
+          title: __("Outstanding"),
           align: "end",
           sortable: true,
-          value: "outstanding_amount",
+          key: "outstanding_amount",
         },
         {
-          text: __("Has Warranty"),
+          title: __("Has Warranty"),
           align: "end",
           sortable: true,
-          value: "posa_has_warranty",
+          key: "posa_has_warranty",
         },
       ],
 
       selected_invoice_items: [],
       invoice_items_headers: [
         {
-          text: __("Item Name"),
+          title: __("Item Name"),
           align: "start",
           sortable: true,
-          value: "item_code",
+          key: "item_code",
         },
         {
-          text: __("Qty"),
+          title: __("Qty"),
           align: "start",
           sortable: true,
-          value: "qty",
+          key: "qty",
         },
         {
-          text: __("Rate"),
+          title: __("Rate"),
           align: "end",
           sortable: true,
-          value: "rate",
+          key: "rate",
         },
         {
-          text: __("Amount"),
+          title: __("Amount"),
           align: "end",
           sortable: true,
-          value: "amount",
+          key: "amount",
         },
       ],
     };

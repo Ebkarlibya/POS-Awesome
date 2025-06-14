@@ -3,7 +3,7 @@
     <v-row v-show="!dialog">
       <v-col md="8" cols="12" class="pb-2 pr-0">
         <v-card
-          class="main mx-auto grey lighten-5 mt-3 p-3 pb-16 overflow-y-auto"
+          class="main mx-auto bg-grey-lighten-5 mt-3 p-3 pb-16 overflow-y-auto"
           style="max-height: 94vh; height: 94vh"
         >
           <div>
@@ -39,7 +39,7 @@
                 ></v-checkbox>
               </v-col>
               <v-col md="4" cols="12">
-                <v-btn block color="warning" @click="get_list_of_orders" dark>{{
+                <v-btn block color="warning" @click="get_list_of_orders" theme="dark">{{
                   __("Search")
                 }}</v-btn>
               </v-col>
@@ -59,7 +59,7 @@
               <!-- @item-selected="onOrderSelected" -->
               <template v-slot:item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
-                {{ formtCurrency(item.grand_total) }}
+                {{ formatCurrency(item.grand_total) }}
               </template>
               <template v-slot:item.status="{ item }">
                 <v-chip variant="elevated" :color="item.color">
@@ -92,11 +92,11 @@
               <v-col md="4" cols="12">
                 <v-text-field
                   class="p-0 m-0"
-                  dense
+                  density="compact"
                   color="primary"
-                  background-color="white"
+                  bg-color="white"
                   hide-details
-                  :value="selected_orders[0].grand_total"
+                  v-model="selected_orders[0].grand_total"
                   readonly
                   flat
                   :prefix="currencySymbol(pos_profile_details.currency)"
@@ -120,7 +120,7 @@
               class="pb-6 pr-6"
               style="position: absolute; bottom: 0; width: 100%"
             >
-              <v-btn block color="primary" dark @click="print_invoice">
+              <v-btn block color="primary" theme="dark" @click="print_invoice">
                 {{ __("Print") }}
               </v-btn>
             </div>
@@ -135,7 +135,6 @@
 import format from "../../format";
 import Customer from "../pos/Customer.vue";
 import UpdateCustomer from "../pos/UpdateCustomer.vue";
-import { evntBus } from "../../bus";
 
 export default {
   mixins: [format],
@@ -154,68 +153,68 @@ export default {
       order_loading: false,
       order_headers: [
         {
-          text: __("Order Name"),
+          title: __("Order Name"),
           align: "start",
           sortable: true,
-          value: "name",
+          key: "name",
         },
         {
-          text: __("Customer"),
+          title: __("Customer"),
           align: "start",
           sortable: true,
-          value: "customer",
+          key: "customer",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "transaction_date",
+          key: "transaction_date",
         },
         {
-          text: __("Due Date"),
+          title: __("Due Date"),
           align: "start",
           sortable: true,
-          value: "delivery_date",
+          key: "delivery_date",
         },
         {
-          text: __("Total"),
+          title: __("Total"),
           align: "end",
           sortable: true,
-          value: "grand_total",
+          key: "grand_total",
         },
         {
-          text: __("Status"),
+          title: __("Status"),
           align: "end",
           sortable: true,
-          value: "status",
+          key: "status",
         },
       ],
 
       selected_order_items: [],
       order_items_headers: [
         {
-          text: __("Item Name"),
+          title: __("Item Name"),
           align: "start",
           sortable: true,
-          value: "item_code",
+          key: "item_code",
         },
         {
-          text: __("Qty"),
+          title: __("Qty"),
           align: "start",
           sortable: true,
-          value: "qty",
+          key: "qty",
         },
         {
-          text: __("Rate"),
+          title: __("Rate"),
           align: "end",
           sortable: true,
-          value: "rate",
+          key: "rate",
         },
         {
-          text: __("Amount"),
+          title: __("Amount"),
           align: "end",
           sortable: true,
-          value: "amount",
+          key: "amount",
         },
       ],
     };
