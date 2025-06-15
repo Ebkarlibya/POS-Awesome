@@ -3,7 +3,7 @@
     <ListInvoices></ListInvoices>
     <ListOrders></ListOrders>
 
-    <v-app-bar app flat height="56" color="white" class="border-bottom">
+    <v-app-bar app variant="flat" height="40" color="white" class="border-bottom">
       <v-app-bar-nav-icon
         ref="navIcon"
         @click="handleNavClick"
@@ -13,7 +13,7 @@
         :src="companyImg"
         :alt="company"
         max-width="32"
-        class="mx-2"
+        class="me-1"
       />
       <v-toolbar-title
         @click="goDesk"
@@ -42,9 +42,9 @@
               v-if="!posProfile.posa_hide_closing_shift"
               class="user-menu-item"
             >
-              <v-list-item-icon>
-                <v-icon>mdi-content-save-move-outline</v-icon>
-              </v-list-item-icon>
+              <template v-slot:prepend>
+                <v-icon :icon="'mdi-content-save-move-outline'"></v-icon>
+              </template>
               <v-list-item-title>
                 {{ __("Close Shift") }}
               </v-list-item-title>
@@ -54,9 +54,9 @@
               v-if="posProfile.posa_allow_print_last_invoice && lastInvoiceId"
               class="user-menu-item"
             >
-              <v-list-item-icon>
-                <v-icon>mdi-printer</v-icon>
-              </v-list-item-icon>
+              <template v-slot:prepend>
+                <v-icon :icon="'mdi-printer'"></v-icon>
+              </template>
               <v-list-item-title>
                 {{ __("Print Last Invoice") }}
               </v-list-item-title>
@@ -67,9 +67,9 @@
               @click="openClosingShiftsList"
               class="user-menu-item"
             >
-              <v-list-item-icon>
-                <v-icon>mdi-menu</v-icon>
-              </v-list-item-icon>
+              <template v-slot:prepend>
+                <v-icon :icon="'mdi-menu'"></v-icon>
+              </template>
               <v-list-item-title>
                 {{ __("Previous Closing Shifts") }}
               </v-list-item-title>
@@ -79,51 +79,51 @@
               @click="openDesk"
               class="user-menu-item"
             >
-              <v-list-item-icon>
-                <v-icon>mdi-menu</v-icon>
-              </v-list-item-icon>
+              <template v-slot:prepend>
+                <v-icon :icon="'mdi-menu'"></v-icon>
+              </template>
               <v-list-item-title>
                 {{ __("Desk") }}
               </v-list-item-title>
             </v-list-item>
 
-                <!-- <v-divider class="my-0"></v-divider> -->
+            <!-- <v-divider class="my-0"></v-divider> -->
 
-                <!-- List Invoices to print -->
-                <!-- <v-list-item @click="openInvoicesList">
-                  <v-list-item-icon>
-                    <v-icon>mdi-menu</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title>{{
-                      __("Invoices List")
-                    }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item> -->
-
-                <!-- List orders to print -->
-                <!-- <v-list-item @click="openOrdersList">
-                  <v-list-item-icon>
-                    <v-icon>mdi-menu</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title>{{
-                      __("Orders List")
-                    }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item> -->
-
-                <v-divider class="my-2" />
-            <v-list-item @click="logOut" class="user-menu-item">
+            <!-- List Invoices to print -->
+            <!-- <v-list-item @click="openInvoicesList">
               <v-list-item-icon>
-                <v-icon>mdi-logout</v-icon>
+                <v-icon>mdi-menu</v-icon>
               </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{
+                  __("Invoices List")
+                }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item> -->
+
+            <!-- List orders to print -->
+            <!-- <v-list-item @click="openOrdersList">
+              <v-list-item-icon>
+                <v-icon>mdi-menu</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{
+                  __("Orders List")
+                }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item> -->
+
+            <v-divider class="my-2" />
+            <v-list-item @click="logOut" class="user-menu-item">
+              <template v-slot:prepend>
+                <v-icon :icon="'mdi-logout'"></v-icon>
+              </template>
               <v-list-item-title>{{ __("Logout") }}</v-list-item-title>
             </v-list-item>
             <v-list-item @click="goAbout" class="user-menu-item">
-              <v-list-item-icon>
-                <v-icon>mdi-information-outline</v-icon>
-              </v-list-item-icon>
+              <template v-slot:prepend>
+                <v-icon :icon="'mdi-information-outline'"></v-icon>
+              </template>
               <v-list-item-title>{{ __("About") }}</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -132,39 +132,54 @@
     </v-app-bar>
     <v-navigation-drawer
       v-model="drawer"
-      :mini-variant="mini"
-      expand-on-hover
       app
-      class="drawer-custom"
+      :width="mini ? 70 : 170"
+      class="drawer-custom bg-primary"
       @mouseleave="handleMouseLeave"
-      width="220"
     >
-      <div v-if="!mini" class="drawer-header">
-        <v-avatar size="40"><v-img :src="companyImg" alt="Company logo" /></v-avatar>
-        <span class="drawer-company">{{ company }}</span>
-        <v-btn icon @click.stop="mini = true">
-          <v-icon>mdi-chevron-left</v-icon>
-        </v-btn>
-      </div>
+      <v-list dense>
+        <v-list-item
+          class="drawer-item border-b"
+          v-if="!mini"
+        >
+          <template v-slot:prepend>
+            <v-avatar size="30"><v-img :src="companyImg" alt="Company logo" /></v-avatar>
+          </template>
 
-      <div v-else class="drawer-header-mini">
-        <v-avatar size="40"><v-img :src="companyImg" alt="Company logo" /></v-avatar>
-      </div>
-      <v-divider />
-      <v-list dense nav>
+          <v-list-item-title v-if="!mini">
+            <div class="flex justify-between align-center">
+              <span class="me-2">{{ company }}</span>
+              <v-btn
+                icon
+                size="small"
+                variant="text"
+                class="ma-0 pa-0"
+                @click.stop="mini = !mini"
+              >
+                <v-icon size="large">mdi-chevron-left</v-icon>
+              </v-btn>
+            </div>
+          </v-list-item-title>
+        </v-list-item>
+        <v-list-item
+          class="drawer-item border-b"
+          v-else
+        >
+          <v-avatar size="30" @click.stop="mini = !mini"><v-img :src="companyImg" alt="Company logo" /></v-avatar>
+        </v-list-item>
         <v-list-item-group v-model="item" active-class="active-item">
           <v-list-item
-            v-for="i in items"
+            v-for="(i, idx) in items"
             :key="i.text"
+            :value="idx"
             @click="changePage(i.text)"
             class="drawer-item"
           >
-            <v-list-item-icon>
-              <v-icon class="drawer-icon">{{ i.icon }}</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content v-if="!mini">
-              <v-list-item-title class="drawer-item-title">{{ i.text }}</v-list-item-title>
-            </v-list-item-content>
+            <template v-slot:prepend>
+              <v-icon :icon="i.icon" class="drawer-icon"></v-icon>
+            </template>
+
+            <v-list-item-title v-text="i.text" v-if="!mini"></v-list-item-title>
           </v-list-item>
         </v-list-item-group>
       </v-list>
@@ -196,7 +211,11 @@ export default {
       drawer: false,
       mini: true,
       item: 0,
-      items: [{ text: "POS", icon: "mdi-network-pos" }],
+      items: [
+        { text: "POS", icon: "mdi-network-pos" },
+        { text: "Orders", icon: "mdi-salesforce" },
+        { text: "Invoices", icon: "mdi-cash" }
+      ],
       company: '',
       companyImg: '/assets/erpnext/images/erpnext-logo.svg',
       posProfile: {},
@@ -212,19 +231,19 @@ export default {
   },
   methods: {
     handleNavClick() {
-      this.drawer = true;
+      this.drawer = !this.drawer;
       this.mini = false;
     },
     handleMouseLeave() {
-      if (!this.drawer) return;
-      clearTimeout(this._closeTimeout);
-      this._closeTimeout = setTimeout(() => {
-        this.drawer = false;
-        this.mini = true;
-      }, 250);
+      // if (!this.drawer) return;
+      // clearTimeout(this._closeTimeout);
+      // this._closeTimeout = setTimeout(() => {
+      //   this.drawer = false;
+      //   this.mini = true;
+      // }, 250);
     },
     changePage(key) {
-      this.eventBus.emit("changePage", key);
+      this.$emit("changePage", key);
     },
     goDesk() {
       frappe.set_route("/");
@@ -315,11 +334,11 @@ export default {
         ) {
           this.items.push(payments);
         }
-        this.items.push({ text: "Orders", icon: "mdi-salesforce" });
-        this.items.push({
-          text: "Invoices",
-          icon: "mdi-cash",
-        });
+        // this.items.push({ text: "Orders", icon: "mdi-salesforce" });
+        // this.items.push({
+        //   text: "Invoices",
+        //   icon: "mdi-cash",
+        // });
       });
       this.eventBus.on("set_last_invoice", (data) => {
         this.lastInvoiceId = data;
@@ -346,10 +365,10 @@ export default {
 .text-secondary {
   color: rgba(0, 0, 0, 0.6) !important;
 }
-.drawer-custom {
+/* .drawer-custom {
   background-color: #fafafa;
   transition: all 0.3s ease-out;
-}
+} */
 .drawer-header {
   display: flex;
   align-items: center;
@@ -367,16 +386,16 @@ export default {
   flex: 1;
   font-weight: 500;
   font-size: 1rem;
-  color: #424242;
+  color: #ffffff;
 }
 .drawer-icon {
   font-size: 24px;
-  color: #1976d2;
+  color: #ffffff;
 }
 .drawer-item-title {
   margin-left: 8px;
   font-weight: 500;
-  color: #424242;
+  color: #ffffff;
 }
 .v-list-item:hover {
   background-color: rgba(25, 118, 210, 0.1) !important;
