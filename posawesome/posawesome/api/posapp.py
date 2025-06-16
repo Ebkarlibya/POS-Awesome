@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_existing_payment_request_amount,
 )
 
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
@@ -1747,6 +1748,29 @@ def search_invoices_for_return(invoice_name, company, customer_name=None, custom
     }
 
 
+@frappe.whitelist()
+def search_orders(company, currency, order_name=None):
+    filters = {
+        "billing_status": ["in", ["Not Billed", "Partly Billed"]],
+        "docstatus": 1,
+        "company": company,
+        "currency": currency,
+    }
+    if order_name:
+        filters["name"] = ["like", f"%{order_name}%"]
+    orders_list = frappe.get_list(
+        "Sales Order",
+        filters=filters,
+        fields=["name"],
+        limit_page_length=0,
+        order_by="customer",
+    )
+    data = []
+    for order in orders_list:
+        data.append(frappe.get_doc("Sales Order", order["name"]))
+    return data
+
+
 def get_version():
     branch_name = get_app_branch("erpnext")
     if "12" in branch_name:
@@ -2349,6 +2373,19 @@ def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
     return """ and (name like {item_code} or item_name like {item_code})""".format(
         item_code=frappe.db.escape("%" + item_code + "%")
     )
+
+
+@frappe.whitelist()
+def create_sales_invoice_from_order(sales_order):
+    sales_invoice = make_sales_invoice(sales_order, ignore_permissions=True)
+    sales_invoice.save()
+    return sales_invoice
+
+
+@frappe.whitelist()
+def delete_sales_invoice(sales_invoice):
+    frappe.delete_doc("Sales Invoice", sales_invoice)
+
 
 @frappe.whitelist()
 def update_invoice_from_order(data):

@@ -1,27 +1,37 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="closingDialog" max-width="900px">
-      <v-card>
-        <v-card-title>
-          <span class="text-h5 text-primary">{{
-            __('Closing POS Shift')
-          }}</span>
+    <v-dialog v-model="closingDialog" max-width="900px" persistent>
+      <v-card elevation="8" class="closing-dialog-card">
+        <v-card-title class="closing-header pa-6">
+          <div class="header-content">
+            <div class="header-icon-wrapper">
+              <v-icon class="header-icon" size="40">mdi-store-clock-outline</v-icon>
+            </div>
+            <div class="header-text">
+              <h3 class="header-title">{{ __('Closing POS Shift') }}</h3>
+              <p class="header-subtitle">{{ __('Reconcile payment methods and close shift') }}</p>
+            </div>
+          </div>
         </v-card-title>
-        <v-card-text class="pa-0">
-          <v-container>
+
+        <v-divider class="header-divider"></v-divider>
+
+        <v-card-text class="pa-0 white-background">
+          <v-container class="pa-6">
             <v-row>
               <v-col cols="12" class="pa-1">
+                <div class="table-header mb-4">
+                  <h4 class="text-h6 text-grey-darken-2 mb-1">{{ __('Payment Reconciliation') }}</h4>
+                  <p class="text-body-2 text-grey">{{ __('Verify closing amounts for each payment method') }}</p>
+                </div>
+
                 <v-data-table :headers="headers" :items="dialog_data.payment_reconciliation" item-key="mode_of_payment"
-                  class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
+                  class="elevation-0 rounded-lg white-table" :items-per-page="itemsPerPage" hide-default-footer
+                  density="compact">
                   <template v-slot:item.closing_amount="props">
-                    <v-confirm-edit v-model:return-value="props.item.closing_amount">
-                      {{ currencySymbol(pos_profile.currency) }}
-                      {{ formatCurrency(props.item.closing_amount) }}
-                      <template v-slot:input>
-                        <v-text-field v-model="props.item.closing_amount" :rules="[max25chars]"
-                          :label="frappe._('Edit')" single-line counter type="number"></v-text-field>
-                      </template>
-                    </v-confirm-edit>
+                    <v-text-field v-model="props.item.closing_amount" :rules="[max25chars]" :label="frappe._('Edit')"
+                      single-line counter type="number" density="compact" variant="outlined" color="primary"
+                      bg-color="white" hide-details :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
                   </template>
                   <template v-slot:item.difference="{ item }">
                     {{ currencySymbol(pos_profile.currency) }}
@@ -41,14 +51,19 @@
             </v-row>
           </v-container>
         </v-card-text>
-        <v-card-actions>
+
+        <v-divider></v-divider>
+        <v-card-actions class="dialog-actions-container">
+          <v-btn theme="dark" @click="submit_dialog" class="pos-action-btn submit-action-btn" size="large"
+            elevation="2">
+            <v-icon start>mdi-check-circle-outline</v-icon>
+            <span>{{ __('Submit') }}</span>
+          </v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="error" theme="dark" @click="close_dialog">{{
-            __('Close')
-          }}</v-btn>
-          <v-btn color="success" theme="dark" @click="submit_dialog">{{
-            __('Submit')
-          }}</v-btn>
+          <v-btn theme="dark" @click="close_dialog" class="pos-action-btn cancel-action-btn" size="large" elevation="2">
+            <v-icon start>mdi-close-circle-outline</v-icon>
+            <span>{{ __('Cancel') }}</span>
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -85,7 +100,7 @@ export default {
         sortable: true,
       },
     ],
-    max25chars: (v) => v.length <= 20 || 'Input too long!', // TODO : should validate as number
+    max25chars: (v) => v.length <= 20 || __('Input too long!'), // TODO : should validate as number
     pagination: {},
   }),
   watch: {},
@@ -129,3 +144,137 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.closing-header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-bottom: 1px solid #e0e0e0;
+  padding: 24px !important;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.header-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.header-icon {
+  color: white !important;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.header-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  font-weight: 400;
+}
+
+.header-divider {
+  border-color: #e0e0e0;
+}
+
+.white-background {
+  background-color: #ffffff;
+}
+
+.table-header {
+  padding: 0 4px;
+}
+
+.white-table {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+}
+
+/* Action Buttons */
+.dialog-actions-container {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-top: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  gap: 12px;
+}
+
+.pos-action-btn {
+  border-radius: 12px;
+  text-transform: none;
+  font-weight: 600;
+  padding: 12px 32px;
+  min-width: 120px;
+  transition: all 0.3s ease;
+  color: white !important;
+  /* Add this line */
+}
+
+/* Add these new rules: */
+.pos-action-btn .v-icon {
+  color: white !important;
+}
+
+.pos-action-btn span {
+  color: white !important;
+}
+
+.pos-action-btn:disabled .v-icon,
+.pos-action-btn:disabled span {
+  color: white !important;
+}
+
+.cancel-action-btn {
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%) !important;
+}
+
+.submit-action-btn {
+  background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%) !important;
+}
+
+.submit-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+}
+
+.cancel-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
+}
+
+.submit-action-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+}
+
+/* And the responsive section: */
+@media (max-width: 768px) {
+  .dialog-actions-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pos-action-btn {
+    width: 100%;
+  }
+}
+</style>
