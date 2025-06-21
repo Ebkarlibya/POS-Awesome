@@ -1,11 +1,16 @@
 <template>
-    <v-dialog v-model="isOpen" max-width="800px">
+    <v-dialog v-model="isOpen" width="800">
         <v-card>
-            <v-card-title class="primary white--text">
+            <v-card-title class="d-flex justify-space-between align-center primary white--text">
                 {{ __("Select Warehouse") }}
-                <v-spacer />
-                <v-btn icon @click="closeDialog" :title="__('Close dialog')">
-                    <v-icon>mdi-close</v-icon>
+                <v-btn
+                    icon
+                    size="small"
+                    density="compact"
+                    @click="closeDialog"
+                    :title="__('Close dialog')"
+                >
+                    <v-icon size="20">mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
             <v-card-text>
@@ -20,10 +25,17 @@
                         {{ item.actual_qty }}
                     </template>
                     <template v-slot:item.actions="{ item }">
-                        <v-btn small icon @click="selectWarehouse(item)" :disabled="item.actual_qty <= 0" :title="item.actual_qty <= 0
-        ? __('There is no available quantity.')
-        : __('Click to add to invoice.')">
-                            <v-icon>mdi-plus</v-icon>
+                        <v-btn
+                            icon
+                            size="large"
+                            density="compact"
+                            @click="selectWarehouse(item)"
+                            :disabled="item.actual_qty <= 0"
+                            :title="item.actual_qty <= 0
+                                    ? __('There is no available quantity.')
+                                    : __('Click to add to invoice.')"
+                        >
+                        <v-icon size="28">mdi-plus</v-icon>
                         </v-btn>
                     </template>
                 </v-data-table>

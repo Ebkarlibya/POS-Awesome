@@ -52,13 +52,19 @@ def validate_referral_code(doc):
             frappe.throw(_("This Referral Code {0} not exists").format(referral_code))
 
 @frappe.whitelist()
-def get_customer_balance(customer):
+def get_customer_balance(customer, company):
     if not customer:
-        return {"balance": 0, "customer_name": None}
+        return {"balance": 0, "customer_name": None, "company_currency": None}
 
     try:
         customer_doc = frappe.get_doc("Customer", customer)
         customer_name = customer_doc.customer_name
+
+        company_currency = None
+        if company:
+            company_currency = frappe.db.get_value(
+                "Company", company, "default_currency"
+            )
 
         # Fetch outstanding balance from GL Entries
         balance = frappe.db.sql("""
@@ -69,7 +75,8 @@ def get_customer_balance(customer):
 
         return {
             "balance": flt(balance[0].get("balance", 0)) if balance else 0,
-            "customer_name": customer_name
+            "customer_name": customer_name,
+            "company_currency": company_currency
         }
     except Exception as e:
         frappe.log_error(f"Error fetching customer balance: {e}")

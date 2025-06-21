@@ -1,11 +1,16 @@
 <template>
-    <v-dialog v-model="isOpen" max-width="800px">
+    <v-dialog v-model="isOpen" width="800">
         <v-card>
-            <v-card-title class="primary white--text">
+            <v-card-title class="d-flex justify-space-between align-center primary white--text">
                 {{ __("Item Information") }}
-                <v-spacer />
-                <v-btn icon @click="closeDialog" :title="__('Close dialog')">
-                    <v-icon>mdi-close</v-icon>
+                <v-btn
+                    icon
+                    size="small"
+                    density="compact"
+                    @click="closeDialog"
+                    :title="__('Close dialog')"
+                >
+                    <v-icon size="20">mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
             <v-card-text>
@@ -57,15 +62,28 @@
                         </span>
                     </template>
                     <template v-slot:item.actions="{ item }">
-                        <v-btn small icon @click="selectWarehouse(item)" :disabled="item.actual_qty <= 0"
-                            :title="item.actual_qty <= 0 ? __('Out of stock') : __('Add from this warehouse')">
-                            <v-icon>mdi-cart-plus</v-icon>
+                        <v-btn
+                            icon
+                            size="large"
+                            density="compact"
+                            @click="selectWarehouse(item)"
+                            :disabled="item.actual_qty <= 0"
+                            :title="item.actual_qty <= 0
+                                    ? __('Out of stock')
+                                    : __('Add from this warehouse')"
+                        >
+                            <v-icon size="28">mdi-cart-plus</v-icon>
                         </v-btn>
-                        <v-btn small icon
-                              @click="openOffers(item)"
-                              :title="__('Show Offers for this item')">
-                            <v-icon>mdi-tag</v-icon>
-                         </v-btn>
+                        <v-btn
+                            icon
+                            size="large"
+                            density="compact"
+                            @click="openOffers(item)"
+                            :title="__('Show Offers for this item')"
+                            class="m-2"
+                        >
+                            <v-icon size="28">mdi-tag</v-icon>
+                        </v-btn>
                     </template>
                 </v-data-table>
             </v-card-text>

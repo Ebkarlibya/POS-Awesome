@@ -86,12 +86,12 @@
                   </v-img>
                   <v-card-text class="text--primary pa-1">
                     <div class="d-flex align-center justify-space-between">
-                      <div class="d-flex align-center">
-                        <span class="text-caption text-primary">
+                      <div class="d-flex flex-column align-center">
+                        <span class="text-caption text-primary" style="white-space: normal; word-break: break-word;">
                           {{ currencySymbol(pos_profile.currency) || "" }}
                           {{ format_currency(item.rate, pos_profile.currency, 4) }}
                         </span>
-                        <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-caption text-success">
+                        <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-caption text-success" style="white-space: normal; word-break: break-word;">
                           {{ currencySymbol(selected_currency) || "" }}
                           {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
                         </span>
@@ -131,6 +131,7 @@
                 :items-per-page="itemsPerPage"
                 hide-default-footer
                 @click:row="click_item_row"
+                dense
               >
                 <template v-slot:item.rate="{ item }">
                   <div>
@@ -152,18 +153,24 @@
                 <template v-slot:item.actions="{ item }">
                     <v-btn
                       v-if="invoiceType==='Order'"
-                      size="small"
-                      icon="mdi-information"
+                      icon
+                      size="large"
+                      density="compact"
                       @click.stop="showItemDetails(item)"
                       :title="__('Click to show item details')"
-                    ></v-btn>
+                    >
+                      <v-icon size="28">mdi-information</v-icon>
+                    </v-btn>
                     <v-btn
                       v-else
-                      size="small"
-                      icon="mdi-database-eye"
+                      icon
+                      size="large"
+                      density="compact"
                       @click.stop="showWarehousesQuantities(item)"
                       :title="__('Click to show quantity per warehouses')"
-                    ></v-btn>
+                    >
+                      <v-icon size="28">mdi-database-eye</v-icon>
+                    </v-btn>
                   </template>
               </v-data-table>
             </div>
@@ -190,7 +197,6 @@
             :itemGroups="items_group"
             :label="frappe._('Items Group')"
             @click="setFastItemGroupFilter"
-            ref="gBtnRef"
           />
         </v-col>
       </v-row>
@@ -757,27 +763,11 @@ export default {
       }
     },
     setFastItemGroupFilter(event, groupName) {
-      this.$refs.gBtnRef.$children.forEach((ref) => {
-        let gBtn = ref.$el;
-        let gSpan = gBtn.children[0];
-        let isGroupSelected =
-          gSpan.innerText.toLowerCase() === groupName.toLowerCase();
-
-        if (isGroupSelected) {
-          if (gBtn.classList.contains("warning")) {
-            gBtn.classList.remove("warning");
-            gBtn.classList.add("primary");
-            this.item_group = "ALL";
-          } else {
-            gBtn.classList.remove("primary");
-            gBtn.classList.add("warning");
-            this.item_group = groupName;
-          }
-        } else {
-          gBtn.classList.remove("warning");
-          gBtn.classList.add("primary");
-        }
-      });
+      if (this.item_group === groupName) {
+        this.item_group = "ALL";
+      } else {
+        this.item_group = groupName;
+      }
     },
     generateWordCombinations(inputString) {
       const words = inputString.split(" ");
@@ -892,9 +882,10 @@ export default {
       let filtered_list = [];
       let filtered_group_list = [];
       if (this.item_group != "ALL") {
-        filtered_group_list = this.items.filter((item) =>
-          item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
-        );
+        filtered_group_list = this.items.filter((item) => {
+          const itemGroup = item.item_group || '';
+          return itemGroup.toLowerCase().includes(this.item_group.toLowerCase());
+        });
       } else {
         filtered_group_list = this.items;
       }
@@ -1123,6 +1114,7 @@ export default {
     this.$nextTick(function () { });
     this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
+      this.selected_currency = this.pos_profile.currency;
       this.get_items();
       this.get_items_groups();
       this.items_view = this.pos_profile.posa_default_card_view

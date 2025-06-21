@@ -102,11 +102,11 @@
                   v => !payment.mode_of_payment.toLowerCase().includes('cash') || 
                        this.is_credit_sale || 
                        v >= (this.invoice_doc.rounded_total || this.invoice_doc.grand_total) || 
-                       'Cash payment cannot be less than invoice total when credit sale is off'
+                       frappe._('Cash payment cannot be less than invoice total when credit sale is off')
                 ]"
                 :prefix="currencySymbol(invoice_doc.currency)"
                 @focus="set_rest_amount(payment.idx)"
-                :readonly="invoice_doc.is_return"
+                :readonly="!!invoice_doc.is_return"
                 :ref="payment.mode_of_payment"
               ></v-text-field>
             </v-col>
@@ -532,6 +532,7 @@
               class="my-0 py-0"
               v-model="is_write_off_change"
               flat
+              color="primary"
               :label="frappe._('Write Off Difference Amount')"
             ></v-switch>
           </v-col>
@@ -543,6 +544,8 @@
               v-model="is_credit_sale"
               :label="frappe._('Credit Sale?')"
               class="my-0 py-0"
+              flat
+              color="primary"
             ></v-switch>
           </v-col>
           <v-col
@@ -552,6 +555,7 @@
             <v-switch
               v-model="is_cashback"
               flat
+              color="primary"
               :label="frappe._('Cashback?')"
               class="my-0 py-0"
             ></v-switch>
@@ -595,6 +599,7 @@
             <v-switch
               v-model="redeem_customer_credit"
               flat
+              color="primary"
               :label="frappe._('Use Customer Credit')"
               class="my-0 py-0"
               @change="get_available_credit(redeem_customer_credit)"

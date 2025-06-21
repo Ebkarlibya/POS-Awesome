@@ -7,7 +7,7 @@
     <NewAddress></NewAddress>
     <MpesaPayments></MpesaPayments>
     <Variants></Variants>
-    <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
+    <OpeningDialog v-model:dialog="dialog" />
     <v-row v-show="!dialog">
       <v-col v-show="!payment && !offers && !coupons" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
         <ItemsSelector></ItemsSelector>
@@ -219,11 +219,16 @@ export default {
         this.dialog = false;
       });
       this.eventBus.on("register_pos_data", (data) => {
-        this.pos_profile = data.pos_profile;
-        this.get_offers(this.pos_profile.name);
-        this.pos_opening_shift = data.pos_opening_shift;
-        this.eventBus.emit("register_pos_profile", data);
-        console.info("LoadPosProfile");
+        try {
+          this.pos_profile = data.pos_profile;
+          this.get_offers(this.pos_profile.name);
+          this.pos_opening_shift = data.pos_opening_shift;
+          this.eventBus.emit("register_pos_profile", data);
+          console.info("LoadPosProfile");
+        }
+        catch(e) {
+          console.error('error in register_pos_data', e);
+        }
       });
       this.eventBus.on("show_payment", (data) => {
         this.payment = true ? data === "true" : false;
