@@ -131,15 +131,17 @@ def update_opening_shift_data(data, pos_profile):
 
 
 @frappe.whitelist()
-def get_items(pos_profile, price_list=None, item_group="", search_value=""):
+def get_items(
+    pos_profile, price_list=None, item_group="", search_value="", customer=None
+):
     _pos_profile = json.loads(pos_profile)
     use_price_list = _pos_profile.get("posa_use_server_cache")
 
     @redis_cache(ttl=60)
-    def __get_items(pos_profile, price_list, item_group, search_value):
-        return _get_items(pos_profile, price_list, item_group, search_value)
+    def __get_items(pos_profile, price_list, item_group, search_value, customer=None):
+        return _get_items(pos_profile, price_list, item_group, search_value, customer)
 
-    def _get_items(pos_profile, price_list, item_group, search_value):
+    def _get_items(pos_profile, price_list, item_group, search_value, customer=None):
         pos_profile = json.loads(pos_profile)
         condition = ""
 
@@ -241,6 +243,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     "currency": pos_profile.get("currency"),
                     "selling": 1,
                     "valid_from": ["<=", today],
+                    "customer": ["in", ["", None, customer]],
                 },
                 or_filters=[
                     ["valid_upto", ">=", today],
@@ -347,9 +350,9 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
         return result
 
     if use_price_list:
-        return __get_items(pos_profile, price_list, item_group, search_value)
+        return __get_items(pos_profile, price_list, item_group, search_value, customer)
     else:
-        return _get_items(pos_profile, price_list, item_group, search_value)
+        return _get_items(pos_profile, price_list, item_group, search_value, customer)
 
 
 def get_item_group_condition(pos_profile):
@@ -698,6 +701,7 @@ def update_invoice(data):
 
     invoice_doc.calculate_taxes_and_totals()
     invoice_doc.docstatus = 0
+    invoice_doc.posp_original_posting_date = payload.get("posting_date")
     invoice_doc.save()
 
     # Return both the invoice doc and the updated data

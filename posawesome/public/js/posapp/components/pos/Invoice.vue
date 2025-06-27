@@ -107,10 +107,10 @@
       <v-row
         align="center"
         class="items px-2 py-1 mt-0 pt-0"
-        v-if="pos_profile.posa_allow_change_posting_date"
+        v-if="pos_profile.posa_allow_change_posting_date || pos_profile.posa_show_customer_balance"
       >
         <!-- Posting Date Selection with Date Picker -->
-        <v-col cols="6" class="pb-2">
+        <v-col cols="6" class="pb-2" v-if="pos_profile.posa_allow_change_posting_date">
           <v-menu
             v-model="posting_date_menu"
             :close-on-content-click="false"
@@ -136,8 +136,8 @@
               no-title
               scrollable
               color="primary"
-              :min="frappe.datetime.add_days(frappe.datetime.nowdate(true), -7)"
-              :max="frappe.datetime.add_days(frappe.datetime.nowdate(true), 7)"
+              :min="frappe.datetime.add_days(frappe.datetime.nowdate(), -Number(pos_profile.posp_days_allowed_before_today_date || 0))"
+              :max="frappe.datetime.nowdate()"
             >
               <template #actions>
                 <v-spacer></v-spacer>
@@ -619,7 +619,7 @@
             </v-col>
             <!-- Additional Discount (Amount or Percentage) -->
             <v-col
-              v-if="!pos_profile.posa_use_percentage_discount"
+              v-if="pos_profile.custom_posa_use_amount_discount"
               cols="6"
             >
               <v-text-field
@@ -633,10 +633,14 @@
                 :prefix="currencySymbol(pos_profile.currency)"
                 :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount"
                 min="0"
+                @change="validateAdditionalDiscount"
               />
             </v-col>
 
-            <v-col cols="6" v-else>
+            <v-col
+              v-else-if="pos_profile.posa_use_percentage_discount"
+              cols="6"
+            >
               <v-text-field
                 v-model.number="additional_discount_percentage"
                 type="number"
@@ -648,8 +652,8 @@
                 color="warning"
                 :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount || !!discount_percentage_offer_name"
                 min="0"
-                max="100"
-                @change="update_discount_umount()"
+                :max="pos_profile.posa_max_discount_allowed ? pos_profile.posa_max_discount_allowed : 100"
+                @change="validateAdditionalDiscount"
               />
             </v-col>
 
@@ -4792,6 +4796,39 @@ export default {
       }
       // For base currency or when multi-currency is disabled, round to nearest integer
       return Math.round(amount);
+    },
+    validateAdditionalDiscount() {
+      if (this.pos_profile.custom_posa_use_amount_discount) {
+        const maxAllowedAmount = (this.Total * this.pos_profile.custom_posa_max_discount_amount_allowed) / 100;
+        if (
+          this.additional_discount > maxAllowedAmount
+        ) {
+          this.eventBus.emit('show_message', {
+            title: __('Additional discount cannot exceed {0} {1} ({2}% of total)', [
+              this.formatCurrency(maxAllowedAmount),
+              this.pos_profile.currency,
+              this.pos_profile.custom_posa_max_discount_amount_allowed
+            ]),
+            color: 'error'
+          });
+          this.additional_discount = maxAllowedAmount;
+        }
+      }
+      else if (this.pos_profile.posa_use_percentage_discount) {
+        if (
+          this.additional_discount_percentage > this.pos_profile.posa_max_discount_allowed &&
+          this.pos_profile.posa_max_discount_allowed > 0
+        ) {
+          this.eventBus.emit('show_message', {
+            title: __('Additional discount % cannot exceed {0}%', [
+              this.pos_profile.posa_max_discount_allowed
+            ]),
+            color: 'error'
+          });
+          this.additional_discount_percentage = this.pos_profile.posa_max_discount_allowed;
+        }
+        this.update_discount_umount();
+      }
     },
   },
 

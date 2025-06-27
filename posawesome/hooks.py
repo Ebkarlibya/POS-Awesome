@@ -161,6 +161,7 @@ fixtures = [
                 "in",
                 (
                     "Sales Invoice-posa_pos_opening_shift",
+                    "Sales Invoice-posp_original_posting_date",
                     "Item Barcode-posa_uom",
                     "POS Profile-posa_pos_awesome_settings",
                     "POS Profile-posa_allow_delete",
@@ -205,6 +206,7 @@ fixtures = [
                     "Sales Order-posa_notes",
                     "Sales Order Item-posa_notes",
                     "POS Profile-posa_allow_sales_order",
+                    "POS Profile-custom_allow_select_sales_order",
                     "POS Profile-posa_column_break_112",
                     "POS Profile-posa_show_template_items",
                     "POS Profile-posa_hide_variants_items",
@@ -240,6 +242,7 @@ fixtures = [
                     "POS Profile-posa_use_delivery_charges",
                     "POS Profile-hide_expected_amount",
                     "POS Profile-posa_allow_change_posting_date",
+                    "POS Profile-posp_days_allowed_before_today_date",
                     "POS Profile-posa_default_card_view",
                     "POS Profile-posa_default_sales_order",
                     "POS Profile-column_break_dqsba",
@@ -283,6 +286,7 @@ fixtures = [
                     "Sales Invoice Item-posa_warranty_no_of_years",  # int
                     "POS Profile-pos_plus_additional_warehouses_section",
                     "POS Profile-pos_plus_additional_warehouses",
+                    "POS Profile-posa_allow_multi_currency"
                 ),
             ]
         ],
@@ -290,17 +294,5 @@ fixtures = [
     {
         "doctype": "Property Setter",
         "filters": [["name", "in", ("Sales Invoice-posa_pos_opening_shift-no_copy")]],
-    },
-    {
-        "doctype": "Custom Field",
-        "filters": [
-            [
-                "name",
-                "in",
-                [
-                    "POS Profile-posa_allow_multi_currency"
-                ]
-            ]
-        ]
     }
 ]
