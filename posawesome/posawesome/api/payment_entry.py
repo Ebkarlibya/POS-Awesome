@@ -157,7 +157,6 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
         # Build filters
         filters = {
             "company": company,
-            "customer": customer,
             "outstanding_amount": (">", 0),
             "docstatus": 1,
             "is_return": 0,
@@ -168,6 +167,9 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
 
         if pos_profile:
             filters["pos_profile"] = pos_profile
+
+        if customer:
+            filters["customer"] = customer
 
         # Get all outstanding invoices directly from Sales Invoice
         outstanding_invoices = frappe.get_all(

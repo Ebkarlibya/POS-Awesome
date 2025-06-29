@@ -1,5 +1,5 @@
 <template>
-  <div fluid>
+  <v-container fluid>
     <v-row v-show="!dialog">
       <v-col md="8" cols="12" class="pb-2 pr-0">
         <v-card
@@ -22,7 +22,7 @@
               </v-col>
               <v-col md="5" cols="12">
                 <p v-if="total_selected_invoices" class="golden--text text-end">
-                  <span>{{ __("Total Selected :") }}</span>
+                  <span>{{ __("Total Selected:") }}</span>
                   <span>
                     {{ currencySymbol(pos_profile.currency) }}
                     {{ formatCurrency(total_selected_invoices) }}
@@ -45,7 +45,7 @@
                   label="Select POS Profile"
                 ></v-select>
               </v-col>
-              <v-col> </v-col>
+              <v-col md="1" cols="0"> </v-col>
               <v-col md="3" cols="12">
                 <v-btn
                   block
@@ -56,6 +56,7 @@
                   {{ __("Search") }}
                 </v-btn>
               </v-col>
+              <v-col md="1" cols="0"> </v-col>
               <v-col md="3" cols="12">
                 <v-btn
                   v-if="selected_invoices.length"
@@ -71,24 +72,24 @@
             <v-data-table
               :headers="invoices_headers"
               :items="outstanding_invoices"
-              item-key="voucher_no"
+              item-value="voucher_no"
               class="elevation-1 mt-0"
               :loading="invoices_loading"
               @click:row="selectSingleInvoice"
               :item-class="isSelected"
             >
-              <template v-slot:item.actions="{ item }">
+              <template #item.actions="{ item }">
                 <v-checkbox 
                   :model-value="isInvoiceSelected(item)"
                   color="primary"
                   @click.stop="toggleInvoiceSelection(item)">
                 </v-checkbox>
               </template>
-              <template v-slot:item.invoice_amount="{ item }">
+              <template #item.invoice_amount="{ item }">
                 {{ currencySymbol(item.currency) }}
                 {{ formatCurrency(item.invoice_amount) }}
               </template>
-              <template v-slot:item.outstanding_amount="{ item }">
+              <template #item.outstanding_amount="{ item }">
                 <span class="text-primary">
                   {{ currencySymbol(item?.currency || pos_profile.currency) }}
                   {{ formatCurrency(item?.outstanding_amount || 0) }}
@@ -123,23 +124,22 @@
             <v-data-table 
               :headers="unallocated_payments_headers" 
               :items="unallocated_payments" 
-              item-key="name"
+              item-value="name"
               class="elevation-1 mt-0" 
               :loading="unallocated_payments_loading">
-              <template v-slot:item.select="{ item }">
+              <template #item.select="{ item }">
                 <v-checkbox
-                  v-model="selected_payments"
-                  :value="item"
+                  :model-value="isPaymentSelected(item)"
                   color="primary"
                   hide-details
-                  @click.stop
+                  @click.stop="togglePaymentSelection(item)"
                 ></v-checkbox>
               </template>
-              <template v-slot:item.paid_amount="{ item }">
+              <template #item.paid_amount="{ item }">
                 {{ currencySymbol(item.currency) }}
                 {{ formatCurrency(item.paid_amount) }}
               </template>
-              <template v-slot:item.unallocated_amount="{ item }">
+              <template #item.unallocated_amount="{ item }">
                 <span class="text-primary">{{ currencySymbol(item.currency) }}
                   {{ formatCurrency(item.unallocated_amount) }}</span>
               </template>
@@ -207,15 +207,16 @@
             <v-data-table
               :headers="mpesa_payment_headers"
               :items="mpesa_payments"
-              item-key="name"
+              item-value="name"
               class="elevation-1 mt-0"
-              :single-select="singleSelect"
+              select-strategy="single"
               show-select
+              return-object
               v-model="selected_mpesa_payments"
               :loading="mpesa_payments_loading"
               checkbox-color="primary"
             >
-              <template v-slot:item.amount="{ item }">
+              <template #item.amount="{ item }">
                 <span class="text-primary">
                   {{ currencySymbol(item.currency) }}
                   {{ formatCurrency(item.amount) }}
@@ -261,7 +262,7 @@
 
             <v-divider v-if="payment_methods.length"></v-divider>
             <div v-if="pos_profile.posa_allow_make_new_payments">
-              <h4 class="text-primary">Make New Payment</h4>
+              <h4 class="text-primary">{{ __('Make New Payment') }}</h4>
               <v-row v-if="payment_methods.length" v-for="method in payment_methods" :key="method.row_id">
                 <v-col md="7"><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
                 </v-col>
@@ -305,14 +306,12 @@
         </v-card>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script>
-
 import format from "../../format";
 import Customer from "../pos/Customer.vue";
-import UpdateCustomer from "../pos/UpdateCustomer.vue";
 
 export default {
   mixins: [format],
@@ -324,7 +323,6 @@ export default {
       customer_name: "",
       customer_info: "",
       company: "",
-      singleSelect: true,
       invoices_loading: false,
       unallocated_payments_loading: false,
       mpesa_payments_loading: false,
@@ -338,7 +336,7 @@ export default {
       pos_profiles_list: [],
       pos_profile_search: "",
       payment_methods_list: [],
-      mpesa_searchname: "",
+      mpesa_search_name: "",
       mpesa_search_mobile: "",
       invoices_headers: [
         {
@@ -468,7 +466,6 @@ export default {
 
   components: {
     Customer,
-    UpdateCustomer,
   },
 
   methods: {
@@ -563,11 +560,17 @@ export default {
       this.invoices_loading = true;
       // Reset selection completely
       this.selected_invoices = [];
+
+      this.unallocated_payments = [];
+      this.selected_payments = [];
+      this.mpesa_payments = [];
+      this.selected_mpesa_payments = [];
+
       return frappe
         .call(
           "posawesome.posawesome.api.payment_entry.get_outstanding_invoices",
           {
-            customer: this.customer_name,
+            customer: this.customer_name || null,
             company: this.company,
             currency: this.pos_profile.currency,
             pos_profile: this.pos_profile_search || null,
@@ -577,6 +580,10 @@ export default {
           if (r.message) {
             this.outstanding_invoices = r.message;
             this.invoices_loading = false;
+
+            this.get_unallocated_payments();
+            this.get_draft_mpesa_payments_register();
+
             // Force refresh UI after data is loaded
             this.$nextTick(() => {
               this.$forceUpdate();
@@ -879,6 +886,17 @@ export default {
       // Open in new window/tab
       window.open(url, '_blank');
     },
+    isPaymentSelected(item) {
+      return this.selected_payments.some(p => p.name === item.name);
+    },
+    togglePaymentSelection(item) {
+      if (this.isPaymentSelected(item)) {
+        this.selected_payments = this.selected_payments.filter(p => p.name !== item.name);
+      } else {
+        this.selected_payments.push(item);
+      }
+      this.$nextTick(() => this.$forceUpdate());
+    },
   },
 
   computed: {
@@ -975,6 +993,11 @@ export default {
   beforeUnmount() {
     this.eventBus.off("update_customer");
     this.eventBus.off("fetch_customer_details");
+  },
+  watch: {
+    pos_profile_search() {
+      this.clear_all(false);
+    }
   },
 };
 </script>

@@ -1,12 +1,29 @@
 <template>
   <!-- ? Disable dropdown if either readonly or loadingCustomers is true -->
   <div class="customer-input-wrapper">
-    <v-autocomplete ref="customerDropdown" class="customer-autocomplete sleek-field" density="compact" clearable
-      variant="solo" color="primary" :label="frappe._('Customer')" v-model="internalCustomer" :items="customers"
-      item-title="customer_name" item-value="name" bg-color="white" :no-data-text="__('Customers not found')"
-      hide-details :custom-filter="customFilter" :disabled="readonly || loadingCustomers"
-      :menu-props="{ closeOnContentClick: false }" @update:menu="onCustomerMenuToggle"
-      @update:modelValue="onCustomerChange" @keydown.enter="handleEnter">
+    <v-autocomplete
+      ref="customerDropdown"
+      class="customer-autocomplete sleek-field"
+      density="compact"
+      clearable
+      variant="solo"
+      color="primary"
+      :label="frappe._('Customer')"
+      v-model="internalCustomer"
+      :items="customers"
+      item-title="customer_name"
+      item-value="name"
+      bg-color="white"
+      :no-data-text="__('Customers not found')"
+      hide-details
+      :custom-filter="customFilter"
+      :disabled="readonly || loadingCustomers"
+      :menu-props="{ closeOnContentClick: false }"
+      @update:menu="onCustomerMenuToggle"
+      @update:modelValue="onCustomerChange"
+      @keydown.enter="handleEnter"
+      @click:clear="onCustomerClear"
+    >
       <!-- hide-details :customFilter="customFilter" :disabled="readonly || loadingCustomers" --> <!-- replace the filter if not working -->
       <!-- Edit icon (left) -->
       <template #prepend-inner>
@@ -148,6 +165,14 @@ export default {
         this.customer = val;
         this.eventBus.emit('update_customer', val);
       }
+    },
+
+    onCustomerClear() {
+      // clear both internal and external customer
+      this.internalCustomer = null;
+      this.tempSelectedCustomer = null;
+      this.customer = null;
+      this.eventBus.emit('update_customer', null);
     },
 
     // Pressing Enter in input

@@ -1,5 +1,5 @@
 <template>
-  <div fluid>
+  <v-container fluid>
     <v-row v-show="!dialog">
       <v-col md="8" cols="12" class="pb-2 pr-0">
         <v-card
@@ -16,52 +16,57 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col md="6" cols="12">
-                <div class="mx-2 my-5">
-                  <v-text-field
-                    v-model="search"
-                    append-icon="mdi-magnify"
-                    :label="
-                      __('Search by Part of Order Name, Amount or Table Name')
-                    "
-                    single-line
-                    hide-details
-                  ></v-text-field>
-                </div>
+              <v-col md="7" cols="12">
+                <v-text-field
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  :label="
+                    __('Search by Part of Order Name, Amount or Table Name')
+                  "
+                  single-line
+                  hide-details
+                  @keyup.enter="get_list_of_orders"
+                  clearable
+                  @click:clear="search = ''; get_list_of_orders()"
+                  clear-icon="mdi-close-circle-outline"
+                ></v-text-field>
               </v-col>
               <v-col md="2" cols="12">
                 <v-checkbox
                   v-model="includeDrafts"
                   label="Include Drafts"
                   color="success"
-                  :value="!includeDrafts"
                   hide-details
                 ></v-checkbox>
               </v-col>
-              <v-col md="4" cols="12">
-                <v-btn block color="warning" @click="get_list_of_orders" theme="dark">{{
-                  __("Search")
-                }}</v-btn>
+              <v-col md="3" cols="12">
+                <v-btn
+                  block
+                  color="warning"
+                  @click="get_list_of_orders"
+                  dark
+                >
+                  {{ __("Search") }}
+                </v-btn>
               </v-col>
             </v-row>
             <v-divider></v-divider>
             <v-data-table
               :headers="order_headers"
               :items="orders_data"
-              item-key="name"
+              item-value="name"
+              return-object
               class="elevation-1 mt-0"
               show-select
               v-model="selected_orders"
-              :loading="order_loading"
-              checkbox-color="primary"
-              :single-select="true"
+              :loading="orders_loading"
+              select-strategy="single"
             >
-              <!-- @item-selected="onOrderSelected" -->
-              <template v-slot:item.grand_total="{ item }">
+              <template #item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
                 {{ formatCurrency(item.grand_total) }}
               </template>
-              <template v-slot:item.status="{ item }">
+              <template #item.status="{ item }">
                 <v-chip variant="elevated" :color="item.color">
                   {{ item.status }}
                 </v-chip>
@@ -86,9 +91,10 @@
           <h3 style="margin: 10px">Sales Order Details</h3>
           <v-divider></v-divider>
           <template v-if="selected_orders.length != 0">
-            <h4 class="primary--text">Totals</h4>
+            <h4 class="text-primary"> {{ selected_orders[0].name }} </h4>
+            <h4 class="text-primary"> {{ __("Totals:") }} </h4>
             <v-row class="mx-2 my-5">
-              <v-col md="8" cols="12">Grand Total</v-col>
+              <v-col md="8" cols="12">{{ __("Grand Total") }}</v-col>
               <v-col md="4" cols="12">
                 <v-text-field
                   class="p-0 m-0"
@@ -109,10 +115,9 @@
               <v-data-table
                 :headers="order_items_headers"
                 :items="selected_order_items"
-                item-key="name"
+                item-value="name"
                 class="elevation-1 mt-0"
                 :loading="order_loading"
-                checkbox-color="primary"
               >
               </v-data-table>
             </v-row>
@@ -120,7 +125,7 @@
               class="pb-6 pr-6"
               style="position: absolute; bottom: 0; width: 100%"
             >
-              <v-btn block color="primary" theme="dark" @click="print_invoice">
+              <v-btn block color="primary" dark @click="print_invoice">
                 {{ __("Print") }}
               </v-btn>
             </div>
@@ -128,28 +133,24 @@
         </v-card>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script>
 import format from "../../format";
-import Customer from "../pos/Customer.vue";
-import UpdateCustomer from "../pos/UpdateCustomer.vue";
 
 export default {
   mixins: [format],
-  components: { Customer, UpdateCustomer },
   data: function () {
     return {
       dialog: false,
       pos_profile: "",
       pos_profile_details: {},
-
       orders_data: [],
       includeDrafts: false,
       search: "",
-      orders_loading: false,
       selected_orders: [],
+      orders_loading: false,
       order_loading: false,
       order_headers: [
         {
@@ -178,13 +179,13 @@ export default {
         },
         {
           title: __("Total"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "grand_total",
         },
         {
           title: __("Status"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "status",
         },
@@ -206,13 +207,13 @@ export default {
         },
         {
           title: __("Rate"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "rate",
         },
         {
           title: __("Amount"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "amount",
         },
@@ -222,6 +223,7 @@ export default {
   methods: {
     get_list_of_orders() {
       this.orders_loading = true;
+
       return frappe.call({
         method: "posawesome.posawesome.api.order.get_orders_list",
         args: { term: this.search.trim(), include_drafts: this.includeDrafts },
@@ -246,6 +248,8 @@ export default {
     },
 
     get_order_items() {
+      this.order_loading = true;
+      
       return frappe.call({
         method: "posawesome.posawesome.api.order.get_order_items",
         args: { order: this.selected_orders[0] },
@@ -257,6 +261,8 @@ export default {
               return el;
             });
           }
+
+          this.order_loading = false;
         },
       });
     },
@@ -271,7 +277,7 @@ export default {
             this.pos_profile_details = r.message.pos_profile;
             this.pos_profile = r.message.pos_profile.name;
             //   this.pos_opening_shift = r.message.pos_opening_shift;
-            //   this.get_offers(this.pos_profile.name);
+            //   this.get_offers(this.pos_profile_details.name);
             //   evntBus.$emit("register_pos_profile", r.message);
             //   evntBus.$emit("set_company", r.message.company);
             //   console.info("LoadPosProfile");
@@ -287,9 +293,9 @@ export default {
     },
     load_print_page(order_name) {
       const print_format =
-        this.pos_profile.print_format_for_online ||
-        this.pos_profile.print_format;
-      const letter_head = this.pos_profile.letter_head || 0;
+        this.pos_profile_details.print_format_for_online ||
+        this.pos_profile_details.print_format;
+      const letter_head = this.pos_profile_details.letter_head || 0;
       const url =
         frappe.urllib.get_base_url() +
         "/printview?doctype=Sales%20Order&name=" +

@@ -1,5 +1,5 @@
 <template>
-  <div fluid>
+  <v-container fluid>
     <v-row v-show="!dialog">
       <v-col md="8" cols="12" class="pb-2 pr-0">
         <v-card
@@ -16,65 +16,66 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col md="6" cols="12">
-                <div class="mx-2 my-5">
-                  <v-text-field
-                    v-model="search"
-                    append-icon="mdi-magnify"
-                    :label="
-                      __('Search by Part of Invoice Name, Amount or Table Name')
-                    "
-                    single-line
-                    hide-details
-                  ></v-text-field>
-                </div>
+              <v-col md="7" cols="12">
+                <v-text-field
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  :label="
+                    __('Search by Part of Invoice Name, Amount or Table Name')
+                  "
+                  single-line
+                  hide-details
+                  @keyup.enter="get_list_of_invoices"
+                  clearable
+                  @click:clear="search = ''; get_list_of_invoices()"
+                  clear-icon="mdi-close-circle-outline"
+                ></v-text-field>
               </v-col>
               <v-col md="2" cols="12">
                 <v-checkbox
                   v-model="includeDrafts"
                   label="Include Drafts"
                   color="success"
-                  :value="!includeDrafts"
                   hide-details
                 ></v-checkbox>
               </v-col>
-              <v-col md="4" cols="12">
+              <v-col md="3" cols="12">
                 <v-btn
                   block
                   color="warning"
                   @click="get_list_of_invoices"
                   dark
-                  >{{ __("Search") }}</v-btn
                 >
+                  {{ __("Search") }}
+                </v-btn>
               </v-col>
             </v-row>
             <v-divider></v-divider>
             <v-data-table
               :headers="invoice_headers"
               :items="invoice_data"
-              item-key="name"
+              item-value="name"
+              return-object
               class="elevation-1 mt-0"
               show-select
               v-model="selected_invoices"
-              :loading="invoice_loading"
-              checkbox-color="primary"
-              :single-select="true"
+              :loading="invoices_loading"
+              select-strategy="single"
             >
               <template #item.status="{ item }">
                 <v-chip variant="elevated" :color="item.color">
                   {{ item.status }}
                 </v-chip>
               </template>
-              <!-- @item-selected="onOrderSelected" -->
-              <template v-slot:item.grand_total="{ item }">
+              <template #item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
                 {{ formatCurrency(item.grand_total) }}
               </template>
-              <template v-slot:item.outstanding_amount="{ item }">
-                <span class="primary--text"
-                  >{{ currencySymbol(item.currency) }}
-                  {{ formatCurrency(item.outstanding_amount) }}</span
-                >
+              <template #item.outstanding_amount="{ item }">
+                <span class="text-primary">
+                  {{ currencySymbol(item.currency) }}
+                  {{ formatCurrency(item.outstanding_amount) }}
+                </span>
               </template>
             </v-data-table>
             <v-divider></v-divider>
@@ -96,17 +97,18 @@
           <h3 style="margin: 10px">Sales Invoice Details</h3>
           <v-divider></v-divider>
           <template v-if="selected_invoices.length != 0">
-            <h4 class="primary--text">Totals</h4>
+            <h4 class="text-primary"> {{ selected_invoices[0].name }} </h4>
+            <h4 class="text-primary"> {{ __("Totals:") }} </h4>
             <v-row class="mx-2 my-5">
-              <v-col md="8" cols="12">Grand Total</v-col>
+              <v-col md="8" cols="12">{{ __("Grand Total") }}</v-col>
               <v-col md="4" cols="12">
                 <v-text-field
                   class="p-0 m-0"
-                  dense
+                  density="compact"
                   color="primary"
-                  background-color="white"
+                  bg-color="white"
                   hide-details
-                  :value="selected_invoices[0].grand_total"
+                  v-model="selected_invoices[0].grand_total"
                   readonly
                   flat
                   :prefix="currencySymbol(pos_profile_details.currency)"
@@ -115,15 +117,15 @@
               }}</v-col>
             </v-row>
             <v-row class="mx-2 my-5">
-              <v-col md="8" cols="12">Outstanding Amount</v-col>
+              <v-col md="8" cols="12">{{ __("Outstanding Amount") }}</v-col>
               <v-col md="4" cols="12">
                 <v-text-field
                   class="p-0 m-0"
-                  dense
+                  density="compact"
                   color="primary"
-                  background-color="white"
+                  bg-color="white"
                   hide-details
-                  :value="selected_invoices[0].outstanding_amount"
+                  v-model="selected_invoices[0].outstanding_amount"
                   readonly
                   flat
                   :prefix="currencySymbol(pos_profile_details.currency)"
@@ -136,10 +138,9 @@
               <v-data-table
                 :headers="invoice_items_headers"
                 :items="selected_invoice_items"
-                item-key="name"
+                item-value="name"
                 class="elevation-1 mt-0"
                 :loading="invoice_loading"
-                checkbox-color="primary"
               >
               </v-data-table>
             </v-row>
@@ -172,28 +173,24 @@
         </v-card>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script>
 import format from "../../format";
-import Customer from "../pos/Customer.vue";
-import UpdateCustomer from "../pos/UpdateCustomer.vue";
-// import { evntBus } from "../../bus";
 
 export default {
   mixins: [format],
-  components: { Customer, UpdateCustomer },
   data: function () {
     return {
       dialog: false,
       pos_profile: "",
       pos_profile_details: {},
-
       invoice_data: [],
       includeDrafts: false,
       search: "",
       selected_invoices: [],
+      invoices_loading: false,
       invoice_loading: false,
       invoice_headers: [
         {
@@ -222,25 +219,25 @@ export default {
         },
         {
           title: __("Total"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "grand_total",
         },
         {
           title: __("Status"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "status",
         },
         {
           title: __("Outstanding"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "outstanding_amount",
         },
         {
           title: __("Has Warranty"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "posa_has_warranty",
         },
@@ -262,13 +259,13 @@ export default {
         },
         {
           title: __("Rate"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "rate",
         },
         {
           title: __("Amount"),
-          align: "end",
+          align: "start",
           sortable: true,
           key: "amount",
         },
@@ -277,7 +274,7 @@ export default {
   },
   methods: {
     get_list_of_invoices() {
-      this.invoice_loading = true;
+      this.invoices_loading = true;
 
       return frappe.call({
         method: "posawesome.posawesome.api.invoice.get_invoices_list",
@@ -293,16 +290,18 @@ export default {
                   : "yellow";
               return el;
             });
-            // console.log(this.invoice_data);
           } else {
+            console.log("error");
           }
 
-          this.invoice_loading = false;
+          this.invoices_loading = false;
         },
       });
     },
 
     get_invoice_items() {
+      this.invoice_loading = true;
+
       return frappe.call({
         method: "posawesome.posawesome.api.invoice.get_invoice_items",
         args: { invoice: this.selected_invoices[0] },
@@ -314,6 +313,8 @@ export default {
               return el;
             });
           }
+
+          this.invoice_loading = false;
         },
       });
     },
@@ -328,7 +329,7 @@ export default {
             this.pos_profile_details = r.message.pos_profile;
             this.pos_profile = r.message.pos_profile.name;
             //   this.pos_opening_shift = r.message.pos_opening_shift;
-            //   this.get_offers(this.pos_profile.name);
+            //   this.get_offers(this.pos_profile_details.name);
             //   evntBus.$emit("register_pos_profile", r.message);
             //   evntBus.$emit("set_company", r.message.company);
             //   console.info("LoadPosProfile");
