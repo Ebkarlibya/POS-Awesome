@@ -223,8 +223,9 @@
               :label="frappe._('Redeemed Customer Credit')"
               bg-color="white"
               hide-details
-              v-model.number="redeemed_customer_credit"
+              :value="formatCurrency(formatted_redeemed_credit)"
               type="number"
+              persistent-placeholder
               :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
@@ -237,6 +238,8 @@
               bg-color="white"
               hide-details
               :value="formatCurrency(available_customer_credit)"
+              type="number"
+              persistent-placeholder
               :prefix="currencySymbol(invoice_doc.currency)"
               readonly
             ></v-text-field>
@@ -626,6 +629,8 @@
                 variant="outlined"
                 color="primary"
                 :label="frappe._('Available Credit')"
+                type="number"
+                persistent-placeholder
                 bg-color="white"
                 hide-details
                 :value="formatCurrency(row.total_credit)"
@@ -649,6 +654,18 @@
           </v-row>
         </div>
 
+        <v-alert
+          type="info"
+          v-else-if="
+            redeem_customer_credit &&
+            !invoice_doc.is_return &&
+            pos_profile.use_customer_credit &&
+            !customer_credit_dict_is_loading
+          "
+        >
+          {{ frappe._("No customer credit available.") }}
+        </v-alert>
+
         <v-divider></v-divider>
 
         <v-row class="pb-0 mb-2" align="start">
@@ -662,30 +679,14 @@
               :label="frappe._('Sales Partner')"
               v-model="sales_partner"
               :items="sales_partners"
-              item-title="name"
-              item-value="name"
+              item-title="title"
+              item-value="value"
               bg-color="white"
               :no-data-text="__('Sales Partner not found')"
               hide-details
               :customFilter="salesPartnerFilter"
             >
               <!-- :disabled="readonly" -->
-              <!-- !change the item text -->
-              <template v-slot:item="{ item }">
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title
-                      class="text-primary text-subtitle-1"
-                    >
-                      <div v-html="item.name"></div>
-                    </v-list-item-title>
-                    <!-- v-if="data.item.sales_person_name != data.item.name" -->
-                    <v-list-item-subtitle>
-                      <div v-html="` ${item.partner_type}`"></div>
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
             </v-autocomplete>
           </v-col>
         </v-row>
@@ -829,6 +830,7 @@ export default {
       is_cashback: true, // Cashback enabled
       redeem_customer_credit: false, // Redeem customer credit?
       customer_credit_dict: [], // List of available customer credits
+      customer_credit_dict_is_loading: false,
       phone_dialog: false, // Show phone payment dialog
       invoiceType: "Invoice", // Type of invoice
       pos_settings: "", // POS settings
@@ -1370,6 +1372,7 @@ export default {
     get_available_credit(use_credit) {
       this.clear_all_amounts();
       if (use_credit) {
+        this.customer_credit_dict_is_loading = true;
         frappe
           .call("posawesome.posawesome.api.posapp.get_available_credit", {
             customer: this.invoice_doc.customer,
@@ -1397,9 +1400,16 @@ export default {
             } else {
               this.customer_credit_dict = [];
             }
+            this.customer_credit_dict_is_loading = false;
+          })
+          .catch((err) => {
+            console.error("Error fetching credit:", err);
+            this.customer_credit_dict = [];
+            this.customer_credit_dict_is_loading = false;
           });
       } else {
         this.customer_credit_dict = [];
+        this.customer_credit_dict_is_loading = false;
       }
     },
     // Get customer addresses for shipping
@@ -1497,7 +1507,12 @@ export default {
         method: "posawesome.posawesome.api.posapp.get_sales_partner_names",
         callback: function (r) {
           if (r.message && r.message.length > 0) {
-            vm.sales_partners = r.message;
+            vm.sales_partners = r.message.map(sp => ({
+              value: sp.name,
+              title: sp.name + ' (' + sp.partner_type + ')',
+              partner_type: sp.partner_type,
+              name: sp.name
+            }));
             if (vm.pos_profile.posa_local_storage) {
               // localStorage.setItem("sales_partners_storage", "");
               localStorage.setItem(
@@ -1533,8 +1548,8 @@ export default {
     },
 
     salesPartnerFilter(item, queryText) {
-      const textOne = item.name ? item.name.toLowerCase() : "";
-      const textTwo = item.name.toLowerCase();
+      const textOne = item ? item.toLowerCase() : "";
+      const textTwo = item.toLowerCase();
       const searchText = queryText.toLowerCase();
 
       return textOne.includes(searchText) || textTwo.includes(searchText);
@@ -1901,6 +1916,9 @@ export default {
       });
       this.invoice_doc.payments = newArr;
     },
+    formatted_redeemed_credit() {
+      return this.flt(this.redeemed_customer_credit, this.currency_precision);
+    },
   },
 
   // Lifecycle hook: mounted
@@ -2131,6 +2149,13 @@ export default {
         this.invoice_doc.sales_partner = newVal;
       } else {
         this.invoice_doc.sales_partner = "";
+      }
+    },
+    customer_credit_dict: {
+      deep: true,
+      handler() {
+        this.redeemed_customer_credit = this.customer_credit_dict
+          .reduce((sum, row) => sum + (parseFloat(row.credit_to_redeem) || 0), 0);
       }
     },
   },

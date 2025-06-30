@@ -162,8 +162,8 @@
         <v-col v-if="pos_profile.posa_show_customer_balance" cols="6" class="pb-2 d-flex align-center">
           <div class="balance-field">
             <strong>Balance:</strong>
-            <span class="balance-value">{{ formatCurrency(customer_balance) }}</span>
-            <span class="balance-value">{{ currencySymbol(company_currency) }}</span>
+            <span :class="formatCurrency(customer_balance) > 0 ? 'balance-value' : 'balance-value-minus'">{{ formatCurrency(customer_balance) }}</span>
+            <span :class="formatCurrency(customer_balance) > 0 ? 'balance-value' : 'balance-value-minus'">{{ currencySymbol(company_currency) }}</span>
           </div>
         </v-col>
       </v-row>
@@ -5094,6 +5094,13 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
   color: #d32f2f;
+  margin-left: 5px;
+}
+
+.balance-value-minus {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #039b1c;
   margin-left: 5px;
 }
 

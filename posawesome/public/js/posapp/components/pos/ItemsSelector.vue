@@ -479,7 +479,13 @@ export default {
         item_selected_warehouse_actual_qty: item.actual_qty
       };
       if (item.has_variants) {
-        this.eventBus.emit("open_variants_model", item, this.items);
+        this.eventBus.emit(
+          "open_variants_model",
+          {
+            'item': item,
+            'items': this.items
+          }
+        );
       } else {
         // // Test it in version 15 (Not ETEMS Custom)
         // if (item.actual_qty === 0 && this.pos_profile.posa_display_items_in_stock) {
