@@ -1162,6 +1162,14 @@ export default {
     this.eventBus.on("update_currency", (data) => {
       this.selected_currency = data.currency;
       this.exchange_rate = data.exchange_rate;
+
+      this.eventBus.emit(
+        "set_selected_currency_and_exchange_rate_for_variants",
+        {
+          'selected_currency': this.selected_currency,
+          'exchange_rate': this.exchange_rate,
+        }
+      );
     });
   },
 

@@ -41,9 +41,9 @@
               <v-card 
                 border
                 hover
-                @click="add_item(item)"
                 class="h-100"
               >
+                <!-- @click="add_item(item)" -->
                 <v-img
                   :src="item.image || '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'"
                   cover
@@ -54,10 +54,37 @@
                     {{ item.item_name }}
                   </v-card-title>
                 </v-img>
-                
-                <v-card-text class="pa-2 text-center">
-                  <div class="text-caption text-primary">
-                    {{ formatCurrency(item.rate || 0) }} {{ item.currency || '' }}
+
+                <v-card-text class="text-primary pa-1">
+                  <div class="d-flex align-center justify-space-between">
+                    <div class="d-flex flex-column align-center">
+                      <span class="text-caption text-primary" style="white-space: normal; word-break: break-word;">
+                        {{ currencySymbol(pos_profile.currency) || "" }}
+                        {{ format_currency(item.rate, pos_profile.currency, 4) }}
+                      </span>
+                      <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-caption text-success" style="white-space: normal; word-break: break-word;">
+                        {{ currencySymbol(selected_currency) || "" }}
+                        {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
+                      </span>
+                    </div>
+                    <v-btn
+                      v-if="invoice_type==='Order'"
+                      size="small"
+                      icon="mdi-information"
+                      @click.stop="showItemDetails(item)"
+                      :title="__('Click to show item details')"
+                    ></v-btn>
+                    <v-btn
+                      v-else
+                      size="small"
+                      icon="mdi-database-eye"
+                      @click.stop="showWarehousesQuantities(item)"
+                      :title="__('Click to show quantity per warehouses')"
+                    ></v-btn>
+                  </div>
+                  <div class="text-caption golden--text">
+                    {{ format_number(item.actual_qty, 4) || 0 }}
+                    {{ item.stock_uom || "" }}
                   </div>
                 </v-card-text>
               </v-card>
@@ -70,7 +97,18 @@
 </template>
 
 <script>
+import format from "../../format";
+
 export default {
+  mixins: [format],
+
+  props: {
+      invoice_type: String,
+      pos_profile: Object,
+      selected_currency: String,
+      exchange_rate: Number,
+  },
+  
   data: () => ({
     variantsDialog: false,
     parentItem: null,
@@ -89,6 +127,22 @@ export default {
   },
 
   methods: {
+    showWarehousesQuantities(item) {
+      this.eventBus.emit('show_warehouse_dialog', item);
+    },
+
+    showItemDetails(item) {
+      this.eventBus.emit('show_item_details_dialog', item);
+    },
+
+    getConvertedRate(item) {
+      if (!item.rate) return 0;
+      if (!this.exchange_rate) return item.rate;
+
+      const convertedRate = item.rate / this.exchange_rate;
+      return this.flt(convertedRate, 4);
+    },
+
     close_dialog() {
       this.variantsDialog = false;
       this.filters = {};
@@ -97,6 +151,40 @@ export default {
     formatCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    },
+    
+    format_currency(value, currency, precision) {
+      if (!value) return '0';
+      
+      // Convert to string for checking decimal points
+      let valueStr = value.toString();
+      
+      // If value has decimal points, show 4 decimal places
+      if (valueStr.includes('.')) {
+        return flt(value, 4).toString();
+      }
+      
+      // For whole numbers, return as is
+      return valueStr;
+    },
+
+    currencySymbol(currency) {
+      return get_currency_symbol(currency);
+    },
+    
+    format_number(value, precision) {
+      if (!value) return '0';
+      
+      // Convert to string for checking decimal points
+      let valueStr = value.toString();
+      
+      // If value has decimal points, show 4 decimal places
+      if (valueStr.includes('.')) {
+        return flt(value, 4).toString();
+      }
+      
+      // For whole numbers, return as is
+      return valueStr;
     },
     
     updateFilteredItems() {

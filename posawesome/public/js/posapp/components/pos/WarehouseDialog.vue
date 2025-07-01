@@ -19,6 +19,7 @@
                     <template v-slot:item.warehouse="{ item }">
                         <span :class="{ 'green--text': item.main_warehouse }">
                             {{ item.warehouse }}
+                            <v-icon small v-if="item.main_warehouse">mdi-home</v-icon>
                         </span>
                     </template>
                     <template v-slot:item.actual_qty="{ item }">
@@ -53,6 +54,9 @@ export default {
         item: Object,
         warehouses: Array,
         main_warehouse: String,
+        pos_profile: Object,
+        selected_currency: String,
+        exchange_rate: Number,
     },
     data() {
         return {

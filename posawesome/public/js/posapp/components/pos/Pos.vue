@@ -6,7 +6,12 @@
     <Returns></Returns>
     <NewAddress></NewAddress>
     <MpesaPayments></MpesaPayments>
-    <Variants></Variants>
+    <Variants
+      :invoice_type="invoiceType"
+      :pos_profile="pos_profile"
+      :selected_currency="selected_currency"
+      :exchange_rate="exchange_rate"
+    ></Variants>
     <OpeningDialog v-model:dialog="dialog" />
     <v-row v-show="!dialog">
       <v-col v-show="!payment && !offers && !coupons" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
@@ -33,6 +38,9 @@
       :main_warehouse="main_warehouse"
       @select="handleWarehouseSelect"
       @close="showWarehouseDialog = false"
+      :pos_profile="pos_profile"
+      :selected_currency="selected_currency"
+      :exchange_rate="exchange_rate"
     />
     <item-information-dialog
       v-if="showItemInformationDialog"
@@ -41,6 +49,9 @@
       :main_warehouse="main_warehouse"
       @select="handleWarehouseSelect"
       @close="showItemInformationDialog = false"
+      :pos_profile="pos_profile"
+      :selected_currency="selected_currency"
+      :exchange_rate="exchange_rate"
     />
     <offer-dialog
       v-if="showOffersDialog"
@@ -89,6 +100,9 @@ export default {
       showOffersDialog: false,
       offersDialogArgs: null,
       pos_profile_name: "",
+      invoiceType: "Invoice",
+      selected_currency: "",
+      exchange_rate: 1,
     };
   },
 
@@ -125,6 +139,13 @@ export default {
       this.offersDialogArgs = args;
       this.showOffersDialog = true;
     });
+    this.eventBus.on('set_order_type_for_variants', (args) => {
+      this.invoiceType = args;
+    });
+    this.eventBus.on('set_selected_currency_and_exchange_rate_for_variants', (args) => {
+      this.selected_currency = args.selected_currency;
+      this.exchange_rate = args.exchange_rate;
+    });
   },
 
   methods: {
@@ -139,6 +160,8 @@ export default {
         .then((r) => {
           if (r.message) {
             this.pos_profile = r.message.pos_profile;
+            this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice"
+            this.selected_currency = this.pos_profile.currency;
             this.pos_profile_name = r.message.pos_profile.name;
             this.pos_plus_additional_warehouses =  r.message.pos_profile.pos_plus_additional_warehouses;
             this.main_warehouse =  r.message.pos_profile.warehouse;
@@ -262,6 +285,8 @@ export default {
     this.eventBus.off("open_closing_dialog");
     this.eventBus.off("submit_closing_pos");
     this.eventBus.off('show_offers_dialog');
+    this.eventBus.off('set_order_type_for_variants');
+    this.eventBus.off('set_selected_currency_and_exchange_rate_for_variants');
   },
 };
 </script>

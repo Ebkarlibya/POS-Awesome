@@ -5021,6 +5021,7 @@ export default {
     // Watch for invoice type change and emit
     invoiceType() {
       this.eventBus.emit("update_invoice_type", this.invoiceType);
+      this.eventBus.emit("set_order_type_for_variants", this.invoiceType);
     },
     // Watch for additional discount and update percentage accordingly
     additional_discount() {

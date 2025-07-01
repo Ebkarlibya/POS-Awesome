@@ -29,8 +29,15 @@
                         <v-row dense>
                             <v-col cols="6">
                                 <div class="text-caption grey--text">{{ __("Price") }}</div>
-                                <div class="text-h5 primary--text">
-                                    {{ currencySymbol(item.currency) }}{{ formatCurrency(item.rate) }}
+                                <div class="d-flex flex-column align-start">
+                                    <span class="text-h5 text-primary" style="white-space: normal; word-break: break-word;">
+                                        {{ currencySymbol(pos_profile.currency) || "" }}
+                                        {{ format_currency(item.rate, pos_profile.currency, 4) }}
+                                    </span>
+                                    <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-h5 text-success" style="white-space: normal; word-break: break-word;">
+                                        {{ currencySymbol(selected_currency) || "" }}
+                                        {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
+                                    </span>
                                 </div>
                             </v-col>
                             <v-col cols="6">
@@ -101,6 +108,9 @@ export default {
         item: Object,
         warehouses: Array,
         main_warehouse: String,
+        pos_profile: Object,
+        selected_currency: String,
+        exchange_rate: Number,
     },
     data() {
         return {
@@ -160,6 +170,27 @@ export default {
         closeDialog() {
             this.isOpen = false;
             this.$emit("close");
+        },
+        format_currency(value, currency, precision) {
+            if (!value) return '0';
+            
+            // Convert to string for checking decimal points
+            let valueStr = value.toString();
+            
+            // If value has decimal points, show 4 decimal places
+            if (valueStr.includes('.')) {
+                return flt(value, 4).toString();
+            }
+            
+            // For whole numbers, return as is
+            return valueStr;
+        },
+        getConvertedRate(item) {
+            if (!item.rate) return 0;
+            if (!this.exchange_rate) return item.rate;
+
+            const convertedRate = item.rate / this.exchange_rate;
+            return this.flt(convertedRate, 4);
         },
     },
     watch: {

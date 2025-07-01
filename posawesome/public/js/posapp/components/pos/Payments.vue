@@ -493,17 +493,18 @@
                 :close-on-content-click="false"
                 transition="scale-transition"
               >
-                <template v-slot:activator="{ on, attrs }">
+                <template v-slot:activator="{ props }">
                   <v-text-field
                     v-model="invoice_doc.po_date"
                     :label="frappe._('Purchase Order Date')"
                     readonly
                     variant="outlined"
                     density="compact"
-                    hide-details
-                    v-bind="attrs"
-                    v-on="on"
+                    clearable
                     color="primary"
+                    hide-details
+                    prepend-inner-icon="mdi-calendar"
+                    v-bind="props"
                   ></v-text-field>
                 </template>
                 <v-date-picker
@@ -511,7 +512,7 @@
                   no-title
                   scrollable
                   color="primary"
-                  @input="po_date_menu = false; update_po_date()"
+                  @update:modelValue="po_date_menu = false; update_po_date()"
                 >
                 </v-date-picker>
               </v-menu>
