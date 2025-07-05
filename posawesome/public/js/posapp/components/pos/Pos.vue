@@ -13,21 +13,15 @@
       :exchange_rate="exchange_rate"
     ></Variants>
     <OpeningDialog v-model:dialog="dialog" />
-    <v-row v-show="!dialog">
-      <v-col v-show="!payment && !offers && !coupons" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
-        <ItemsSelector></ItemsSelector>
-      </v-col>
-      <v-col v-show="offers" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
-        <PosOffers></PosOffers>
-      </v-col>
-      <v-col v-show="coupons" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
-        <PosCoupons></PosCoupons>
-      </v-col>
-      <v-col v-show="payment" xl="6" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
-        <Payments></Payments>
+    <v-row v-show="!dialog" class="flex-wrap flex-lg-nowrap" style="min-height: calc(100vh - 40px)">
+      <v-col cols="12" lg="6" class="d-flex flex-column pa-0">
+        <ItemsSelector v-show="!payment && !offers && !coupons"></ItemsSelector>
+        <PosOffers v-show="offers"></PosOffers>
+        <PosCoupons v-show="coupons"></PosCoupons>
+        <Payments v-show="payment"></Payments>
       </v-col>
 
-      <v-col xl="6" lg="6" md="6" sm="6" cols="12" class="pos">
+      <v-col cols="12" lg="6" class="d-flex flex-column pa-0">
         <Invoice></Invoice>
       </v-col>
     </v-row>
@@ -291,4 +285,14 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.col {
+  padding: 4px !important;
+}
+
+@media (max-width: 1263px) {
+  .row {
+    gap: 8px;
+  }
+}
+</style>

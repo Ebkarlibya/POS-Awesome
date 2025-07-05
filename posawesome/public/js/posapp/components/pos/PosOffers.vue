@@ -1,49 +1,74 @@
 <template>
-  <div>
-    <v-card class="selection mx-auto bg-grey-lighten-5" style="max-height: 80vh; height: 80vh">
-      <v-card-title>
-        <span class="text-h6 text-primary">{{ __('Offers') }}</span>
-      </v-card-title>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh" @mouseover="style = 'cursor: pointer'">
-        <v-data-table :headers="items_headers" :items="pos_offers" :single-expand="singleExpand"
-          v-model:expanded="expanded" show-expand item-key="row_id" class="elevation-1" :items-per-page="itemsPerPage"
-          hide-default-footer>
-          <template v-slot:item.offer_applied="{ item }">
-            <v-checkbox-btn @click="toggleOfferApplied(item)" v-model="item.offer_applied" :disabled="(item.offer == 'Give Product' &&
-              !item.give_item &&
-              (!offer.replace_cheapest_item || !offer.replace_item)) ||
-              (item.offer == 'Grand Total' &&
-                discount_percentage_offer_name &&
-                discount_percentage_offer_name != item.name)
-              "></v-checkbox-btn>
-          </template>
-          <template v-slot:expanded-item="{ headers, item }">
-            <td :colspan="headers.length">
-              <v-row class="mt-2">
-                <v-col v-if="item.description">
-                  <div class="text-primary" v-html="handleNewLine(item.description)"></div>
-                </v-col>
-                <v-col v-if="item.offer == 'Give Product'">
-                  <v-autocomplete v-model="item.give_item" :items="get_give_items(item)" item-title="item_code"
-                    variant="outlined" density="compact" color="primary" :label="frappe._('Give Item')" :disabled="item.apply_type != 'Item Group' ||
-                      item.replace_item ||
-                      item.replace_cheapest_item
-                      "></v-autocomplete>
-                </v-col>
-              </v-row>
-            </td>
-          </template>
-        </v-data-table>
+  <div style="max-height: calc(100vh - 40px); height: calc(100vh - 40px)">
+    <v-card
+      class="selection mx-auto bg-grey-lighten-5 mt-3 d-flex flex-column"
+      style="max-height: 100%; height: 100%"
+    >
+      <div class="flex-grow-1 overflow-hidden pa-2">
+        <v-card-title>
+          <span class="text-h6 text-primary">{{ __('Offers') }}</span>
+        </v-card-title>
+        <div class="my-0 py-0 overflow-y-auto" @mouseover="style = 'cursor: pointer'" style="height: 100%; max-height: 100%">
+          <v-data-table
+            :headers="items_headers"
+            :items="pos_offers"
+            :single-expand="singleExpand"
+            v-model:expanded="expanded"
+            show-expand
+            item-value="row_id"
+            class="elevation-1"
+            :items-per-page="itemsPerPage"
+            expand-on-click
+            hide-default-footer
+          >
+            <template v-slot:item.offer_applied="{ item }">
+              <v-checkbox-btn
+                @click="toggleOfferApplied(item)"
+                v-model="item.offer_applied"
+                :disabled="(item.offer == 'Give Product' &&
+                  !item.give_item &&
+                  (!offer.replace_cheapest_item || !offer.replace_item)) ||
+                  (item.offer == 'Grand Total' &&
+                  discount_percentage_offer_name &&
+                  discount_percentage_offer_name != item.name)"
+              ></v-checkbox-btn>
+            </template>
+            <template v-slot:expanded-row="{ columns: headers, item }">
+              <td :colspan="headers.length">
+                <v-row class="mt-2">
+                  <v-col v-if="item.description">
+                    <div class="text-primary" v-html="handleNewLine(item.description)"></div>
+                  </v-col>
+                  <v-col v-if="item.offer == 'Give Product'">
+                    <v-autocomplete
+                      v-model="item.give_item"
+                      :items="get_give_items(item)"
+                      item-title="item_code"
+                      variant="outlined"
+                      density="compact"
+                      color="primary"
+                      :label="frappe._('Give Item')"
+                      :disabled="item.apply_type != 'Item Group' ||
+                        item.replace_item ||
+                        item.replace_cheapest_item
+                      "
+                    ></v-autocomplete>
+                  </v-col>
+                </v-row>
+              </td>
+            </template>
+          </v-data-table>
+        </div>
       </div>
-    </v-card>
-
-    <v-card flat style="max-height: 11vh; height: 11vh" class="cards mb-0 mt-3 py-0">
-      <v-row align="start" no-gutters>
-        <v-col cols="12">
-          <v-btn block class="pa-1" size="large" color="warning" theme="dark" @click="back_to_invoice">{{ __('Back')
-            }}</v-btn>
-        </v-col>
-      </v-row>
+      <div class="flex-grow-0 overflow-hidden border-b">
+        <v-row align="start" no-gutters>
+          <v-col cols="12">
+            <v-btn block class="pa-1" size="large" color="warning" theme="dark" @click="back_to_invoice">
+              {{ __('Back') }}
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
     </v-card>
   </div>
 </template>

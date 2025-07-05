@@ -25,7 +25,19 @@
       </v-toolbar-title>
 
       <v-spacer />
-      <v-btn style="cursor: unset; text-transform: none;" variant="text" color="primary">
+      <v-btn
+        style="cursor: pointer; text-transform: none;"
+        variant="text"
+        color="primary"
+        @click="reloadPage()"
+      >
+        <v-icon right>mdi-refresh</v-icon>
+      </v-btn>
+      <v-btn
+        style="cursor: unset; text-transform: none;"
+        variant="text"
+        color="primary"
+      >
         {{ posProfile.name }}
       </v-btn>
       <v-menu offset-y offset-x :min-width="200">
@@ -133,9 +145,10 @@
     <v-navigation-drawer
       v-model="drawer"
       app
-      :width="mini ? 70 : 170"
+      :width="mini ? 56 : 170"
       class="drawer-custom bg-primary"
       @mouseleave="handleMouseLeave"
+      :permanent="$vuetify.display.mdAndUp"
     >
       <v-list dense>
         <v-list-item
@@ -230,6 +243,9 @@ export default {
     };
   },
   methods: {
+    reloadPage() {
+      window.location.reload();
+    },
     handleNavClick() {
       this.drawer = !this.drawer;
       this.mini = false;

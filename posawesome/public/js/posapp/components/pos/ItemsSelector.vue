@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div style="max-height: calc(100vh - 40px); height: calc(100vh - 40px)">
     <v-card
-      class="selection mx-auto bg-grey-lighten-5 mt-3"
-      style="max-height: 70vh; height: 70vh"
+      class="selection mx-auto bg-grey-lighten-5 mt-3 d-flex flex-column"
+      style="max-height: 100%; height: 100%"
     >
       <v-progress-linear
         :active="loading"
@@ -11,232 +11,251 @@
         :location="top"
         color="info"
       ></v-progress-linear>
-      <v-row class="items px-2 py-1">
-        <v-col cols="8" class="pb-0 mb-2">
-          <v-text-field
-            density="compact"
-            clearable
-            autofocus
-            variant="solo"
-            color="primary"
-            :label="frappe._('Search Items')"
-            hint="Search by item code, serial number, batch no or barcode"
-            bg-color="white"
-            hide-details
-            v-model="debounce_search"
-            @keydown.esc="esc_event"
-            @keydown.enter="search_onchange"
-            @click:clear="clearSearch"
-            prepend-inner-icon="mdi-magnify"
-            @focus="handleItemSearchFocus"
-            ref="debounce_search"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="4">
-          <TagFilters />
-        </v-col>
-        <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
-          <v-text-field
-            density="compact"
-            variant="solo"
-            color="primary"
-            :label="frappe._('QTY')"
-            bg-color="white"
-            hide-details
-            v-model.number="qty"
-            type="number"
-            @keydown.enter="enter_event"
-            @keydown.esc="esc_event"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
-          <v-checkbox
-            v-model="new_line"
-            color="accent"
-            value="true"
-            label="NLine"
-            density="default"
-            hide-details
-          ></v-checkbox>
-        </v-col>
-        <v-col cols="12" class="pt-0 mt-0">
-          <div fluid class="items" v-if="items_view == 'card'">
-            <v-row density="default" class="overflow-y-auto" style="max-height: 67vh">
-              <v-col
-                v-for="(item, idx) in filtered_items"
-                :key="idx"
-                xl="2"
-                lg="3"
-                md="6"
-                sm="6"
-                cols="6"
-                min-height="50"
-              >
-                <v-card hover="hover" @click="add_item(item)">
-                  <v-img
-                    :src="item.image || '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'"
-                    class="text-white align-end"
-                    gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.4)"
-                    height="100px"
-                  >
-                    <v-card-text
-                      v-text="item.item_name"
-                      class="text-caption px-1 pb-0"
-                    ></v-card-text>
-                  </v-img>
-                  <v-card-text class="text--primary pa-1">
-                    <div class="d-flex align-center justify-space-between">
-                      <div class="d-flex flex-column align-center">
-                        <span class="text-caption text-primary" style="white-space: normal; word-break: break-word;">
-                          {{ currencySymbol(pos_profile.currency) || "" }}
-                          {{ format_currency(item.rate, pos_profile.currency, 4) }}
-                        </span>
-                        <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-caption text-success" style="white-space: normal; word-break: break-word;">
-                          {{ currencySymbol(selected_currency) || "" }}
-                          {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
-                        </span>
+      <div class="flex-grow-0 pa-2 border-b">
+        <v-row align="center" class="items px-2 py-1">
+          <v-col :cols="pos_profile.posa_input_qty ? 7 : 10" class="pb-0 mb-2">
+            <v-text-field
+              density="compact"
+              clearable
+              autofocus
+              variant="solo"
+              color="primary"
+              :label="frappe._('Search Items')"
+              hint="Search by item code, serial number, batch no or barcode"
+              bg-color="white"
+              hide-details
+              v-model="debounce_search"
+              @keydown.esc="esc_event"
+              @keydown.enter="search_onchange"
+              @click:clear="clearSearch"
+              prepend-inner-icon="mdi-magnify"
+              @focus="handleItemSearchFocus"
+              ref="debounce_search"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
+            <v-text-field
+              density="compact"
+              variant="solo"
+              color="primary"
+              :label="frappe._('QTY')"
+              bg-color="white"
+              hide-details
+              v-model.number="qty"
+              type="number"
+              @keydown.enter="enter_event"
+              @keydown.esc="esc_event"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="2" class="pb-0 mb-2">
+            <TagFilters />
+          </v-col>
+        </v-row>
+      </div>
+      <div class="flex-grow-1 overflow-hidden border-b">
+        <v-col cols="12" class="pt-0 mt-0 h-100">
+          <div class="h-100">
+            <div v-if="items_view == 'card'" class="h-100">
+              <v-row class="overflow-y-auto" style="height: 100%; max-height: 100%">
+                <v-col
+                  v-for="(item, idx) in filtered_items"
+                  :key="idx"
+                  xl="2"
+                  lg="3"
+                  md="6"
+                  sm="6"
+                  cols="6"
+                  min-height="50"
+                >
+                  <v-card hover="hover" @click="add_item(item)">
+                    <v-img
+                      :src="item.image || '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'"
+                      class="text-white align-end"
+                      gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.4)"
+                      height="100px"
+                    >
+                      <v-card-text
+                        v-text="item.item_name"
+                        class="text-caption px-1 pb-0"
+                      ></v-card-text>
+                    </v-img>
+                    <v-card-text class="text--primary pa-1">
+                      <div class="d-flex align-center justify-space-between">
+                        <div class="d-flex flex-column align-center">
+                          <span class="text-caption text-primary" style="white-space: normal; word-break: break-word;">
+                            {{ currencySymbol(pos_profile.currency) || "" }}
+                            {{ format_currency(item.rate, pos_profile.currency, 4) }}
+                          </span>
+                          <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-caption text-success" style="white-space: normal; word-break: break-word;">
+                            {{ currencySymbol(selected_currency) || "" }}
+                            {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
+                          </span>
+                        </div>
+                        <v-btn
+                          v-if="invoiceType==='Order'"
+                          size="small"
+                          icon="mdi-information"
+                          @click.stop="showItemDetails(item)"
+                          :title="__('Click to show item details')"
+                        ></v-btn>
+                        <v-btn
+                          v-else
+                          size="small"
+                          icon="mdi-database-eye"
+                          @click.stop="showWarehousesQuantities(item)"
+                          :title="__('Click to show quantity per warehouses')"
+                        ></v-btn>
                       </div>
+                      <div class="text-caption golden--text">
+                        {{ format_number(item.actual_qty, 4) || 0 }}
+                        {{ item.stock_uom || "" }}
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </div>
+
+            <div v-if="items_view == 'list'" class="h-100">
+              <div class="overflow-y-auto" style="height: 100%; max-height: 100%">
+                <v-data-table
+                  :headers="getItemsHeaders()"
+                  :items="filtered_items"
+                  item-key="item_code"
+                  item-value="item-"
+                  class="elevation-0 sleek-data-table"
+                  :items-per-page="itemsPerPage"
+                  hide-default-footer
+                  @click:row="click_item_row"
+                  dense
+                >
+                  <template v-slot:item.rate="{ item }">
+                    <div>
+                      <div class="text-primary">
+                        {{ currencySymbol(pos_profile.currency) }}
+                        {{ format_currency(item.rate, pos_profile.currency, 4) }}
+                      </div>
+                      <div v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-success">
+                        {{ currencySymbol(selected_currency) }}
+                        {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
+                      </div>
+                    </div>
+                  </template>
+                  <template v-slot:item.actual_qty="{ item }">
+                    <span class="golden--text">
+                      {{ format_number(item.actual_qty, 4) }}
+                    </span>
+                  </template>
+                  <template v-slot:item.actions="{ item }">
                       <v-btn
                         v-if="invoiceType==='Order'"
-                        size="small"
-                        icon="mdi-information"
+                        icon
+                        size="large"
+                        density="compact"
                         @click.stop="showItemDetails(item)"
                         :title="__('Click to show item details')"
-                      ></v-btn>
+                      >
+                        <v-icon size="28">mdi-information</v-icon>
+                      </v-btn>
                       <v-btn
                         v-else
-                        size="small"
-                        icon="mdi-database-eye"
+                        icon
+                        size="large"
+                        density="compact"
                         @click.stop="showWarehousesQuantities(item)"
                         :title="__('Click to show quantity per warehouses')"
-                      ></v-btn>
-                    </div>
-                    <div class="text-caption golden--text">
-                      {{ format_number(item.actual_qty, 4) || 0 }}
-                      {{ item.stock_uom || "" }}
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-          </div>
-          <div fluid class="items" v-if="items_view == 'list'">
-            <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
-              <v-data-table
-                :headers="getItemsHeaders()"
-                :items="filtered_items"
-                item-key="item_code"
-                item-value="item-"
-                class="elevation-0 sleek-data-table"
-                :items-per-page="itemsPerPage"
-                hide-default-footer
-                @click:row="click_item_row"
-                dense
-              >
-                <template v-slot:item.rate="{ item }">
-                  <div>
-                    <div class="text-primary">
-                      {{ currencySymbol(pos_profile.currency) }}
-                      {{ format_currency(item.rate, pos_profile.currency, 4) }}
-                    </div>
-                    <div v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-success">
-                      {{ currencySymbol(selected_currency) }}
-                      {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
-                    </div>
-                  </div>
-                </template>
-                <template v-slot:item.actual_qty="{ item }">
-                  <span class="golden--text">
-                    {{ format_number(item.actual_qty, 4) }}
-                  </span>
-                </template>
-                <template v-slot:item.actions="{ item }">
-                    <v-btn
-                      v-if="invoiceType==='Order'"
-                      icon
-                      size="large"
-                      density="compact"
-                      @click.stop="showItemDetails(item)"
-                      :title="__('Click to show item details')"
-                    >
-                      <v-icon size="28">mdi-information</v-icon>
-                    </v-btn>
-                    <v-btn
-                      v-else
-                      icon
-                      size="large"
-                      density="compact"
-                      @click.stop="showWarehousesQuantities(item)"
-                      :title="__('Click to show quantity per warehouses')"
-                    >
-                      <v-icon size="28">mdi-database-eye</v-icon>
-                    </v-btn>
-                  </template>
-              </v-data-table>
+                      >
+                        <v-icon size="28">mdi-database-eye</v-icon>
+                      </v-btn>
+                    </template>
+                </v-data-table>
+              </div>
             </div>
           </div>
         </v-col>
-      </v-row>
-    </v-card>
-    <v-card class="cards mb-0 mt-3 pa-2 bg-grey-lighten-5">
-      <!-- Item Group Filter -->
-      <v-row
-        no-gutters
-        align="center"
-        justify="center"
-        class="pb-3"
-        style="
-          height: 180px;
-          overflow-y: auto;
-          background: #d3d3d359;
-          padding: 5px;
-        "
-      >
-        <v-col cols="12">
-          <item-group-multi-select
-            :itemGroups="items_group"
-            :label="frappe._('Items Group')"
-            @click="setFastItemGroupFilter"
-          />
-        </v-col>
-      </v-row>
-      <!-- Item Group Filter End -->
+      </div>
 
-      <v-row no-gutters align="center" justify="center">
-        <!-- <v-col cols="12">
-          <v-select
-            :items="items_group"
-            :label="frappe._('Items Group')"
-            density="compact"
-            variant="solo"
-            hide-details
-            v-model="item_group"
-          ></v-select>
-        </v-col> -->
-        <v-col cols="3" class="mt-1">
-          <v-btn-toggle
-            v-model="items_view"
-            color="primary"
-            group
-            density="compact"
-            rounded
+      <div class="flex-grow-0">
+        <v-card class="cards mb-0 pa-2 bg-grey-lighten-5">
+          <!-- Item Group Filter -->
+          <v-row
+            no-gutters
+            align="center"
+            justify="center"
+            class="pb-3 border-b"
           >
-            <v-btn size="small" value="list">{{ __("List") }}</v-btn>
-            <v-btn size="small" value="card">{{ __("Card") }}</v-btn>
-          </v-btn-toggle>
-        </v-col>
-        <v-col cols="4" class="mt-2">
-          <v-btn size="small" block color="primary" variant="text" @click="show_coupons">
-            {{ couponsCount }} {{ __("Coupons") }}
-          </v-btn>
-        </v-col>
-        <v-col cols="5" class="mt-2">
-          <v-btn size="small" block color="primary" variant="text" @click="show_offers">{{ offersCount }} {{
-            __("Offers") }}
-            : {{ appliedOffersCount }}
-            {{ __("Applied") }}</v-btn>
-        </v-col>
-      </v-row>
+            <v-col cols="12">
+              <div style="max-height: 120px; overflow-y: auto">
+                <item-group-multi-select
+                  :itemGroups="items_group"
+                  :label="frappe._('Items Group')"
+                  @click="setFastItemGroupFilter"
+                />
+              </div>
+            </v-col>
+          </v-row>
+          <!-- Item Group Filter End -->
+
+          <v-row no-gutters align="center" justify="center">
+            <!-- <v-col cols="12">
+              <v-select
+                :items="items_group"
+                :label="frappe._('Items Group')"
+                density="compact"
+                variant="solo"
+                hide-details
+                v-model="item_group"
+              ></v-select>
+            </v-col> -->
+            <v-col :cols="pos_profile.posa_new_line ? 3 : 6" class="mt-1">
+              <v-btn-toggle
+                v-model="items_view"
+                color="primary"
+                group
+                density="compact"
+                rounded
+              >
+                <v-btn size="small" value="list">{{ __("List") }}</v-btn>
+                <v-btn size="small" value="card">{{ __("Card") }}</v-btn>
+              </v-btn-toggle>
+            </v-col>
+            <v-col cols="3" class="mt-1" v-if="pos_profile.posa_new_line">
+              <v-btn-toggle
+                v-model="new_line"
+                color="primary"
+                group
+                density="compact"
+                rounded
+              >
+                <v-btn size="small" :value="true">{{ __("New Line") }}</v-btn>
+                <v-btn size="small" :value="false">{{ __("One Line") }}</v-btn>
+              </v-btn-toggle>
+            </v-col>
+            <v-col cols="2" class="mt-1">
+              <v-btn
+                size="small"
+                block
+                color="primary"
+                variant="text"
+                @click="show_coupons"
+              >
+                {{ couponsCount }} {{ __("Coupons") }}
+              </v-btn>
+            </v-col>
+            <v-col cols="4" class="mt-1">
+              <v-btn
+                size="small"
+                block
+                color="primary"
+                variant="text"
+                @click="show_offers"
+              >
+                {{ offersCount }} {{ __("Offers") }}: {{ appliedOffersCount }} {{ __("Applied") }}
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card>
+      </div>
     </v-card>
   </div>
 </template>

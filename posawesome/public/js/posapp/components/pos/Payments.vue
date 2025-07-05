@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div style="max-height: calc(100vh - 40px); height: calc(100vh - 40px)">
     <!-- Main Payment Card -->
     <v-card
-      class="selection mx-auto bg-grey-lighten-5 d-1 mt-3"
-      style="max-height: 76vh; height: 76vh"
+      class="selection mx-auto bg-grey-lighten-5 mt-3 d-flex flex-column"
+      style="max-height: 100%; height: 100%"
     >
       <v-progress-linear
         :active="loading"
@@ -12,7 +12,7 @@
         location="top"
         color="info"
       ></v-progress-linear>
-      <div class="overflow-y-auto px-2 pt-2" style="max-height: 75vh">
+      <div class="flex-grow-1 overflow-y-auto px-2 pt-4">
         
         <!-- Payment Summary (Paid, To Be Paid, Change) -->
         <v-row v-if="invoice_doc" class="px-1 py-0">
@@ -725,48 +725,47 @@
           </v-col>
         </v-row>
       </div>
-    </v-card>
-
-    <!-- Action Buttons -->
-    <v-card flat class="cards mb-0 mt-3 py-0">
-      <v-row align="start" no-gutters>
-        <v-col cols="6">
-          <v-btn
-            block
-            size="large"
-            color="primary"
-            theme="dark"
-            @click="submit"
-            :disabled="vaildatPayment"
-          >
-            {{ __("Submit") }}
-          </v-btn>
-        </v-col>
-        <v-col cols="6" class="pl-1">
-          <v-btn
-            block
-            size="large"
-            color="success"
-            theme="dark"
-            @click="submit(undefined, false, true)"
-            :disabled="vaildatPayment"
-          >
-            {{ __("Submit & Print") }}
-          </v-btn>
-        </v-col>
-        <v-col cols="12">
-          <v-btn
-            block
-            class="mt-2 pa-1"
-            size="large"
-            color="error"
-            theme="dark"
-            @click="back_to_invoice"
-          >
-            {{ __("Cancel Payment") }}
-          </v-btn>
-        </v-col>
-      </v-row>
+    <div class="flex-grow-0 p-2 border-t">
+        <!-- Action Buttons -->
+        <v-row align="start" no-gutters>
+          <v-col cols="6">
+            <v-btn
+              block
+              size="large"
+              color="primary"
+              theme="dark"
+              @click="submit"
+              :disabled="vaildatPayment"
+            >
+              {{ __("Submit") }}
+            </v-btn>
+          </v-col>
+          <v-col cols="6" class="pl-1">
+            <v-btn
+              block
+              size="large"
+              color="success"
+              theme="dark"
+              @click="submit(undefined, false, true)"
+              :disabled="vaildatPayment"
+            >
+              {{ __("Submit & Print") }}
+            </v-btn>
+          </v-col>
+          <v-col cols="12">
+            <v-btn
+              block
+              class="mt-2 pa-1"
+              size="large"
+              color="error"
+              theme="dark"
+              @click="back_to_invoice"
+            >
+              {{ __("Cancel Payment") }}
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
     </v-card>
 
     <!-- Phone Payment Dialog -->

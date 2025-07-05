@@ -1,12 +1,11 @@
 <template>
-  <div>
+  <div style="max-height: 120px; overflow-y: auto">
     <v-btn
       v-for="groupName in itemGroups"
       :key="groupName"
       medium
       :color="groupName === activeGroup ? 'warning' : 'primary'"
-      style="padding: 4px"
-      class="ms-2 mb-2"
+      style="padding: 4px; margin: 0 4px 8px 0"
       @click="triggerSelect($event, groupName)"
     >
       {{ groupName }}

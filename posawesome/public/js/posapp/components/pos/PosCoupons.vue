@@ -1,38 +1,50 @@
 <template>
-  <div>
-    <v-card class="selection mx-auto bg-grey-lighten-5" style="max-height: 80vh; height: 80vh">
-      <v-card-title>
-        <v-row no-gutters align="center" justify="center">
-          <v-col cols="6">
-            <span class="text-h6 text-primary">{{ __('Coupons') }}</span>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Coupon')"
-              bg-color="white" hide-details v-model="new_coupon" class="mr-4"></v-text-field>
-          </v-col>
-          <v-col cols="2">
-            <v-btn class="pa-1" color="success" theme="dark" @click="add_coupon(new_coupon)">{{ __('add') }}</v-btn>
+  <div style="max-height: calc(100vh - 40px); height: calc(100vh - 40px)">
+    <v-card
+      class="selection mx-auto bg-grey-lighten-5 mt-3 d-flex flex-column"
+      style="max-height: 100%; height: 100%"
+    >
+      <div class="flex-grow-1 overflow-hidden pa-2">
+        <v-card-title>
+          <v-row no-gutters align="center" justify="center">
+            <v-col cols="6">
+              <span class="text-h6 text-primary">{{ __('Coupons') }}</span>
+            </v-col>
+            <v-col cols="4">
+              <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Coupon')"
+                bg-color="white" hide-details v-model="new_coupon" class="mr-4"></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-btn class="pa-1" color="success" theme="dark" @click="add_coupon(new_coupon)">{{ __('add') }}</v-btn>
+            </v-col>
+          </v-row>
+        </v-card-title>
+        <div class="my-0 py-0 overflow-y-auto" @mouseover="style = 'cursor: pointer'" style="height: 100%; max-height: 100%">
+          <v-data-table
+            :headers="items_headers"
+            :items="posa_coupons"
+            :single-expand="singleExpand"
+            v-model:expanded="expanded"
+            item-value="coupon"
+            class="elevation-1"
+            :items-per-page="itemsPerPage"
+            hide-default-footer
+          >
+            <template v-slot:item.applied="{ item }">
+              <v-checkbox-btn :model-value="!!item.applied" disabled></v-checkbox-btn>
+            </template>
+          </v-data-table>
+        </div>
+      </div>
+      <div class="flex-grow-0 overflow-hidden">
+        <v-row align="start" no-gutters>
+          <v-col cols="12">
+            <v-btn block class="pa-1" size="large" color="warning" theme="dark" @click="back_to_invoice">
+              {{ __('Back') }}
+            </v-btn>
           </v-col>
         </v-row>
-      </v-card-title>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh" @mouseover="style = 'cursor: pointer'">
-        <v-data-table :headers="items_headers" :items="posa_coupons" :single-expand="singleExpand"
-          v-model:expanded="expanded" item-key="coupon" class="elevation-1" :items-per-page="itemsPerPage"
-          hide-default-footer>
-          <template v-slot:item.applied="{ item }">
-            <v-checkbox-btn v-model="item.applied" disabled></v-checkbox-btn>
-          </template>
-        </v-data-table>
       </div>
-    </v-card>
-
-    <v-card flat style="max-height: 11vh; height: 11vh" class="cards mb-0 mt-3 py-0">
-      <v-row align="start" no-gutters>
-        <v-col cols="12">
-          <v-btn block class="pa-1" size="large" color="warning" theme="dark" @click="back_to_invoice">{{ __('Back')
-            }}</v-btn>
-        </v-col>
-      </v-row>
     </v-card>
   </div>
 </template>
