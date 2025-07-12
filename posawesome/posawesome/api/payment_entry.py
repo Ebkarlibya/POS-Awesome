@@ -148,7 +148,7 @@ def set_paid_amount_and_received_amount(
 
 
 @frappe.whitelist()
-def get_outstanding_invoices(customer=None, company=None, currency=None, pos_profile=None):
+def get_outstanding_invoices(customer=None, company=None, currency=None, pos_profile=None, invoice_id=None):
     try:
         party_account = get_party_account("Customer", customer, company)
 
@@ -170,6 +170,9 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
 
         if customer:
             filters["customer"] = customer
+        
+        if invoice_id:
+            filters["name"] = ["like", f"%{invoice_id}%"]
 
         # Get all outstanding invoices directly from Sales Invoice
         outstanding_invoices = frappe.get_all(

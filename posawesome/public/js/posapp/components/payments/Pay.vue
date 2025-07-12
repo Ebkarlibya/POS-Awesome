@@ -32,7 +32,7 @@
               </v-col>
             </v-row>
             <v-row align="center" no-gutters class="mb-1">
-              <v-col md="4" cols="12">
+              <v-col md="3" cols="6" class="p-1">
                 <v-select
                   density="compact"
                   variant="outlined"
@@ -45,8 +45,18 @@
                   label="Select POS Profile"
                 ></v-select>
               </v-col>
-              <v-col md="1" cols="0"> </v-col>
-              <v-col md="3" cols="12">
+              <v-col md="3" cols="6" class="p-1">
+                <v-text-field
+                  density="compact"
+                  variant="outlined"
+                  hide-details
+                  bg-color="white"
+                  v-model="invoice_filter"
+                  :label="__('Invoice ID')"
+                  clearable
+                ></v-text-field>
+              </v-col>
+              <v-col md="3" cols="6" class="p-1">
                 <v-btn
                   block
                   color="warning"
@@ -56,8 +66,7 @@
                   {{ __("Search") }}
                 </v-btn>
               </v-col>
-              <v-col md="1" cols="0"> </v-col>
-              <v-col md="3" cols="12">
+              <v-col md="3" cols="6" class="p-1">
                 <v-btn
                   v-if="selected_invoices.length"
                   block
@@ -264,14 +273,33 @@
             <div v-if="pos_profile.posa_allow_make_new_payments">
               <h4 class="text-primary">{{ __('Make New Payment') }}</h4>
               <v-row v-if="payment_methods.length" v-for="method in payment_methods" :key="method.row_id">
-                <v-col md="7"><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
+                <v-col md="7">
+                  <v-btn
+                    class="mt-1"
+                    block
+                    color="primary"
+                    theme="dark"
+                    @click="set_full_amount(method)"
+                  >
+                    {{ __(method.mode_of_payment) }}
+                  </v-btn>
                 </v-col>
                 <v-col md="5">
                   <div class="d-flex align-center">
-                    <div class="mr-1 text-primary">{{ currencySymbol(pos_profile.currency) }}</div>
-                    <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white"
-                      hide-details v-model="method.amount" type="number" flat 
-                      @input="$forceUpdate()"></v-text-field>
+                    <div class="mr-1 text-primary">
+                      {{ currencySymbol(pos_profile.currency) }}
+                    </div>
+                    <v-text-field
+                      class="p-0 m-0"
+                      density="compact"
+                      color="primary"
+                      bg-color="white"
+                      hide-details
+                      v-model="method.amount"
+                      type="number"
+                      flat 
+                      @input="$forceUpdate()"
+                    ></v-text-field>
                   </div>
                 </v-col>
               </v-row>
@@ -335,6 +363,7 @@ export default {
       selected_mpesa_payments: [],
       pos_profiles_list: [],
       pos_profile_search: "",
+      invoice_filter: "",
       payment_methods_list: [],
       mpesa_search_name: "",
       mpesa_search_mobile: "",
@@ -486,6 +515,7 @@ export default {
             
             // Initialize pos_profile_search as empty
             this.pos_profile_search = "";
+            this.invoice_filter = "";
             
             // Initialize the dropdown list with profiles but don't select any
             this.pos_profiles_list = [];
@@ -574,6 +604,7 @@ export default {
             company: this.company,
             currency: this.pos_profile.currency,
             pos_profile: this.pos_profile_search || null,
+            invoice_id: this.invoice_filter || null,
           }
         )
         .then((r) => {
@@ -854,6 +885,7 @@ export default {
         
         if (item.customer && !this.customer_name) {
           this.eventBus.emit("set_customer", item.customer);
+          this.customer_name = item.customer; // this for fixing the unset locally customer
         }
       }
       
@@ -896,6 +928,16 @@ export default {
         this.selected_payments.push(item);
       }
       this.$nextTick(() => this.$forceUpdate());
+    },
+    set_full_amount(method) {
+      this.payment_methods.forEach(payment => {
+        payment.amount = 0;
+      });
+
+      method.amount = this.total_selected_invoices;
+
+      // Force Vue to update the view
+      this.$forceUpdate();
     },
   },
 
