@@ -177,16 +177,37 @@ def auto_set_delivery_charges(doc):
         restrict=True,
     )
 
+    default_charges = [dc for dc in delivery_charges if getattr(dc, "is_default", False)]
+
+    def pick_charge():
+        if len(default_charges) == 1:
+            return default_charges[0]
+        elif len(default_charges) > 1:
+            frappe.log(
+                f"Multiple ({len(default_charges)}) default delivery charges found; using the first one.",
+                level="WARNING",
+            )
+            return default_charges[0]
+        # No defaults, fallback to the first available
+        return delivery_charges[0]
+
     if doc.posa_delivery_charges:
         if doc.posa_delivery_charges_rate:
             return
         else:
             if len(delivery_charges) > 0:
-                doc.posa_delivery_charges_rate = delivery_charges[0].rate
+                selected = pick_charge()
+                doc.posa_delivery_charges_rate = selected.rate
+                
+                # doc.posa_delivery_charges_rate = delivery_charges[0].rate
     else:
         if len(delivery_charges) > 0:
-            doc.posa_delivery_charges = delivery_charges[0].name
-            doc.posa_delivery_charges_rate = delivery_charges[0].rate
+            selected = pick_charge()
+            doc.posa_delivery_charges = selected.name
+            doc.posa_delivery_charges_rate = selected.rate
+
+            # doc.posa_delivery_charges = delivery_charges[0].name
+            # doc.posa_delivery_charges_rate = delivery_charges[0].rate
         else:
             doc.posa_delivery_charges = None
             doc.posa_delivery_charges_rate = None

@@ -83,9 +83,16 @@ export default {
       this.eventBus.emit('show_coupons', 'false');
     },
     add_coupon(new_coupon) {
-      if (!this.customer || !new_coupon) {
+      if (!this.customer) {
         this.eventBus.emit('show_message', {
           title: __('Select a customer to use coupon'),
+          color: 'error',
+        });
+        return;
+      };
+      if (!new_coupon) {
+        this.eventBus.emit('show_message', {
+          title: __('Enter a coupon'),
           color: 'error',
         });
         return;
@@ -95,7 +102,7 @@ export default {
       );
       if (exist) {
         this.eventBus.emit('show_message', {
-          title: __('This coupon already used !'),
+          title: __('This coupon already used!'),
           color: 'error',
         });
         return;
@@ -212,6 +219,7 @@ export default {
           this.removeCoupon(to_remove);
         }
       }
+      this.posa_coupons = [];
       this.setActiveGiftCoupons();
     });
     this.eventBus.on('update_pos_coupons', (data) => {

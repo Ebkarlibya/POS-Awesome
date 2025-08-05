@@ -279,6 +279,10 @@ export default {
       this.eventBus.on('fetch_customer_details', () => {
         this.get_customer_names();
       });
+
+      this.eventBus.on('refresh_customer', () => {
+        this.eventBus.emit('update_customer', this.customer);
+      });
     });
   },
 };

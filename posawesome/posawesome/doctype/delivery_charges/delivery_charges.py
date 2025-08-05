@@ -90,11 +90,13 @@ def get_applicable_delivery_charges(
         profile = next((i for i in delivery_profiels if i.parent == charge.name), None)
         if profile:
             charge.rate = profile.rate
+            charge.is_default = profile.default
             charges.append(charge)
         else:
             if not restrict:
                 if not charge.profiles_list:
                     charge.rate = charge.default_rate
+                    charge.is_default = 0
                     charges.append(charge)
 
     return charges

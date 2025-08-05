@@ -142,10 +142,11 @@
               :customFilter="deliveryChargesFilter"
               :disabled="readonly"
               @update:model-value="update_delivery_charges()"
+              @click:clear="selected_delivery_charge=''"
             >
               <template v-slot:item="{ props, item }">
                 <v-list-item v-bind="props">
-                  <v-list-item-title class="text-primary text-subtitle-1" v-html="item.raw.name"></v-list-item-title>
+                  <v-list-item-title class="text-primary text-subtitle-1" v-html="item.raw.name + (item.raw.is_default?__(' (Default)'):'')"></v-list-item-title>
                   <v-list-item-subtitle v-html="`Rate: ${item.raw.rate}`"></v-list-item-subtitle>
                 </v-list-item>
               </template>
@@ -1269,6 +1270,8 @@ export default {
       this.eventBus.emit("set_customer_readonly", false);
       this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
       this.invoiceTypes = ["Invoice", "Order"];
+
+      this.set_delivery_charges();
     },
 
     // Fetch customer balance from backend
@@ -4395,10 +4398,23 @@ export default {
         },
         async: false,
         callback: function (r) {
-          if (r.message) {
-            if (r.message?.length) {
-              console.log(r.message)
-              vm.delivery_charges = r.message;
+          if (r.message && r.message.length) {
+            console.log('delivery_charges', r.message)
+            vm.delivery_charges = r.message;
+
+            if(vm.pos_profile.posa_use_delivery_charges && vm.pos_profile.posa_auto_set_delivery_charges) {
+              const defaults = vm.delivery_charges.filter(dc => dc.is_default);
+        
+              if (defaults.length === 1) {
+                vm.selected_delivery_charge = defaults[0];
+              } else if (defaults.length > 1) {
+                console.warn(`Multiple (${defaults.length}) default delivery charges found; using the first one.`);
+                vm.selected_delivery_charge = defaults[0];
+              } else {
+                vm.selected_delivery_charge = vm.delivery_charges[0];
+              }
+
+              vm.update_delivery_charges();
             }
           }
         },
