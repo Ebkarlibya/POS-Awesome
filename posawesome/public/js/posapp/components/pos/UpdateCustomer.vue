@@ -247,7 +247,7 @@ export default {
     mobile_no: '',
     address_line1: '',
     city: '',
-    country: 'Libya',
+    country: '',
     email_id: '',
     referral_code: '',
     birthday: '',
@@ -404,12 +404,12 @@ export default {
       this.mobile_no = '';
       this.address_line1 = '';
       this.city = '';
-      this.country = 'Pakistan';
+      this.country = frappe.sys_defaults.country;
       this.email_id = '';
       this.referral_code = '';
       this.birthday = '';
-      this.group = frappe.defaults.get_user_default('Customer Group');
-      this.territory = frappe.defaults.get_user_default('Territory');
+      this.group = this.pos_settings_panel.default_customer_group || frappe.defaults.get_user_default('Customer Group');
+      this.territory = this.pos_settings_panel.default_customer_territory || frappe.defaults.get_user_default('Territory');
       this.customer_id = '';
       this.customer_type = 'Individual';
       this.gender = '';
@@ -656,14 +656,14 @@ export default {
         this.customer_id = data.name;
         this.address_line1 = data.address_line1 || "";
         this.city = data.city || "";
-        this.country = data.country || "Libya";
+        this.country = data.country || frappe.sys_defaults.country;
         this.tax_id = data.tax_id;
         this.mobile_no = data.mobile_no;
         this.email_id = data.email_id;
         this.referral_code = data.referral_code;
         this.birthday = data.birthday;
-        this.group = data.customer_group;
-        this.territory = data.territory;
+        this.group = data.customer_group || this.pos_settings_panel.default_customer_group || frappe.defaults.get_user_default("Customer Group");
+        this.territory = data.territory || this.pos_settings_panel.default_customer_territory || frappe.defaults.get_user_default("Territory");
         this.loyalty_points = data.loyalty_points;
         this.loyalty_program = data.loyalty_program;
         this.gender = data.gender;
@@ -672,14 +672,14 @@ export default {
     this.eventBus.on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
       this.pos_settings_panel = data.pos_settings_panel;
-      this.countryCode = this.pos_settings_panel.country_code || "+218";
+      this.countryCode = this.pos_settings_panel.country_code;
       this.group =
         this.pos_settings_panel.default_customer_group ||
         frappe.defaults.get_user_default("Customer Group");
       this.territory =
         this.pos_settings_panel.default_customer_territory ||
         frappe.defaults.get_user_default("Territory");
-      // console.log(this.group, this.territory);
+      this.country = frappe.sys_defaults.country;
     });
     this.eventBus.on('payments_register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
@@ -690,9 +690,8 @@ export default {
     this.getSalesPartners();
     // set default values for customer group and territory from user defaults
 
-    this.group = frappe.defaults.get_user_default('Customer Group');
-    this.territory = frappe.defaults.get_user_default('Territory');
-    // console.log(this.group, this.territory);
+    this.group = this.pos_settings_panel.default_customer_group || frappe.defaults.get_user_default('Customer Group');
+    this.territory = this.pos_settings_panel.default_customer_territory || frappe.defaults.get_user_default('Territory');
   },
 };
 </script>
