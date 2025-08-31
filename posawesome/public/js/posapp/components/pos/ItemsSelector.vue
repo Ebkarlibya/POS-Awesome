@@ -276,6 +276,7 @@ export default {
   mixins: [format],
   data: () => ({
     pos_profile: "",
+    pos_settings_panel: "",
     flags: {},
     items_view: "list",
     item_group: "ALL",
@@ -596,6 +597,9 @@ export default {
       }
       if (match) {
         this.add_item(new_item);
+        this.search = null;
+        this.first_search = null;
+        this.debounce_search = null;
         this.flags.serial_no = null;
         this.flags.batch_no = null;
         this.qty = 1;
@@ -813,7 +817,9 @@ export default {
         });
         frappe.utils.play_sound("error");
       } else {
-        this.enter_event();
+        if(this.pos_settings_panel && this.pos_settings_panel.enable_barcode_auto_add) {
+          this.enter_event();
+        }
       }
     },
     setFastItemGroupFilter(event, groupName) {
@@ -1172,6 +1178,7 @@ export default {
     this.$nextTick(function () { });
     this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
+      this.pos_settings_panel = data.pos_settings_panel;
       this.selected_currency = this.pos_profile.currency;
       this.get_items();
       this.get_items_groups();

@@ -218,7 +218,25 @@
             @update:expanded="handleExpandedUpdate">
             <!-- Quantity Column Template -->
             <template v-slot:item.qty="{ item }">
-              {{ formatFloat(item.qty) }}
+              <div v-if="pos_settings_panel && pos_settings_panel.allow_edit_qty_without_expand">
+                <v-text-field
+                  :model-value="formatFloat(item.qty)"
+                  variant="plain"
+                  density="compact"
+                  hide-details
+                  single-line
+                  type="number"
+                  :min="invoiceType === 'Return' ? null : 0"
+                  :step="1"
+                  @update:model-value="updateQtyInline(item, $event)"
+                  :rules="[isNumber]"
+                  :disabled="!!item.posa_is_replace"
+                  @click.stop=""
+                ></v-text-field>
+              </div>
+              <div v-else>
+                {{ formatFloat(item.qty) }}
+              </div>
             </template>
             <!-- Rate Column Template with Currency Symbol -->
             <template v-slot:item.rate="{ item }">
@@ -841,6 +859,7 @@ export default {
     return {
       // POS profile settings
       pos_profile: "",
+      pos_settings_panel: "",
       pos_opening_shift: "",
       stock_settings: "",
       invoice_doc: { posa_notes: ""},
@@ -4852,12 +4871,37 @@ export default {
         this.update_discount_umount();
       }
     },
+    updateQtyInline(item, value) {
+      let parsedValue = parseFloat(value);
+      if (isNaN(parsedValue)) {
+        parsedValue = 0;
+      }
+      
+      if (this.invoiceType === "Return" && parsedValue > 0) {
+        parsedValue = -Math.abs(parsedValue);
+      }
+      
+      if (this.invoiceType !== "Return" && parsedValue < 0) {
+        parsedValue = 0;
+      }
+      
+      item.qty = parsedValue;
+      
+      this.calc_stock_qty(item, item.qty);
+      
+      if (item.qty === 0) {
+        this.remove_item(item);
+      }
+      
+      this.$forceUpdate();
+    },
   },
 
   mounted() {
     // Register event listeners for POS profile, items, customer, offers, etc.
     this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
+      this.pos_settings_panel = data.pos_settings_panel;
       this.customer = data.pos_profile.customer;
       this.pos_opening_shift = data.pos_opening_shift;
       this.stock_settings = data.stock_settings;
