@@ -142,10 +142,11 @@
               :customFilter="deliveryChargesFilter"
               :disabled="readonly"
               @update:model-value="update_delivery_charges()"
+              @click:clear="selected_delivery_charge=''"
             >
               <template v-slot:item="{ props, item }">
                 <v-list-item v-bind="props">
-                  <v-list-item-title class="text-primary text-subtitle-1" v-html="item.raw.name"></v-list-item-title>
+                  <v-list-item-title class="text-primary text-subtitle-1" v-html="item.raw.name + (item.raw.is_default?__(' (Default)'):'')"></v-list-item-title>
                   <v-list-item-subtitle v-html="`Rate: ${item.raw.rate}`"></v-list-item-subtitle>
                 </v-list-item>
               </template>
@@ -217,7 +218,25 @@
             @update:expanded="handleExpandedUpdate">
             <!-- Quantity Column Template -->
             <template v-slot:item.qty="{ item }">
-              {{ formatFloat(item.qty) }}
+              <div v-if="pos_settings_panel && pos_settings_panel.allow_edit_qty_without_expand">
+                <v-text-field
+                  :model-value="formatFloat(item.qty)"
+                  variant="plain"
+                  density="compact"
+                  hide-details
+                  single-line
+                  type="number"
+                  :min="invoiceType === 'Return' ? null : 0"
+                  :step="1"
+                  @update:model-value="updateQtyInline(item, $event)"
+                  :rules="[isNumber]"
+                  :disabled="!!item.posa_is_replace"
+                  @click.stop=""
+                ></v-text-field>
+              </div>
+              <div v-else>
+                {{ formatFloat(item.qty) }}
+              </div>
             </template>
             <!-- Rate Column Template with Currency Symbol -->
             <template v-slot:item.rate="{ item }">
@@ -840,6 +859,7 @@ export default {
     return {
       // POS profile settings
       pos_profile: "",
+      pos_settings_panel: "",
       pos_opening_shift: "",
       stock_settings: "",
       invoice_doc: { posa_notes: ""},
@@ -1269,6 +1289,8 @@ export default {
       this.eventBus.emit("set_customer_readonly", false);
       this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
       this.invoiceTypes = ["Invoice", "Order"];
+
+      this.set_delivery_charges();
     },
 
     // Fetch customer balance from backend
@@ -4395,10 +4417,23 @@ export default {
         },
         async: false,
         callback: function (r) {
-          if (r.message) {
-            if (r.message?.length) {
-              console.log(r.message)
-              vm.delivery_charges = r.message;
+          if (r.message && r.message.length) {
+            console.log('delivery_charges', r.message)
+            vm.delivery_charges = r.message;
+
+            if(vm.pos_profile.posa_use_delivery_charges && vm.pos_profile.posa_auto_set_delivery_charges) {
+              const defaults = vm.delivery_charges.filter(dc => dc.is_default);
+        
+              if (defaults.length === 1) {
+                vm.selected_delivery_charge = defaults[0];
+              } else if (defaults.length > 1) {
+                console.warn(`Multiple (${defaults.length}) default delivery charges found; using the first one.`);
+                vm.selected_delivery_charge = defaults[0];
+              } else {
+                vm.selected_delivery_charge = vm.delivery_charges[0];
+              }
+
+              vm.update_delivery_charges();
             }
           }
         },
@@ -4836,12 +4871,37 @@ export default {
         this.update_discount_umount();
       }
     },
+    updateQtyInline(item, value) {
+      let parsedValue = parseFloat(value);
+      if (isNaN(parsedValue)) {
+        parsedValue = 0;
+      }
+      
+      if (this.invoiceType === "Return" && parsedValue > 0) {
+        parsedValue = -Math.abs(parsedValue);
+      }
+      
+      if (this.invoiceType !== "Return" && parsedValue < 0) {
+        parsedValue = 0;
+      }
+      
+      item.qty = parsedValue;
+      
+      this.calc_stock_qty(item, item.qty);
+      
+      if (item.qty === 0) {
+        this.remove_item(item);
+      }
+      
+      this.$forceUpdate();
+    },
   },
 
   mounted() {
     // Register event listeners for POS profile, items, customer, offers, etc.
     this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
+      this.pos_settings_panel = data.pos_settings_panel;
       this.customer = data.pos_profile.customer;
       this.pos_opening_shift = data.pos_opening_shift;
       this.stock_settings = data.stock_settings;

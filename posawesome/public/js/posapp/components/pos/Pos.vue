@@ -258,6 +258,9 @@ export default {
         this.coupons = false ? data === "true" : false;
       });
       this.eventBus.on("show_coupons", (data) => {
+        if (data === "true") {
+          this.eventBus.emit('refresh_customer');
+        }
         this.coupons = true ? data === "true" : false;
         this.offers = false ? data === "true" : false;
         this.payment = false ? data === "true" : false;

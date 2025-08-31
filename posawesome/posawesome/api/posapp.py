@@ -1381,6 +1381,7 @@ def create_customer(
                 "customer_type": customer_type,
                 "gender": gender,
                 "default_sales_partner": default_sales_partner,
+                "country": country,
             }
 
             if pos_profile.get("custom_posa_different_mobile_no_field"):

@@ -276,6 +276,7 @@ export default {
   mixins: [format],
   data: () => ({
     pos_profile: "",
+    pos_settings_panel: "",
     flags: {},
     items_view: "list",
     item_group: "ALL",
@@ -596,6 +597,9 @@ export default {
       }
       if (match) {
         this.add_item(new_item);
+        this.search = null;
+        this.first_search = null;
+        this.debounce_search = null;
         this.flags.serial_no = null;
         this.flags.batch_no = null;
         this.qty = 1;
@@ -603,25 +607,48 @@ export default {
       }
     },
     search_onchange: _.debounce(function(newSearchTerm) {
-        const vm = this;
-        if(newSearchTerm) vm.search = newSearchTerm;
-        
-        if (vm.pos_profile.pose_use_limit_search) {
-            vm.get_items();
+      const vm = this;
+      
+      let term = "";
+      if (typeof newSearchTerm === "string") {
+        term = newSearchTerm;
+      } else if (newSearchTerm && typeof newSearchTerm === "object") {
+        // Could be an Event or other object
+        if (newSearchTerm.target && typeof newSearchTerm.target.value === "string") {
+          term = newSearchTerm.target.value;
         } else {
-            // Save the current filtered items before search to maintain quantity data
-            const current_items = [...vm.filtered_items];
-            if(vm.search && vm.search.length >=3) {
-              vm.enter_event();
-            }
-            
-            // After search, update quantities for newly filtered items
-            if (vm.filtered_items && vm.filtered_items.length > 0) {
-                setTimeout(() => {
-                    vm.update_items_details(vm.filtered_items);
-                }, 300);
-            }
+          term = vm.first_search || vm.debounce_search || vm.search || "";
         }
+      } else {
+        term = vm.first_search || vm.debounce_search || vm.search || "";
+      }
+
+      // Normalize and assign safely (only when it's a string)
+      if (term && typeof term === "string") {
+        term = term.trim().replace(/\s+/g, " ");
+        vm.search = term;
+      } else {
+        // ensure vm.search becomes empty string, not some non-string value
+        vm.search = "";
+      }
+      
+      if (vm.pos_profile.pose_use_limit_search) {
+        vm.get_items();
+      } else {
+        // Save the current filtered items before search to maintain quantity data
+        const current_items = [...vm.filtered_items];
+
+        if (vm.search && vm.search.length >= 3) {
+          vm.enter_event();
+        }
+
+        // After search, update quantities for newly filtered items
+        if (vm.filtered_items && vm.filtered_items.length > 0) {
+          setTimeout(() => {
+            vm.update_items_details(vm.filtered_items);
+          }, 300);
+        }
+      }
     }, 300),
     get_item_qty(first_search) {
       let scal_qty = Math.abs(this.qty);
@@ -647,6 +674,12 @@ export default {
     },
     get_search(first_search) {
       let search_term = "";
+
+      // Normalize the search input - trim and collapse multiple spaces
+      if (first_search) {
+        first_search = first_search.trim().replace(/\s+/g, ' ');
+      }
+
       if (
         first_search &&
         first_search.startsWith(this.pos_profile.posa_scale_barcode_start)
@@ -784,7 +817,9 @@ export default {
         });
         frappe.utils.play_sound("error");
       } else {
-        this.enter_event();
+        if(this.pos_settings_panel && this.pos_settings_panel.enable_barcode_auto_add) {
+          this.enter_event();
+        }
       }
     },
     setFastItemGroupFilter(event, groupName) {
@@ -1130,8 +1165,12 @@ export default {
         return this.first_search;
       },
       set: _.debounce(function (newValue) {
-        this.first_search = newValue;
-      }, 200),
+        if (newValue) {
+            this.first_search = newValue.trim().replace(/\s+/g, ' ');
+        } else {
+            this.first_search = newValue;
+        }
+      }, 300),
     },
   },
 
@@ -1139,6 +1178,7 @@ export default {
     this.$nextTick(function () { });
     this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
+      this.pos_settings_panel = data.pos_settings_panel;
       this.selected_currency = this.pos_profile.currency;
       this.get_items();
       this.get_items_groups();
