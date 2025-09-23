@@ -13,7 +13,7 @@
       ></v-progress-linear>
       <div class="flex-grow-0 pa-2 border-b">
         <v-row align="center" class="items px-2 py-1">
-          <v-col :cols="pos_profile.posa_input_qty ? 7 : 10" class="pb-0 mb-2">
+          <v-col :cols="pos_profile.posa_input_qty ? 6 : 9" class="pb-0 mb-2">
             <v-text-field
               density="compact"
               clearable
@@ -49,6 +49,17 @@
           </v-col>
           <v-col cols="2" class="pb-0 mb-2">
             <TagFilters />
+          </v-col>
+          <v-col cols="1" class="pb-0 mb-2">
+            <v-btn
+              icon
+              size="small"
+              :disabled="items_view !== 'list'"
+              @click="showColumnSettings = true"
+              title="Column Settings"
+            >
+              <v-icon>mdi-cog</v-icon>
+            </v-btn>
           </v-col>
         </v-row>
       </div>
@@ -119,7 +130,7 @@
             <div v-if="items_view == 'list'" class="h-100">
               <div class="overflow-y-auto" style="height: 100%; max-height: 100%">
                 <v-data-table
-                  :headers="getItemsHeaders()"
+                  :headers="getVisibleHeaders()"
                   :items="filtered_items"
                   item-key="item_code"
                   item-value="item-"
@@ -128,6 +139,7 @@
                   hide-default-footer
                   @click:row="click_item_row"
                   dense
+                  :style="autoAdjustWidths ? '' : 'table-layout: fixed;'"
                 >
                   <template v-slot:item.rate="{ item }">
                     <div>
@@ -141,33 +153,45 @@
                       </div>
                     </div>
                   </template>
+                  <template v-slot:item.item_group="{ item }">
+                    <span>{{ item.item_group || '' }}</span>
+                  </template>
+
+                  <template v-slot:item.brand="{ item }">
+                    <span>{{ item.brand || '' }}</span>
+                  </template>
+
+                  <template v-slot:item.description="{ item }">
+                    <div class="text-caption" v-html="item.description || ''"></div>
+                  </template>
+
                   <template v-slot:item.actual_qty="{ item }">
                     <span class="golden--text">
                       {{ format_number(item.actual_qty, 4) }}
                     </span>
                   </template>
                   <template v-slot:item.actions="{ item }">
-                      <v-btn
-                        v-if="invoiceType==='Order'"
-                        icon
-                        size="large"
-                        density="compact"
-                        @click.stop="showItemDetails(item)"
-                        :title="__('Click to show item details')"
-                      >
-                        <v-icon size="28">mdi-information</v-icon>
-                      </v-btn>
-                      <v-btn
-                        v-else
-                        icon
-                        size="large"
-                        density="compact"
-                        @click.stop="showWarehousesQuantities(item)"
-                        :title="__('Click to show quantity per warehouses')"
-                      >
-                        <v-icon size="28">mdi-database-eye</v-icon>
-                      </v-btn>
-                    </template>
+                    <v-btn
+                      v-if="invoiceType==='Order'"
+                      icon
+                      size="large"
+                      density="compact"
+                      @click.stop="showItemDetails(item)"
+                      :title="__('Click to show item details')"
+                    >
+                      <v-icon size="28">mdi-information</v-icon>
+                    </v-btn>
+                    <v-btn
+                      v-else
+                      icon
+                      size="large"
+                      density="compact"
+                      @click.stop="showWarehousesQuantities(item)"
+                      :title="__('Click to show quantity per warehouses')"
+                    >
+                      <v-icon size="28">mdi-database-eye</v-icon>
+                    </v-btn>
+                  </template>
                 </v-data-table>
               </div>
             </div>
@@ -258,6 +282,11 @@
       </div>
     </v-card>
   </div>
+  <ColumnSettings
+    v-model:show="showColumnSettings"
+    :availableHeaders="availableHeadersConfig"
+    @columns-changed="handleColumnsChanged"
+  />
 </template>
 
 <script>
@@ -266,11 +295,13 @@ import format from "../../format";
 import _ from "lodash";
 import ItemGroupMultiSelect from "./ItemGroupMultiSelect.vue";
 import TagFilters from "./TagFilters.vue";
+import ColumnSettings from "./ColumnSettings.vue";
 
 export default {
   components: {
     ItemGroupMultiSelect,
     TagFilters,
+    ColumnSettings,
   },
 
   mixins: [format],
@@ -303,6 +334,83 @@ export default {
     exchange_rate: 1,
     pos_tags_filters: [],
     invoiceType: "Invoice",
+    columnSettings: {},
+    showColumnSettings: false,
+    availableHeadersConfig: [
+      {
+        title: __("Name"),
+        key: "item_name",
+        hideable: false, // Cannot be hidden
+        widthConfigurable: true,
+        defaultWidth: "40%"
+      },
+      {
+        title: __("Code"),
+        key: "item_code",
+        hideable: true,
+        widthConfigurable: true,
+        defaultWidth: "15%",
+        defaultVisible: true
+      },
+      {
+        title: __("Rate"),
+        key: "rate",
+        hideable: true,
+        widthConfigurable: true,
+        defaultWidth: "15%",
+        defaultVisible: true
+      },
+      {
+        title: __("Ava. QTY"),
+        key: "actual_qty",
+        hideable: true,
+        widthConfigurable: true,
+        defaultWidth: "15%",
+        defaultVisible: true
+      },
+      {
+        title: __("UOM"),
+        key: "stock_uom",
+        hideable: true,
+        widthConfigurable: true,
+        defaultWidth: "10%",
+        defaultVisible: true
+      },
+      // Additional columns (hidden by default)
+      {
+        title: __("Item Group"),
+        key: "item_group",
+        hideable: true,
+        widthConfigurable: true,
+        defaultWidth: "15%",
+        defaultVisible: false
+      },
+      {
+        title: __("Brand"),
+        key: "brand",
+        hideable: true,
+        widthConfigurable: true,
+        defaultWidth: "15%",
+        defaultVisible: false
+      },
+      {
+        title: __("Description"),
+        key: "description",
+        hideable: true,
+        widthConfigurable: true,
+        defaultWidth: "20%",
+        defaultVisible: false
+      },
+      {
+        title: __("Actions"),
+        key: "actions",
+        hideable: false, // Cannot be hidden
+        widthConfigurable: false,
+        defaultWidth: "5%"
+      }
+    ],
+    columnWidths: {},
+    autoAdjustWidths: true,
   }),
 
   watch: {
@@ -920,6 +1028,104 @@ export default {
       }
       return !Number.isInteger(value);
     },
+    getVisibleHeaders() {
+      const items_headers = [
+        {
+          title: __("Name"),
+          align: "start",
+          sortable: true,
+          key: "item_name",
+          width: this.columnWidths.item_name || "40%"
+        },
+        {
+          title: __("Code"),
+          align: "start",
+          sortable: true,
+          key: "item_code",
+          width: this.columnWidths.item_code || "15%"
+        },
+        { 
+          title: __("Rate"), 
+          key: "rate", 
+          align: "start",
+          width: this.columnWidths.rate || "15%"
+        },
+        { 
+          title: __("Ava. QTY"), 
+          key: "actual_qty", 
+          align: "start",
+          width: this.columnWidths.actual_qty || "15%"
+        },
+        { 
+          title: __("UOM"), 
+          key: "stock_uom", 
+          align: "start",
+          width: this.columnWidths.stock_uom || "10%"
+        },
+        // Additional columns
+        { 
+          title: __("Item Group"), 
+          key: "item_group", 
+          align: "start",
+          width: this.columnWidths.item_group || "15%"
+        },
+        { 
+          title: __("Brand"), 
+          key: "brand", 
+          align: "start",
+          width: this.columnWidths.brand || "15%"
+        },
+        { 
+          title: __("Description"), 
+          key: "description", 
+          align: "start",
+          width: this.columnWidths.description || "20%"
+        },
+        {
+          title: __("Actions"),
+          key: "actions",
+          align: "end",
+          sortable: false,
+          width: this.columnWidths.actions || "5%"
+        }
+      ];
+      
+      // Filter headers based on column settings and display settings
+      return items_headers.filter(header => {
+        // Always show actions column and name column
+        if (header.key === 'actions' || header.key === 'item_name') return true;
+        
+        // Hide item_code if disabled in POS profile
+        if (!this.pos_profile.posa_display_item_code && header.key === 'item_code') return false;
+        
+        // Check column visibility settings
+        return this.columnSettings[header.key] !== false;
+      });
+    },
+    handleColumnsChanged(settings) {
+      this.columnSettings = settings.visibility;
+      this.columnWidths = settings.widths;
+      this.autoAdjustWidths = settings.autoAdjust;
+      
+      // Apply auto-adjust if enabled
+      if (this.autoAdjustWidths) {
+        this.applyAutoColumnWidths();
+      }
+      
+      this.$forceUpdate();
+    },
+    applyAutoColumnWidths() {
+      // Reset to default widths for auto-adjust
+      this.columnWidths = {};
+      
+      // You could add more sophisticated logic here to calculate
+      // optimal column widths based on content
+      this.availableHeadersConfig.forEach(header => {
+        if (header.defaultWidth) {
+          this.columnWidths[header.key] = header.defaultWidth;
+        }
+      });
+    },
   },
 
   computed: {
@@ -1176,6 +1382,42 @@ export default {
 
   created: function () {
     this.$nextTick(function () { });
+
+    // Load column settings
+    const savedColumnSettings = localStorage.getItem('posawesome_column_settings');
+    if (savedColumnSettings) {
+      this.columnSettings = JSON.parse(savedColumnSettings);
+    } else {
+      // Set default column settings for all available headers
+      this.columnSettings = {};
+      this.availableHeadersConfig.forEach(header => {
+        this.columnSettings[header.key] = header.defaultVisible !== false;
+      });
+    }
+    
+    // Load column width settings
+    const savedWidths = localStorage.getItem('posawesome_column_widths');
+    if (savedWidths) {
+      this.columnWidths = JSON.parse(savedWidths);
+    } else {
+      // Set default widths for all available headers
+      this.columnWidths = {};
+      this.availableHeadersConfig.forEach(header => {
+        if (header.defaultWidth) {
+          this.columnWidths[header.key] = header.defaultWidth;
+        }
+      });
+    }
+    
+    // Load auto-adjust setting
+    const savedAutoAdjust = localStorage.getItem('posawesome_auto_adjust_widths');
+    this.autoAdjustWidths = savedAutoAdjust ? JSON.parse(savedAutoAdjust) : true;
+    
+    // Apply auto-adjust if enabled
+    if (this.autoAdjustWidths) {
+      this.applyAutoColumnWidths();
+    }
+
     this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
       this.pos_settings_panel = data.pos_settings_panel;
@@ -1281,5 +1523,12 @@ export default {
 
 .sleek-data-table:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important; /* Match Customer.vue style */
+}
+
+.column-settings-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 1;
 }
 </style>

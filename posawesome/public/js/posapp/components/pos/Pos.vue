@@ -15,7 +15,10 @@
     <OpeningDialog v-model:dialog="dialog" />
     <v-row v-show="!dialog" class="flex-wrap flex-lg-nowrap" style="min-height: calc(100vh - 40px)">
       <v-col cols="12" lg="6" class="d-flex flex-column pa-0">
-        <ItemsSelector v-show="!payment && !offers && !coupons"></ItemsSelector>
+        <div v-show="!payment && !offers && !coupons">
+          <ItemsSelector />
+        </div>
+
         <PosOffers v-show="offers"></PosOffers>
         <PosCoupons v-show="coupons"></PosCoupons>
         <Payments v-show="payment"></Payments>
@@ -248,22 +251,23 @@ export default {
         }
       });
       this.eventBus.on("show_payment", (data) => {
-        this.payment = true ? data === "true" : false;
-        this.offers = false ? data === "true" : false;
-        this.coupons = false ? data === "true" : false;
+        const show = data === true || data === "true";
+        this.payment = show;
+        this.offers = false;
+        this.coupons = false;
       });
       this.eventBus.on("show_offers", (data) => {
-        this.offers = true ? data === "true" : false;
-        this.payment = false ? data === "true" : false;
-        this.coupons = false ? data === "true" : false;
+        const show = data === true || data === "true";
+        this.offers = show;
+        this.payment = false;
+        this.coupons = false;
       });
       this.eventBus.on("show_coupons", (data) => {
-        if (data === "true") {
-          this.eventBus.emit('refresh_customer');
-        }
-        this.coupons = true ? data === "true" : false;
-        this.offers = false ? data === "true" : false;
-        this.payment = false ? data === "true" : false;
+        const show = data === true || data === "true";
+        if (show) this.eventBus.emit('refresh_customer');
+        this.coupons = show;
+        this.offers = false;
+        this.payment = false;
       });
       this.eventBus.on("open_closing_dialog", () => {
         this.get_closing_data();
