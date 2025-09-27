@@ -34,7 +34,8 @@
                                         {{ currencySymbol(pos_profile.currency) || "" }}
                                         {{ format_currency(item.rate, pos_profile.currency, 4) }}
                                     </span>
-                                    <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" class="text-h5 text-success" style="white-space: normal; word-break: break-word;">
+                                    <span v-if="pos_profile.posa_allow_multi_currency && selected_currency !== pos_profile.currency" 
+                                          class="text-h5 text-success" style="white-space: normal; word-break: break-word;">
                                         {{ currencySymbol(selected_currency) || "" }}
                                         {{ format_currency(getConvertedRate(item), selected_currency, 4) }}
                                     </span>
@@ -144,6 +145,7 @@ export default {
                 },
             });
         },
+
         getStockClass(qty) {
             return {
                 'red--text': qty <= 0,
@@ -151,46 +153,83 @@ export default {
                 'green--text': qty > 10
             };
         },
+
         selectWarehouse(chosen) {
             if (chosen.actual_qty <= 0) return;
 
-            this.$emit("select", {
+            // Prepare the item with currency conversion
+            let itemToAdd = {
                 ...this.item,
                 item_selected_warehouse: chosen.warehouse,
                 item_selected_warehouse_actual_qty: chosen.actual_qty
-            });
+            };
+            
+            // Ensure UOMs are initialized
+            if (!itemToAdd.item_uoms || itemToAdd.item_uoms.length === 0) {
+                itemToAdd.item_uoms = [{ uom: itemToAdd.stock_uom, conversion_factor: 1.0 }];
+            }
+            
+            // Convert rate if multi-currency is enabled
+            if (this.pos_profile.posa_allow_multi_currency && 
+                this.selected_currency !== this.pos_profile.currency) {
+                // Store original rate as base_rate
+                itemToAdd.base_rate = itemToAdd.rate;
+                itemToAdd.base_price_list_rate = itemToAdd.price_list_rate;
+                
+                // Set converted rates
+                itemToAdd.rate = this.getConvertedRate(itemToAdd);
+                itemToAdd.price_list_rate = this.getConvertedRate(itemToAdd);
+                
+                // Set currency
+                itemToAdd.currency = this.selected_currency;
+            }
+
+            // Set default quantity
+            if (!itemToAdd.qty || itemToAdd.qty === 1) {
+                itemToAdd.qty = 1;
+            }
+
+            this.$emit("select", itemToAdd);
             this.closeDialog();
         },
+
         openOffers(chosen) {
             this.eventBus.emit("show_offers_dialog", {
                 item_code: this.item.item_code,
                 warehouse: chosen.warehouse,
             });
         },
+
         closeDialog() {
             this.isOpen = false;
             this.$emit("close");
         },
+
         format_currency(value, currency, precision) {
             if (!value) return '0';
             
             // Convert to string for checking decimal points
             let valueStr = value.toString();
-            
+
             // If value has decimal points, show 4 decimal places
             if (valueStr.includes('.')) {
                 return flt(value, 4).toString();
             }
-            
+
             // For whole numbers, return as is
             return valueStr;
         },
+        
         getConvertedRate(item) {
             if (!item.rate) return 0;
             if (!this.exchange_rate) return item.rate;
 
             const convertedRate = item.rate / this.exchange_rate;
             return this.flt(convertedRate, 4);
+        },
+
+        currencySymbol(currency) {
+            return get_currency_symbol(currency);
         },
     },
     watch: {
