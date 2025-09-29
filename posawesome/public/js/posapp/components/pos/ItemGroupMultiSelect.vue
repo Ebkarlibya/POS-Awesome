@@ -6,7 +6,7 @@
       medium
       :color="groupName === activeGroup ? 'warning' : 'primary'"
       style="padding: 4px; margin: 0 4px 8px 0"
-      @click="triggerSelect($event, groupName)"
+      @click.stop="triggerSelect($event, groupName)"
     >
       {{ groupName }}
     </v-btn>
@@ -24,8 +24,9 @@ export default {
   },
   methods: {
     triggerSelect(event, groupName) {
+      event.stopPropagation();
       this.activeGroup = this.activeGroup === groupName ? "ALL" : groupName;
-      this.$emit("click", event, this.activeGroup);
+      this.$emit("click", event, groupName);
     },
   },
 };
