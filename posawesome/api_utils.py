@@ -1,0 +1,760 @@
+# encoding=utf8
+# -*- coding: utf-8 -*- u
+from __future__ import unicode_literals
+from __future__ import division
+import frappe
+import frappe, os , math
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import get_site_base_path, cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
+    comma_or, get_fullname, add_years, add_months, add_days, nowdate
+from frappe.utils.data import flt, nowdate, getdate, cint, rounded, add_months, add_days, get_last_day
+from frappe.utils.password import update_password as _update_password
+from frappe.utils import cint, cstr, flt, nowdate, comma_and, date_diff, getdate, formatdate ,get_url
+import datetime
+import traceback
+from datetime import date
+from frappe.model.mapper import get_mapped_doc
+import sys
+from frappe.utils import cstr
+from frappe.model.document import Document
+import json
+# from erpnext.stock.doctype.item.item import get_last_purchase_details
+from pymysql import MySQLError
+from datetime import datetime
+
+
+
+@frappe.whitelist()
+def make_delivery_note_purchase_invoice(source_name, target_doc=None):
+    # Get the Purchase Invoice document using the source_name
+    source_doc = frappe.get_doc("Purchase Invoice", source_name)
+
+    def postprocess(source, target):
+        if source.tc_name and frappe.db.get_value("Terms and Conditions", source.tc_name, "buying") != 1:
+            target.tc_name = None
+            target.terms = None
+
+    def update_item(source, target, source_parent):
+        target.item_code = source.item_code
+        target.qty = source.qty
+        target.stock_uom = source.stock_uom
+        target.rate = source.rate
+
+        # Additional field calculations can be added here if necessary
+        target.amount = target.qty * target.rate
+
+    # Using get_mapped_doc to map fields from Purchase Invoice to Delivery Note
+    doc = get_mapped_doc(
+        "Purchase Invoice",
+        source_name,
+        {
+            "Purchase Invoice": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+            "Purchase Invoice Item": {
+                "doctype": "Delivery Note Item",
+                "field_map": {
+                    "item_code": "item_code",
+                    "qty": "qty",
+                    "stock_uom": "stock_uom",
+                    "rate": "rate",
+                    "uom": "uom",
+                },
+                "postprocess": update_item,
+            },
+        },
+        target_doc,
+        postprocess,
+    )
+
+    return doc
+
+
+@frappe.whitelist()
+def make_delivery_note_purchase_receipt(source_name, target_doc=None, *args, **kwargs):
+    # Get the Purchase Receipt document using the source_name
+    source_doc = frappe.get_doc("Purchase Receipt", source_name)
+
+    def postprocess(source, target):
+        if source.tc_name and frappe.db.get_value("Terms and Conditions", source.tc_name, "buying") != 1:
+            target.tc_name = None
+            target.terms = None
+
+    def update_item(source, target, source_parent):
+        target.item_code = source.item_code
+        target.qty = source.qty
+        target.stock_uom = source.stock_uom
+        target.rate = source.rate
+
+        # Additional field calculations can be added here if necessary
+        target.amount = target.qty * target.rate
+
+    # Using get_mapped_doc to map fields from Purchase Receipt to Delivery Note
+    doc = get_mapped_doc(
+        "Purchase Receipt",
+        source_name,
+        {
+            "Purchase Receipt": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+            "Purchase Receipt Item": {
+                "doctype": "Delivery Note Item",
+                "field_map": {
+                    "item_code": "item_code",
+                    "qty": "qty",
+                    "stock_uom": "stock_uom",
+                    "rate": "rate",
+                    "uom": "uom",
+                },
+                "postprocess": update_item,
+            },
+        },
+        target_doc,
+        postprocess,
+    )
+
+    return doc
+
+
+
+
+
+
+
+
+
+
+# @frappe.whitelist()
+# def fetch_last_purchase_details(item_code):
+#     return get_last_purchase_details(item_code=item_code, doc_name='PUR-ORD-2025-00004')
+
+@frappe.whitelist()
+def user_has_role(role):
+    roles = frappe.get_all('Has Role', filters={'parent': frappe.session.user}, fields=['role'])
+    for user_role in roles:
+        if user_role.role == role:
+            return True
+    return False
+
+
+
+def custom_sales_order_validation(doc, method):
+    # Check if the user has the "Sales Rate Exception" role
+    has_sales_rate_exception_role = user_has_role("Sales Rate Exception")
+    invalid_rows = []
+
+    # Validate items
+    for idx, item in enumerate(doc.items, start=1):
+        if item.rate < item.custom_item_valuation_rate and not has_sales_rate_exception_role:
+            invalid_rows.append(str(idx))
+        
+        if item.custom_item_valuation_rate == 0:
+            frappe.throw(f"Please fill the Valuation Rate of item: {item.item_code}")
+    
+    if invalid_rows:
+        row_numbers = ", ".join(invalid_rows)
+        frappe.throw(f"The rate in rows {row_numbers} is below the item valuation rate. This is not accepted.")
+
+
+def custom_quotation_validation(doc, method):
+    # Check if the user has the "Sales Rate Exception" role
+    has_sales_rate_exception_role = user_has_role("Sales Rate Exception")
+    invalid_rows = []
+
+    # Validate items
+    for idx, item in enumerate(doc.items, start=1):
+        if item.rate < item.custom_item_valuation_rate and not has_sales_rate_exception_role:
+            invalid_rows.append(str(idx))
+        
+        if item.custom_item_valuation_rate == 0:
+            frappe.throw(f"Please fill the Valuation Rate of item: {item.item_code}")
+    
+    if invalid_rows:
+        row_numbers = ", ".join(invalid_rows)
+        frappe.throw(f"The rate in rows {row_numbers} is below the item valuation rate. This is not accepted.")
+
+
+
+
+@frappe.whitelist()
+def get_last_buying_item_price(item_code, currency='LYD'):
+    if item_code and currency:
+        rate = frappe.db.sql(
+            "select price_list_rate from `tabItem Price` where item_code = %s and currency = %s and buying=1 order by modified desc",
+            (item_code, currency),
+            as_dict=1,
+        )
+        return flt(rate[0]["price_list_rate"]) if rate else 0
+
+
+
+
+from pypika import Order
+
+@frappe.whitelist()
+def get_last_purchase_details(item_code, doc_name=None, currency='LYD', conversion_rate=1.0):
+    """returns last purchase details in stock uom"""
+    # get last purchase order item details
+
+    last_purchase_order = get_purchase_voucher_details("Purchase Order", item_code, doc_name, currency)
+
+    # get last purchase receipt item details
+    last_purchase_receipt = get_purchase_voucher_details("Purchase Receipt", item_code, doc_name, currency)
+
+    purchase_order_date = getdate(
+        last_purchase_order and last_purchase_order[0].transaction_date or "1900-01-01"
+    )
+    purchase_receipt_date = getdate(
+        last_purchase_receipt and last_purchase_receipt[0].posting_date or "1900-01-01"
+    )
+
+    if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
+        # use purchase order
+
+        last_purchase = last_purchase_order[0]
+        purchase_date = purchase_order_date
+
+    elif last_purchase_receipt and (purchase_receipt_date > purchase_order_date or not last_purchase_order):
+        # use purchase receipt
+        last_purchase = last_purchase_receipt[0]
+        purchase_date = purchase_receipt_date
+
+    else:
+        last_purchase_invoice = get_purchase_voucher_details("Purchase Invoice", item_code, doc_name, currency)
+
+        if last_purchase_invoice:
+            last_purchase = last_purchase_invoice[0]
+            purchase_date = getdate(last_purchase.posting_date)
+        else:
+            return frappe._dict()
+
+    conversion_factor = flt(last_purchase.conversion_factor)
+    out = frappe._dict(
+        {
+            "base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
+            "base_rate": flt(last_purchase.base_rate) / conversion_factor,
+            "base_net_rate": flt(last_purchase.base_net_rate) / conversion_factor,
+            "discount_percentage": flt(last_purchase.discount_percentage),
+            "purchase_date": purchase_date,
+        }
+    )
+
+    conversion_rate = flt(conversion_rate) or 1.0
+    out.update(
+        {
+            "price_list_rate": out.base_price_list_rate / conversion_rate,
+            "rate": out.base_rate / conversion_rate,
+            "base_rate": out.base_rate,
+            "base_net_rate": out.base_net_rate,
+        }
+    )
+
+    return out
+
+
+def get_purchase_voucher_details(doctype, item_code, document_name, currency):
+    parent_doc = frappe.qb.DocType(doctype)
+    child_doc = frappe.qb.DocType(doctype + " Item")
+
+    query = (
+        frappe.qb.from_(parent_doc)
+        .inner_join(child_doc)
+        .on(parent_doc.name == child_doc.parent)
+        .select(
+            parent_doc.name,
+            parent_doc.currency,
+            parent_doc.conversion_rate,
+            child_doc.conversion_factor,
+            child_doc.base_price_list_rate,
+            child_doc.discount_percentage,
+            child_doc.base_rate,
+            child_doc.base_net_rate,
+        )
+        .where(parent_doc.docstatus == 1)
+        .where(child_doc.item_code == item_code)
+        .where(parent_doc.name.isnotnull())
+        .where(parent_doc.currency == currency)
+    )
+
+    if doctype in ("Purchase Receipt", "Purchase Invoice"):
+        query = query.select(parent_doc.posting_date, parent_doc.posting_time)
+        query = query.orderby(
+            parent_doc.posting_date, parent_doc.posting_time, parent_doc.name, order=Order.desc
+        )
+    else:
+        query = query.select(parent_doc.transaction_date)
+        query = query.orderby(parent_doc.transaction_date, parent_doc.name, order=Order.desc)
+
+    return query.run(as_dict=1)
+
+
+
+
+
+
+
+@frappe.whitelist()
+def get_available_qty_stock(doc, method):
+    for d in doc.get("items"):
+        if d.item_code and d.warehouse:
+            bin = frappe.db.sql(
+                "select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
+                (d.item_code, d.warehouse),
+                as_dict=1,
+            )
+            d.custom_available_qty_at_warehouse = bin and flt(bin[0]["actual_qty"]) or 0
+
+
+@frappe.whitelist()
+def get_item_available_qty(item_code, warehouse):
+    if item_code and warehouse:
+        bin = frappe.db.sql(
+            "select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
+            (item_code, warehouse),
+            as_dict=1,
+        )
+        return flt(bin[0]["actual_qty"]) if bin else 0
+    return 0
+    
+
+
+@frappe.whitelist()
+def calculate_enterprise_rate(doc, method):
+    total_enterprise_amount = 0.0
+    enterprise_paid_amount = 0.0
+    # Fetch the enterprise percent for the customer
+    enterprise_percent = frappe.db.get_value("Customer", doc.customer, "custom_item_enterprise_percent")
+
+    if enterprise_percent>0:
+        # Loop through items and update custom field
+        for item in doc.items:
+            if item.rate:
+                item.custom_item_enterprise_rate = item.rate+ (item.rate * (enterprise_percent / 100))
+                item.custom_item_enterprise_amount = item.qty * item.custom_item_enterprise_rate
+                
+                item.custom_employee_enterprise_amount = item.custom_employee_amount + (item.custom_employee_amount * (enterprise_percent / 100))
+
+                total_enterprise_amount += item.custom_item_enterprise_amount
+                enterprise_paid_amount += item.custom_employee_enterprise_amount
+
+        doc.custom_total_enterprise_amount = total_enterprise_amount
+        doc.custom_enterprise_paid_amount = enterprise_paid_amount
+
+
+@frappe.whitelist()
+def update_employee_and_company_percentage(doc, method):
+    if doc.custom_manually_entry and doc.is_pos and doc.pos_profile:
+        total_paid_amount = 0
+
+        for item in doc.items:
+            total_amount = item.rate * item.qty
+
+            employee_percentage = 100
+            company_percentage = 0
+
+            if doc.custom_related_customer:
+                employee_percentage = frappe.get_value(
+                    "Percent Table", 
+                    filters={
+                        "parenttype": 'Related Customer', 
+                        "parent": doc.custom_related_customer, 
+                        "item_group": item.item_group
+                    }, 
+                    fieldname="employee_percentage"
+                ) or 100
+
+            if doc.custom_plan:
+                employee_percentage = frappe.get_value(
+                    "Plan", 
+                    filters={
+                        "plan_name": doc.custom_plan
+                    }, 
+                    fieldname="plan_percent"
+                ) or 100
+
+            company_percentage = 100 - employee_percentage
+            employee_amount = total_amount * (employee_percentage / 100)
+            company_amount = total_amount * (company_percentage / 100)
+
+            item.db_set("custom_employee_percentage", employee_percentage)
+            item.db_set("custom_company_percentage", company_percentage)
+            item.db_set("custom_employee_amount", employee_amount)
+            item.db_set("custom_company_amount", company_amount)
+
+            total_paid_amount += employee_amount
+            
+        if doc.pos_profile:
+            doc.db_set("paid_amount", total_paid_amount)
+
+            default_payment_method = get_default_payment_method(doc.pos_profile)
+            payment_found = False
+
+            for payment in doc.payments:
+                if payment.mode_of_payment == default_payment_method:
+                    payment.amount = total_paid_amount
+                    payment_found = True
+                    break
+
+            if not payment_found:
+                doc.append("payments", {
+                    "mode_of_payment": default_payment_method,
+                    "amount": total_paid_amount
+                })
+
+
+
+
+
+
+@frappe.whitelist()
+def update_related_customer_item_percent(doc, method):
+    if not doc.custom_plan:
+        for item in doc.items:
+            total_amount = item.rate * item.qty
+
+            employee_percentage = 0
+            company_percentage = 0
+            employee_amount = 0
+            company_amount = 0
+
+            if doc.custom_related_customer:
+                employee_percentage, company_percentage = frappe.get_value(
+                    "Percent Table", 
+                    filters={
+                        "parenttype": 'Related Customer', 
+                        "parent": doc.custom_related_customer, 
+                        "item_group": item.item_group
+                    }, 
+                    fieldname=["employee_percentage", "company_percentage"]
+                ) or (100, 0)
+
+            employee_amount = total_amount * (employee_percentage / 100)
+            company_amount = total_amount * (company_percentage / 100)
+
+            frappe.db.sql("""update `tabSales Invoice Item` set custom_employee_percentage={0}, custom_company_percentage={1},
+                custom_employee_amount={2}, custom_company_amount={3} where parent='{4}' and name='{5}'
+                    """.format(employee_percentage, company_percentage, employee_amount, company_amount, doc.name, item.name))
+
+            
+            doc.paid_amount = sum(item.custom_employee_amount for item in doc.items)
+            doc.append("payments", {
+                "mode_of_payment": get_default_payment_method(doc.pos_profile),
+                "amount": doc.paid_amount
+            })
+
+            doc.save()
+            doc.reload()
+
+
+
+
+def get_default_payment_method(pos_profile_name):
+    payments = frappe.get_all(
+        "POS Payment Method",
+        filters={"parent": pos_profile_name, "parenttype": "POS Profile"},
+        fields=["mode_of_payment", "default"]
+    )
+    for payment in payments:
+        if payment.get("default"):
+            return payment.get("mode_of_payment")
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def get_customer_plans(customer):
+    plans = frappe.get_all('Customer Plan', 
+                           filters={'parent': customer, 'parenttype': 'Customer'},
+                           fields=['plan_name', 'plan_percent', 'is_default'])
+    
+    return plans
+
+
+def add_related_customer_import_template():
+    doc = frappe.get_doc("Related Customer Import")
+    doc.download_template = '/posawesome/Related Customer Template.csv'
+    doc.flags.ignore_mandatory = True
+    doc.save(ignore_permissions=True)
+
+
+
+def add_related_customer():
+    print('*** Add Related Customer ***')
+    from frappe.utils.csvutils import read_csv_content
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, 'related_customer.csv')
+    try:
+        with open(file_path, "r") as infile:
+            rows = read_csv_content(infile.read())
+            i = 0
+            for index, row in enumerate(rows):
+                if index!=0:
+                    if not frappe.db.exists("Customer", {"name": row[5]}):
+                        return 'Customer: {0} not exists!'.format(row[5])
+                    else:
+                        if not frappe.get_doc("Customer", row[5]).custom_percent_table:
+                            return 'Customer: {0}, has no percent table data!'.format(row[5])
+
+                    if row[0] and row[1] and row[2] and row[3] and row[4] and row[5]:
+                        if not frappe.db.exists("Related Customer", {"employee_name": row[0], "phone": row[2]}):
+                            if row[0]:
+                                try:
+
+                                    try:
+                                        card_expiry_date = datetime.strptime(row[4], "%d/%m/%Y").strftime("%Y-%m-%d")
+                                    except ValueError:
+                                        card_expiry_date = None
+
+                                    doc = frappe.new_doc("Related Customer")
+                                    doc.update({
+                                        "doctype":"Related Customer",
+                                        "employee_name": row[0],
+                                        "employee_id": row[1],
+                                        "phone": row[2],
+                                        "card_number": row[3],
+                                        "card_expiry_date": card_expiry_date,
+                                        "parent_customer": row[5],
+                                        "designation": row[6]
+                                    })
+
+                                    for percent_table in frappe.get_doc("Customer", row[5]).custom_percent_table:
+                                        doc.append('percent_table',{
+                                            "doctype": "Percent Table",
+                                            "item_group": percent_table.item_group,
+                                            "employee_percentage": percent_table.employee_percentage,
+                                            "company_percentage": percent_table.company_percentage
+                                        })
+                                    
+                                    doc.save(ignore_permissions=True)
+                                    frappe.db.commit()
+                                except MySQLError as e:
+                                    if e.args[0] == 1292:
+                                        print(f"Incorrect date value: {e.args[1]}")
+                                    else:
+                                        print(f"Error adding percent table for customer {customer_name}: {e.args[1]}")
+                                    continue
+
+
+                                i+=1
+                                print(row[0])
+                    else:
+                        print("Missing Data!")
+            print('*************')
+            print(f"Total Related Customer added: {i}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
+@frappe.whitelist()
+def validate_card_expiry():
+    related_customers = frappe.get_all(
+        'Related Customer', 
+        filters={},
+        fields=['name', 'card_expiry_date', 'enabled']
+    )
+    
+    for related_customer in related_customers:
+        doc = frappe.get_doc("Related Customer", related_customer['name'])
+        if getdate(related_customer['card_expiry_date']) < getdate(nowdate()):
+            if related_customer['enabled']==1:
+                doc.enabled = 0
+                doc.flags.ignore_mandatory = True
+                doc.save(ignore_permissions=True)
+                print('- Expiry Card for Related Customer: {0}'.format(related_customer['name']))
+        else:
+            if related_customer['enabled']==0:
+                doc.enabled = 1
+                doc.flags.ignore_mandatory = True
+                doc.save(ignore_permissions=True)
+                print('- Card Activated for Related Customer: {0}'.format(related_customer['name']))
+
+                
+
+
+
+@frappe.whitelist()
+def employee_files_expiry_email_notification():
+    emps = frappe.db.sql_list("select name from `tabEmployee` where status='Active'")
+        
+    for emp in emps:
+        doc = frappe.get_doc("Employee", emp)
+        for empfile in doc.custom_employee_files:
+            if empfile.title in ["License to Practice", "Health Insurance", "Health Certificate"]:
+                if empfile.expiry_date:
+                    notification_date = add_months(getdate(empfile.expiry_date), -1)
+                    if getdate(notification_date) == getdate(nowdate()):
+                        print("{0} file will expired after 1 month, for employee: {1}".format(empfile.title, doc.employee_name))
+    
+                        msg = "<b>{0}</b> file will expired after 1 month, for employee: <b>{1}</b>".format(empfile.title, doc.employee_name)
+
+                        sender = frappe.get_value("Email Account", filters = {"default_outgoing": 1}, fieldname = "email_id") or None
+                        
+                        hr_managers = frappe.db.sql("""
+                            SELECT DISTINCT u.email
+                            FROM `tabUser` u
+                            JOIN `tabHas Role` hr ON hr.parent = u.name
+                            WHERE hr.role = 'HR Manager'
+                              AND u.enabled = 1
+                              AND u.email IS NOT NULL
+                              AND u.name NOT IN (
+                                  SELECT parent
+                                  FROM `tabHas Role`
+                                  WHERE role = 'Administrator'
+                              )
+                        """, as_dict=True)
+
+                        for user in hr_managers:
+                            recipient = user['email']
+
+                            frappe.sendmail(sender=sender, recipients= recipient,
+                                content=msg, subject="File Expired After 1 Month!", delayed=False)
+
+      
+
+
+
+                
+
+
+
+@frappe.whitelist()
+def update_related_customer_percentages(parent_customer):
+    # Get the current customer's percent table
+    current_customer = frappe.get_doc("Customer", parent_customer)
+
+    if len(current_customer.custom_percent_table) < 1:
+        frappe.throw("No Record Found in Percent Table")
+
+    percent_table_data = current_customer.custom_percent_table
+
+    # Find all related customers
+    related_customers = frappe.get_all(
+        "Related Customer",
+        filters={"parent_customer": parent_customer},
+        fields=["name"]
+    )
+
+    # Initialize a dictionary to count updated related customers by item group
+    update_counts = {row.item_group: 0 for row in percent_table_data}
+
+    # Loop through each related customer
+    for related_customer in related_customers:
+        # Get related customer document
+        related_customer_doc = frappe.get_doc("Related Customer", related_customer.name)
+
+        # Track if any changes were made for each item group
+        changes_made = False
+
+        # Update the percent_table for matching item groups
+        for row in percent_table_data:
+            # Check if the item group exists in the related customer's percent_table
+            existing_row = next((item for item in related_customer_doc.percent_table if item.item_group == row.item_group), None)
+
+            if existing_row:
+                # Update the existing percentages for the item group
+                if (existing_row.employee_percentage != row.employee_percentage or 
+                    existing_row.company_percentage != row.company_percentage):
+                    existing_row.employee_percentage = row.employee_percentage
+                    existing_row.company_percentage = row.company_percentage
+                    changes_made = True  # Mark that changes were made
+                    update_counts[row.item_group] += 1  # Increment count for this item group
+
+        # Save changes to the related customer only if there were updates
+        if changes_made:
+            related_customer_doc.save()
+
+    return update_counts  # Return the counts of updated related customers by item group
+
+
+
+@frappe.whitelist()
+def get_employee_percentage(invoice_name):
+    employee_percentage = 100
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
+
+    total_cash = 0
+
+    for item in invoice_doc.items:
+        amount = item.rate * item.qty
+
+        employee_percentage = 100
+
+        if invoice_doc.custom_related_customer:
+            employee_percentage = frappe.get_value(
+                "Percent Table", 
+                filters={
+                    "parenttype": 'Related Customer', 
+                    "parent": invoice_doc.custom_related_customer, 
+                    "item_group": item.item_group
+                }, 
+                fieldname="employee_percentage"
+            )
+
+        if invoice_doc.custom_plan:
+            employee_percentage = frappe.get_value(
+                "Plan", 
+                filters={
+                    "plan_name": invoice_doc.custom_plan
+                }, 
+                fieldname="plan_percent"
+            )
+
+        if employee_percentage is None:
+            employee_percentage = 100
+
+
+        total_cash += amount * (employee_percentage / 100)
+    
+    return total_cash
+
+
+
+
+@frappe.whitelist()
+def get_item_percentage_and_amount(customer, related_customer, plan, item):
+    
+    item = json.loads(item)
+
+    employee_percentage = 0
+    company_percentage = 0
+    employee_amount = 0
+    company_amount = 0
+
+    total_amount = item['rate'] * item['qty']
+
+    if related_customer:
+        employee_percentage, company_percentage = frappe.get_value(
+            "Percent Table", 
+            filters={
+                "parenttype": 'Related Customer', 
+                "parent": related_customer, 
+                "item_group": item['item_group']
+            }, 
+            fieldname=["employee_percentage", "company_percentage"]
+        ) or (100, 0)
+
+    plan_percent = 100
+
+    if plan:
+        plan_percent = frappe.get_value(
+            "Plan", 
+            filters={
+                "plan_name": plan
+            }, 
+            fieldname="plan_percent"
+        )
+
+        employee_percentage = plan_percent
+        company_percentage = 100 - plan_percent
+
+    employee_amount = total_amount * (employee_percentage / 100)
+    company_amount = total_amount * (company_percentage / 100)
+
+
+    return employee_percentage, company_percentage, employee_amount, company_amount
+
+
+
+
+
+
+
+

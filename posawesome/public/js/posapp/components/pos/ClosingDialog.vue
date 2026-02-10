@@ -126,7 +126,7 @@ export default {
     });
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
-      if (!this.pos_profile.hide_expected_amount) {
+      if (!this.pos_profile.hide_expected_amount && false) {
         this.headers.push({
           text: __('Expected Amount'),
           value: 'expected_amount',

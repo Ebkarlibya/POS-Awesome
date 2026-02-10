@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-08 12:10:22.432286",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_group",
+  "section_break_a0qkk",
+  "employee_percentage",
+  "column_break_7tc03",
+  "company_percentage"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_a0qkk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Employee Percentage",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_7tc03",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Company Percentage",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-10-08 12:10:22.432286",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Percent Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

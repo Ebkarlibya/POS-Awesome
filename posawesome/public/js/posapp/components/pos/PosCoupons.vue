@@ -88,6 +88,7 @@ export default {
     new_coupon: null,
     itemsPerPage: 1000,
     singleExpand: true,
+    expanded: [],
     items_headers: [
       { text: __('Coupon'), value: 'coupon_code', align: 'start' },
       { text: __('Type'), value: 'type', align: 'start' },

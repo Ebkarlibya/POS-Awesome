@@ -88,7 +88,7 @@
                     </div>
                     <div class="text-caption golden--text">
                       {{ formtFloat(item.actual_qty) || 0 }}
-                      {{ item.stock_uom || '' }}
+                      {{ item.sales_uom || '' }}
                     </div>
                   </v-card-text>
                 </v-card>
@@ -317,7 +317,7 @@ export default {
         },
         { text: __('Rate'), value: 'rate', align: 'start' },
         { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
-        { text: __('UOM'), value: 'stock_uom', align: 'start' },
+        { text: __('UOM'), value: 'sales_uom', align: 'start' },
       ];
       if (!this.pos_profile.posa_display_item_code) {
         items_headers.splice(1, 1);
