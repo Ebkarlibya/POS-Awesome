@@ -7,5 +7,5 @@ __version__ = "4.6.4"
 
 
 def console(*data):
-  pass
+    pass
 #     frappe.publish_realtime("toconsole", data, user=frappe.session.user)
