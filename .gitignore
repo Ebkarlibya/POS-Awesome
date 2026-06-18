@@ -6,3 +6,4 @@ tags
 posawesome/docs/current
 node_modules
 posawesome/public/dist
+pyrightconfig.json

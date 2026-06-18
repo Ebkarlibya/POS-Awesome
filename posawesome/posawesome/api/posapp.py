@@ -5,14 +5,17 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate, flt, cstr, getdate, cint, money_in_words
+from frappe.utils import nowdate, flt, cstr, money_in_words
 from erpnext.setup.utils import get_exchange_rate
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
-from erpnext.accounts.party import get_party_bank_account
+
+from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
+
+# from erpnext.accounts.party import get_party_bank_account
 from erpnext.stock.doctype.batch.batch import (
     get_batch_no,
     get_batch_qty,
@@ -148,20 +151,24 @@ def get_items(
         # Clear quantity cache to ensure fresh values on each search
         try:
             if hasattr(frappe.local.cache, "delete_key"):
-                frappe.local.cache.delete_key('bin_qty_cache')
-            elif frappe.cache().get_value('bin_qty_cache'):
-                frappe.cache().delete_value('bin_qty_cache')
+                frappe.local.cache.delete_key("bin_qty_cache")
+            elif frappe.cache().get_value("bin_qty_cache"):
+                frappe.cache().delete_value("bin_qty_cache")
         except Exception as e:
             frappe.log_error(f"Error clearing bin_qty_cache: {str(e)}", "POS Awesome")
-        
+
         today = nowdate()
         posa_display_items_in_stock = pos_profile.get("posa_display_items_in_stock")
         search_serial_no = pos_profile.get("posa_search_serial_no")
         search_batch_no = pos_profile.get("posa_search_batch_no")
         posa_show_template_items = pos_profile.get("posa_show_template_items")
         warehouse = pos_profile.get("warehouse")
-        pos_plus_additional_warehouses = pos_profile.get("pos_plus_additional_warehouses", [])
-        additional_warehouses = [row['warehouse'] for row in pos_plus_additional_warehouses]
+        pos_plus_additional_warehouses = pos_profile.get(
+            "pos_plus_additional_warehouses", []
+        )
+        additional_warehouses = [
+            row["warehouse"] for row in pos_plus_additional_warehouses
+        ]
         use_limit_search = pos_profile.get("pose_use_limit_search")
         search_limit = 0
 
@@ -226,9 +233,7 @@ def get_items(
             ORDER BY
                 item_name asc
             {limit}
-                """.format(
-                condition=condition, limit=limit
-            ),
+                """.format(condition=condition, limit=limit),
             as_dict=1,
         )
 
@@ -370,9 +375,7 @@ def get_root_of(doctype):
         """select t1.name from `tab{0}` t1 where
 		(select count(*) from `tab{1}` t2 where
 			t2.lft < t1.lft and t2.rgt > t1.rgt) = 0
-		and t1.rgt > t1.lft""".format(
-            doctype, doctype
-        )
+		and t1.rgt > t1.lft""".format(doctype, doctype)
     )
     return result[0][0] if result else None
 
@@ -448,9 +451,7 @@ def get_customer_names(pos_profile):
             FROM `tabCustomer`
             WHERE {0}
             ORDER by name
-            """.format(
-                condition
-            ),
+            """.format(condition),
             as_dict=1,
         )
         return customers
@@ -474,7 +475,9 @@ def get_sales_person_names():
         return sales_persons
     except Exception as e:
         print(f"Error fetching sales persons: {str(e)}")
-        frappe.log_error(f"Error fetching sales persons: {str(e)}", "POS Sales Person Error")
+        frappe.log_error(
+            f"Error fetching sales persons: {str(e)}", "POS Sales Person Error"
+        )
         return []
 
 
@@ -565,6 +568,7 @@ def add_taxes_from_tax_template(item, parent_doc):
                     tax_row.update({"category": "Total", "add_deduct_tax": "Add"})
                 tax_row.db_insert()
 
+
 def validate_return_items(original_invoice_name, return_items):
     """
     Ensure that return items do not exceed the quantity from the original invoice.
@@ -573,16 +577,18 @@ def validate_return_items(original_invoice_name, return_items):
     original_item_qty = {}
 
     for item in original_invoice.items:
-        original_item_qty[item.item_code] = original_item_qty.get(item.item_code, 0) + item.qty
+        original_item_qty[item.item_code] = (
+            original_item_qty.get(item.item_code, 0) + item.qty
+        )
 
     returned_items = frappe.get_all(
         "Sales Invoice",
         filters={
             "return_against": original_invoice_name,
             "docstatus": 1,
-            "is_return": 1
+            "is_return": 1,
         },
-        fields=["name"]
+        fields=["name"],
     )
 
     for returned_invoice in returned_items:
@@ -597,7 +603,9 @@ def validate_return_items(original_invoice_name, return_items):
         if item_code in original_item_qty and return_qty > original_item_qty[item_code]:
             return {
                 "valid": False,
-                "message": _("You are trying to return more quantity for item {0} than was sold.").format(item_code),
+                "message": _(
+                    "You are trying to return more quantity for item {0} than was sold."
+                ).format(item_code),
             }
 
     return {"valid": True}
@@ -624,35 +632,62 @@ def update_invoice(data):
     if selected_currency:
         invoice_doc.currency = selected_currency
         # Get default conversion rate from ERPNext if currency is different from company currency
-        default_ccy = frappe.get_cached_value("Company", invoice_doc.company, "default_currency")
+        default_ccy = frappe.get_cached_value(
+            "Company", invoice_doc.company, "default_currency"
+        )
         if selected_currency != default_ccy:
             try:
                 # Get exchange rate from selected currency to base currency
-                ex_rate = get_exchange_rate(selected_currency, default_ccy, invoice_doc.posting_date)
+                ex_rate = get_exchange_rate(
+                    selected_currency, default_ccy, invoice_doc.posting_date
+                )
             except Exception as e:
-                frappe.throw(_("Could not fetch exchange rate for {0} on {1}: {2}").format(selected_currency, invoice_doc.posting_date, e))
+                frappe.throw(
+                    _("Could not fetch exchange rate for {0} on {1}: {2}").format(
+                        selected_currency, invoice_doc.posting_date, e
+                    )
+                )
             invoice_doc.conversion_rate = invoice_doc.plc_conversion_rate = ex_rate
             invoice_doc.price_list_currency = selected_currency
 
             # Recompute all base-fields
             for itm in invoice_doc.items:
                 if itm.price_list_rate:
-                    itm.base_price_list_rate = flt(itm.price_list_rate * ex_rate, itm.precision("base_price_list_rate"))
+                    itm.base_price_list_rate = flt(
+                        itm.price_list_rate * ex_rate,
+                        itm.precision("base_price_list_rate"),
+                    )
                 if itm.rate:
                     itm.base_rate = flt(itm.rate * ex_rate, itm.precision("base_rate"))
                 if itm.amount:
-                    itm.base_amount = flt(itm.amount * ex_rate, itm.precision("base_amount"))
+                    itm.base_amount = flt(
+                        itm.amount * ex_rate, itm.precision("base_amount")
+                    )
 
             # Update payment amounts
             for pay in invoice_doc.payments:
-                pay.base_amount = flt(pay.amount * ex_rate, pay.precision("base_amount"))
+                pay.base_amount = flt(
+                    pay.amount * ex_rate, pay.precision("base_amount")
+                )
 
             # Update invoice level amounts
-            invoice_doc.base_total       = flt(invoice_doc.total       * ex_rate, invoice_doc.precision("base_total"))
-            invoice_doc.base_net_total   = flt(invoice_doc.net_total   * ex_rate, invoice_doc.precision("base_net_total"))
-            invoice_doc.base_grand_total = flt(invoice_doc.grand_total * ex_rate, invoice_doc.precision("base_grand_total"))
-            invoice_doc.base_rounded_total = flt(invoice_doc.rounded_total * ex_rate, invoice_doc.precision("base_rounded_total"))
-            invoice_doc.base_in_words    = money_in_words(invoice_doc.base_rounded_total, default_ccy)
+            invoice_doc.base_total = flt(
+                invoice_doc.total * ex_rate, invoice_doc.precision("base_total")
+            )
+            invoice_doc.base_net_total = flt(
+                invoice_doc.net_total * ex_rate, invoice_doc.precision("base_net_total")
+            )
+            invoice_doc.base_grand_total = flt(
+                invoice_doc.grand_total * ex_rate,
+                invoice_doc.precision("base_grand_total"),
+            )
+            invoice_doc.base_rounded_total = flt(
+                invoice_doc.rounded_total * ex_rate,
+                invoice_doc.precision("base_rounded_total"),
+            )
+            invoice_doc.base_in_words = money_in_words(
+                invoice_doc.base_rounded_total, default_ccy
+            )
     else:
         invoice_doc.conversion_rate = invoice_doc.plc_conversion_rate = 1.0
 
@@ -680,7 +715,7 @@ def update_invoice(data):
             desired_wh = items_payload[idx].get("warehouse")
             if desired_wh:
                 item.warehouse = desired_wh
-        
+
         if not item.rate or item.rate == 0:
             if allow_zero_rated_items:
                 item.price_list_rate = 0.00
@@ -695,7 +730,7 @@ def update_invoice(data):
 
     if frappe.get_cached_value(
         "POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"
-        ) and invoice_doc.get("taxes"):
+    ) and invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
             tax.included_in_print_rate = 1
 
@@ -758,7 +793,9 @@ def submit_invoice(invoice, data):
     for item in invoice_doc.items:
         if item.item_name and item.rate and item.qty:
             total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
+            items.append(
+                f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}"
+            )
 
     # Add the grand total at the end of remarks
     grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
@@ -870,39 +907,42 @@ def submit_order(data, invoice):
         data = json.loads(data)
     if isinstance(invoice, str):
         invoice = json.loads(invoice)
-    
-    so = frappe.get_doc({
-        "doctype": "Sales Order",
-        "customer": invoice.get("customer"),
-        "transaction_date": nowdate(),
-        "delivery_date": invoice.get("posa_delivery_date"),
-        "po_no": invoice.get("po_no"),
-        "po_date": invoice.get("po_date"),
-        "shipping_address_name": invoice.get("shipping_address_name"),
-        "sales_partner": invoice.get("sales_partner"),
-        "sales_person": invoice.get("sales_person"),
-        "posa_notes": invoice.get("posa_notes"),
-        "items": [
-            {
-                "item_code": item.get("item_code"),
-                "item_name": item.get("item_name"),
-                "description": (item.get("description")
-                                or item.get("posa_notes")
-                                or item.get("item_name")),
-                "posa_notes": item.get("posa_notes"),
-                "qty": item.get("qty"),
-                "rate": item.get("rate"),
-                "delivery_date": item.get("posa_delivery_date"),
-                "warehouse": item.get("warehouse"),
 
-            }
-            for item in invoice.get("items", [])
-        ]
-    })
+    so = frappe.get_doc(
+        {
+            "doctype": "Sales Order",
+            "customer": invoice.get("customer"),
+            "transaction_date": nowdate(),
+            "delivery_date": invoice.get("posa_delivery_date"),
+            "po_no": invoice.get("po_no"),
+            "po_date": invoice.get("po_date"),
+            "shipping_address_name": invoice.get("shipping_address_name"),
+            "sales_partner": invoice.get("sales_partner"),
+            "sales_person": invoice.get("sales_person"),
+            "posa_notes": invoice.get("posa_notes"),
+            "items": [
+                {
+                    "item_code": item.get("item_code"),
+                    "item_name": item.get("item_name"),
+                    "description": (
+                        item.get("description")
+                        or item.get("posa_notes")
+                        or item.get("item_name")
+                    ),
+                    "posa_notes": item.get("posa_notes"),
+                    "qty": item.get("qty"),
+                    "rate": item.get("rate"),
+                    "delivery_date": item.get("posa_delivery_date"),
+                    "warehouse": item.get("warehouse"),
+                }
+                for item in invoice.get("items", [])
+            ],
+        }
+    )
     so.flags.ignore_permissions = True
     so.insert()
     so.submit()
-    
+
     return so.as_dict()
 
 
@@ -1042,7 +1082,9 @@ def submit_in_background_job(kwargs):
     for item in invoice_doc.items:
         if item.item_name and item.rate and item.qty:
             total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
+            items.append(
+                f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}"
+            )
 
     # Add the grand total at the end of remarks
     grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
@@ -1159,14 +1201,18 @@ def get_items_details(pos_profile, items_data):
                 item_code = item.get("item_code")
                 # Force refresh stock quantity on each request using proper cache clearing
                 if hasattr(frappe.local.cache, "delete_key"):
-                    frappe.local.cache.delete_key('bin_qty_cache')
-                elif frappe.cache().get_value('bin_qty_cache'):
-                    frappe.cache().delete_value('bin_qty_cache')
+                    frappe.local.cache.delete_key("bin_qty_cache")
+                elif frappe.cache().get_value("bin_qty_cache"):
+                    frappe.cache().delete_value("bin_qty_cache")
 
                 warehouse = item.get("warehouse", pos_profile.get("warehouse"))
-                pos_plus_additional_warehouses = pos_profile.get("pos_plus_additional_warehouses", [])
-                additional_warehouses = [row['warehouse'] for row in pos_plus_additional_warehouses]
-                
+                pos_plus_additional_warehouses = pos_profile.get(
+                    "pos_plus_additional_warehouses", []
+                )
+                additional_warehouses = [
+                    row["warehouse"] for row in pos_plus_additional_warehouses
+                ]
+
                 item_stock_qty = get_stock_availability(item_code, warehouse)
                 (has_batch_no, has_serial_no) = frappe.db.get_value(
                     "Item", item_code, ["has_batch_no", "has_serial_no"]
@@ -1200,7 +1246,7 @@ def get_items_details(pos_profile, items_data):
                     if not stock_uom_exists:
                         uoms.append({"uom": stock_uom, "conversion_factor": 1.0})
 
-                serial_no_data = [row['serial_no'] for row in warehouses_serial_no_data]
+                serial_no_data = [row["serial_no"] for row in warehouses_serial_no_data]
 
                 batch_no_data = []
 
@@ -1354,13 +1400,13 @@ def create_customer(
     if birthday:
         try:
             # Try to parse date in DD-MM-YYYY format
-            if '-' in birthday:
-                date_parts = birthday.split('-')
+            if "-" in birthday:
+                date_parts = birthday.split("-")
                 if len(date_parts) == 3:
                     day, month, year = date_parts
                     formatted_birthday = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
             # If format is already YYYY-MM-DD, use as is
-            elif len(birthday) == 10 and birthday[4] == '-' and birthday[7] == '-':
+            elif len(birthday) == 10 and birthday[4] == "-" and birthday[7] == "-":
                 formatted_birthday = birthday
         except Exception:
             frappe.log_error(f"Error formatting birthday: {birthday}", "POS Awesome")
@@ -1434,7 +1480,7 @@ def create_customer(
         existing_address_name = frappe.db.get_value(
             "Dynamic Link",
             {"link_doctype": "Customer", "link_name": customer_id},
-            "parent"
+            "parent",
         )
 
         if existing_address_name:
@@ -1570,10 +1616,22 @@ def set_customer_info(customer, fieldname, value=""):
 
 
 @frappe.whitelist()
-def search_invoices_for_return(invoice_name, company, customer_name=None, customer_id=None, mobile_no=None, tax_id=None, from_date=None, to_date=None, min_amount=None, max_amount=None, page=1):
+def search_invoices_for_return(
+    invoice_name,
+    company,
+    customer_name=None,
+    customer_id=None,
+    mobile_no=None,
+    tax_id=None,
+    from_date=None,
+    to_date=None,
+    min_amount=None,
+    max_amount=None,
+    page=1,
+):
     """
     Search for invoices that can be returned with separate customer search fields and pagination
-    
+
     ETMS EDIT: We edited this function so if the checkbox in the settings Panel, is checked,
     It will get all the invoices
 
@@ -1589,13 +1647,13 @@ def search_invoices_for_return(invoice_name, company, customer_name=None, custom
         min_amount: Minimum invoice amount to filter by
         max_amount: Maximum invoice amount to filter by
         page: Page number for pagination (starts from 1)
-    
+
     Returns:
         Dictionary with:
             - invoices: List of invoice documents
             - has_more: Boolean indicating if there are more invoices to load
     """
-    
+
     allow_cross_branch_return = frappe.get_single(
         "POS Settings Panel"
     ).allow_cross_branch_return
@@ -1699,7 +1757,7 @@ def search_invoices_for_return(invoice_name, company, customer_name=None, custom
         "Sales Invoice",
         filters=filters,
         fields=["name"],
-        limit_start=start, 
+        limit_start=start,
         limit_page_length=page_length,
         order_by="posting_date desc, name desc",
         ignore_permissions=allow_cross_branch_return,
@@ -1715,10 +1773,7 @@ def search_invoices_for_return(invoice_name, company, customer_name=None, custom
         # Check if any items have already been returned
         has_returns = frappe.get_all(
             "Sales Invoice",
-            filters={
-                "return_against": invoice.name,
-                "docstatus": 1
-            },
+            filters={"return_against": invoice.name, "docstatus": 1},
             fields=["name"],
             ignore_permissions=allow_cross_branch_return,
         )
@@ -1748,10 +1803,7 @@ def search_invoices_for_return(invoice_name, company, customer_name=None, custom
     # Check if there are more results
     has_more = (start + page_length) < total_count
 
-    return {
-        "invoices": data,
-        "has_more": has_more
-    }
+    return {"invoices": data, "has_more": has_more}
 
 
 @frappe.whitelist()
@@ -1820,7 +1872,7 @@ def get_app_branch(app):
 #         """
 #         SELECT *
 #         FROM `tabPOS Offer`
-#         WHERE 
+#         WHERE
 #         disable = 0 AND
 #         company = %(company)s AND
 #         (pos_profile is NULL OR pos_profile  = '' OR  pos_profile = %(pos_profile)s) AND
@@ -1839,7 +1891,9 @@ def get_offers(profile):
     pos_profile = frappe.get_doc("POS Profile", profile)
     company = pos_profile.company
     warehouse = pos_profile.warehouse
-    additional_warehouses = [row.warehouse for row in pos_profile.pos_plus_additional_warehouses or []]
+    additional_warehouses = [
+        row.warehouse for row in pos_profile.pos_plus_additional_warehouses or []
+    ]
     all_warehouses = tuple({warehouse, *additional_warehouses})
     date = nowdate()
 
@@ -1888,9 +1942,7 @@ def get_customer_addresses(customer):
             AND link.link_name = '{0}'
             AND address.disabled = 0
         ORDER BY address.name
-        """.format(
-            customer
-        ),
+        """.format(customer),
         as_dict=1,
     )
 
@@ -2283,11 +2335,10 @@ def get_customer_info(customer):
         LIMIT 1
         """,
         (customer.name,),
-        as_dict=True
+        as_dict=True,
     )
 
     if addresses:
-
         addr = addresses[0]
         res["address_line1"] = addr.address_line1 or ""
         res["address_line2"] = addr.address_line2 or ""
@@ -2395,60 +2446,61 @@ def delete_sales_invoice(sales_invoice):
 
 @frappe.whitelist()
 def update_invoice_from_order(data):
-     data = json.loads(data)
-     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
-     invoice_doc.update(data)
-     invoice_doc.save()
-     return invoice_doc
+    data = json.loads(data)
+    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    invoice_doc.update(data)
+    invoice_doc.save()
+    return invoice_doc
+
 
 @frappe.whitelist()
 def validate_return_items(return_against, items):
-     """Custom validation for return items"""
-     # If no return_against (return without invoice), skip validation
-     if not return_against:
-         return {"valid": True}
+    """Custom validation for return items"""
+    # If no return_against (return without invoice), skip validation
+    if not return_against:
+        return {"valid": True}
 
-     original_invoice = frappe.get_doc("Sales Invoice", return_against)
+    original_invoice = frappe.get_doc("Sales Invoice", return_against)
 
-     # Create lookup for original items
-     original_items = {}
-     for item in original_invoice.items:
-         # Use item_code as key since that's what we're matching against
-         if item.item_code not in original_items:
-             original_items[item.item_code] = {
-                 'qty': item.qty,
-                 'rate': item.rate
-             }
-         else:
-             original_items[item.item_code]['qty'] += item.qty
+    # Create lookup for original items
+    original_items = {}
+    for item in original_invoice.items:
+        # Use item_code as key since that's what we're matching against
+        if item.item_code not in original_items:
+            original_items[item.item_code] = {"qty": item.qty, "rate": item.rate}
+        else:
+            original_items[item.item_code]["qty"] += item.qty
 
-     # Validate return items
-     for item in items:
-         item_code = item.get('item_code')
-         if item_code not in original_items:
-             return {
-                 "valid": False,
-                 "message": f"Item {item_code} not found in original invoice"
-             }
+    # Validate return items
+    for item in items:
+        item_code = item.get("item_code")
+        if item_code not in original_items:
+            return {
+                "valid": False,
+                "message": f"Item {item_code} not found in original invoice",
+            }
 
-         return_qty = abs(float(item.get('qty')))
-         if return_qty > original_items[item_code]['qty']:
-             return {
-                 "valid": False, 
-                 "message": f"Return quantity {return_qty} exceeds original quantity {original_items[item_code]['qty']} for item {item_code}"
-             }
+        return_qty = abs(float(item.get("qty")))
+        if return_qty > original_items[item_code]["qty"]:
+            return {
+                "valid": False,
+                "message": f"Return quantity {return_qty} exceeds original quantity {original_items[item_code]['qty']} for item {item_code}",
+            }
 
-         original_items[item_code]['qty'] -= return_qty
+        original_items[item_code]["qty"] -= return_qty
 
-     return {"valid": True}
+    return {"valid": True}
+
 
 @frappe.whitelist()
 def get_available_currencies():
     """Get list of available currencies from ERPNext"""
-    return frappe.get_all("Currency", fields=["name", "currency_name"], 
-                         filters={"enabled": 1}, order_by="currency_name")
-
-
+    return frappe.get_all(
+        "Currency",
+        fields=["name", "currency_name"],
+        filters={"enabled": 1},
+        order_by="currency_name",
+    )
 
 
 @frappe.whitelist()
@@ -2461,19 +2513,17 @@ def get_app_info() -> Dict[str, List[Dict[str, str]]]:
     app_records = frappe.get_all(
         "Installed Application",
         fields=["app_name", "app_version"],
-        order_by="app_name asc"
+        order_by="app_name asc",
     )
 
     # Transform into the shape your API expects
     apps_info = [
-        {
-            "app_name": record["app_name"],
-            "installed_version": record["app_version"]
-        }
+        {"app_name": record["app_name"], "installed_version": record["app_version"]}
         for record in app_records
     ]
 
     return {"apps": apps_info}
+
 
 @frappe.whitelist()
 def get_item_warehouse_stock(item_code, warehouses, main_warehouse):
@@ -2481,25 +2531,33 @@ def get_item_warehouse_stock(item_code, warehouses, main_warehouse):
         warehouses = json.loads(warehouses)
     stock_data = []
     for warehouse in warehouses:
-        actual_qty = frappe.db.get_value('Bin', {
-            'item_code': item_code,
-            'warehouse': warehouse
-        }, 'actual_qty') or 0
-        stock_data.append({
-            'warehouse': warehouse,
-            'actual_qty': actual_qty,
-            'main_warehouse': False,
-        })
-    
-    main_warehouse_actual_qty = frappe.db.get_value('Bin', {
-        'item_code': item_code,
-        'warehouse': main_warehouse
-    }, 'actual_qty') or 0
-    stock_data.append({
-        'warehouse': main_warehouse,
-        'actual_qty': main_warehouse_actual_qty,
-        'main_warehouse': True,
-    })
+        actual_qty = (
+            frappe.db.get_value(
+                "Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+            )
+            or 0
+        )
+        stock_data.append(
+            {
+                "warehouse": warehouse,
+                "actual_qty": actual_qty,
+                "main_warehouse": False,
+            }
+        )
+
+    main_warehouse_actual_qty = (
+        frappe.db.get_value(
+            "Bin", {"item_code": item_code, "warehouse": main_warehouse}, "actual_qty"
+        )
+        or 0
+    )
+    stock_data.append(
+        {
+            "warehouse": main_warehouse,
+            "actual_qty": main_warehouse_actual_qty,
+            "main_warehouse": True,
+        }
+    )
     return stock_data
 
 
@@ -2508,23 +2566,39 @@ def get_item_offers(item_code, warehouse, profile):
     """
     Return active POS Offers for a given item + warehouse under the specified POS Profile.
     """
-    offers = frappe.get_all("POS Offer",
+    offers = frappe.get_all(
+        "POS Offer",
         filters={
             "disable": 0,
             "pos_profile": profile,
             "warehouse": warehouse,
             "company": frappe.db.get_value("POS Profile", profile, "company"),
             "valid_from": ["<=", frappe.utils.nowdate()],
-            "valid_upto": [">=", frappe.utils.nowdate()]
+            "valid_upto": [">=", frappe.utils.nowdate()],
         },
         fields=[
-            "name", "title", "description", "offer", "apply_on",
-            "item", "item_group", "brand",
-            "valid_from", "valid_upto",
-            "min_qty", "max_qty", "min_amt", "max_amt",
-            "discount_type", "rate", "discount_amount", "discount_percentage",
-            "given_qty", "apply_item_code", "apply_item_group"
-        ]
+            "name",
+            "title",
+            "description",
+            "offer",
+            "apply_on",
+            "item",
+            "item_group",
+            "brand",
+            "valid_from",
+            "valid_upto",
+            "min_qty",
+            "max_qty",
+            "min_amt",
+            "max_amt",
+            "discount_type",
+            "rate",
+            "discount_amount",
+            "discount_percentage",
+            "given_qty",
+            "apply_item_code",
+            "apply_item_group",
+        ],
     )
 
     valid = []
